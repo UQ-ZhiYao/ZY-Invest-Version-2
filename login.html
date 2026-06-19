@@ -176,25 +176,21 @@
 <script src="assets/js/site.js"></script>
 <script>
 (function(){
-  // Show / hide password
   var pw=document.getElementById('password'), tog=document.getElementById('pwToggle');
   tog.addEventListener('click',function(){
     if(pw.type==='password'){ pw.type='text'; tog.textContent='Hide'; }
     else { pw.type='password'; tog.textContent='Show'; }
   });
 
-  // Already logged in? Go straight to the dashboard.
+  // Already logged in? Check Supabase session — not stale localStorage token.
   (async function(){
-  try {
-    if (typeof sb !== 'undefined' && sb) {
-      const { data } = await sb.auth.getSession();
-      if (data.session) {
-        window.location.href = 'members/dashboard.html';
-        return;
+    try{
+      if(sb){
+        var s=await sb.auth.getSession();
+        if(s.data.session){ window.location.href='members/dashboard.html'; return; }
       }
-    }
-  } catch(e) {}
-})();
+    }catch(e){}
+  })();
 
   var form=document.getElementById('loginForm'), btn=document.getElementById('submitBtn'),
       btnText=document.getElementById('btnText'), spin=document.getElementById('spinner'),
@@ -210,14 +206,14 @@
     var password=document.getElementById('password').value;
     btn.disabled=true; btnText.textContent='Signing in...'; spin.style.display='block';
     try{
-      if (!sb) throw new Error('Auth service not configured.');
-      const { data, error } = await sb.auth.signInWithPassword({ email, password });
-      if (error) throw error;
+      if(!sb) throw new Error('Auth service not configured.');
+      var res=await sb.auth.signInWithPassword({ email:email, password:password });
+      if(res.error) throw res.error;
       authSave({
-        access_token: data.session.access_token,
-        role:         data.user.user_metadata?.role || 'member',
-        name:         data.user.user_metadata?.full_name || email,
-        investor_id:  data.user.user_metadata?.investor_id || ''
+        access_token: res.data.session.access_token,
+        role:         res.data.user.user_metadata?.role || 'member',
+        name:         res.data.user.user_metadata?.full_name || email,
+        investor_id:  res.data.user.user_metadata?.investor_id || ''
       });
       window.zyEnterDashboard('members/dashboard.html');
     }catch(err){
