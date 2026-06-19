@@ -27,8 +27,6 @@
 html,body{margin:0;padding:0;height:100%;}
 body{font-family:var(--font-body);color:var(--ink);background:#0B1220;-webkit-font-smoothing:antialiased;
   min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;}
-
-/* living dark backdrop */
 .bg{position:fixed;inset:0;z-index:0;background:linear-gradient(160deg,#0B1220 0%,#0D2A52 55%,#0B1220 100%);}
 .orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.5;}
 .orb.a{width:480px;height:480px;background:radial-gradient(circle,rgba(21,101,192,.55),transparent 70%);top:-140px;right:-80px;animation:drift1 14s ease-in-out infinite;}
@@ -36,7 +34,6 @@ body{font-family:var(--font-body);color:var(--ink);background:#0B1220;-webkit-fo
 .grid-lines{position:absolute;inset:0;opacity:.06;background-image:linear-gradient(rgba(255,255,255,.6) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.6) 1px,transparent 1px);background-size:54px 54px;}
 @keyframes drift1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-46px,40px) scale(1.1);}}
 @keyframes drift2{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(40px,-36px) scale(1.08);}}
-
 .card{position:relative;z-index:2;width:100%;max-width:440px;background:#fff;border-radius:var(--radius-xl);
   box-shadow:0 30px 80px rgba(0,0,0,.45);overflow:hidden;animation:rise .5s ease;}
 @keyframes rise{from{transform:translateY(16px);}to{transform:none;}}
@@ -50,7 +47,6 @@ body{font-family:var(--font-body);color:var(--ink);background:#0B1220;-webkit-fo
 .card-top p{margin:0;font-size:0.86rem;color:rgba(255,255,255,.8);position:relative;line-height:1.5;}
 .lock-pill{position:absolute;top:30px;right:34px;z-index:3;display:inline-flex;align-items:center;gap:6px;font-size:0.68rem;font-weight:600;
   letter-spacing:0.08em;text-transform:uppercase;color:#fff;background:rgba(255,255,255,.16);padding:6px 11px;border-radius:999px;}
-
 .card-body{padding:28px 34px 32px;}
 .note{display:none;font-size:0.83rem;padding:10px 13px;border-radius:var(--radius-md);margin-bottom:16px;}
 .note.error{display:block;background:#FEF2F2;color:var(--red);border:1px solid #FECACA;}
@@ -75,8 +71,6 @@ body{font-family:var(--font-body);color:var(--ink);background:#0B1220;-webkit-fo
 .install-btn:hover{background:#dbe8fa;}
 .install-btn img{width:20px;height:20px;border-radius:4px;}
 .install-hint{margin-top:9px;font-size:0.72rem;color:var(--fg-3);text-align:center;line-height:1.5;}
-
-/* progress transition overlay (login → admin) */
 #prog{position:fixed;inset:0;z-index:50;background:linear-gradient(160deg,#0B1220,#0D2A52);display:none;align-items:center;justify-content:center;flex-direction:column;gap:22px;}
 #prog.show{display:flex;animation:fadeIn .3s ease;}
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
@@ -127,7 +121,6 @@ body{font-family:var(--font-body);color:var(--ink);background:#0B1220;-webkit-fo
   </div>
 </div>
 
-<!-- progress transition -->
 <div id="prog">
   <div class="prog-mark">
     <svg class="prog-ring" viewBox="0 0 120 120"><circle class="trk" cx="60" cy="60" r="54"/><circle class="prg" id="progRing" cx="60" cy="60" r="54"/></svg>
@@ -159,70 +152,81 @@ body{font-family:var(--font-body);color:var(--ink);background:#0B1220;-webkit-fo
     },90);
   }
 
+  /* ── Key fix: check if we just logged out via URL flag ────
+     admin-supabase.js sets ?loggedout=1 when signing out so
+     this page knows NOT to auto-redirect even if a stale
+     Supabase session token is still briefly present.         */
+  var justLoggedOut = location.search.indexOf('loggedout=1') !== -1;
+
+  /* ── Auto-redirect only if NOT just logged out ─────────── */
+  if(!justLoggedOut){
+    (async function(){
+      try{
+        if(!sb) return;
+        var s = await sb.auth.getSession();
+        if(!s.data || !s.data.session) return;
+        var pr = await sb.from('profiles').select('role').eq('id', s.data.session.user.id).single();
+        if(pr.data && pr.data.role === 'admin'){
+          window.location.href = 'admin.html';
+        }
+      }catch(ex){}
+    })();
+  } else {
+    /* Clean the URL so refreshing doesn't keep the flag */
+    history.replaceState(null, '', location.pathname);
+  }
+
+  /* ── Form submit ────────────────────────────────────────── */
   form.addEventListener('submit', async function(e){
     e.preventDefault();
     clearErr();
-    var email=document.getElementById('email').value.trim();
-    var password=pw.value;
-    btn.disabled=true; btnText.textContent='Signing in…'; spin.style.display='block';
+    var email    = document.getElementById('email').value.trim();
+    var password = pw.value;
+    btn.disabled = true; btnText.textContent = 'Signing in…'; spin.style.display = 'block';
     try{
       if(!sb) throw new Error('Auth service not configured.');
-      // Step 1 — Supabase login
-      var res=await sb.auth.signInWithPassword({ email:email, password:password });
+      var res = await sb.auth.signInWithPassword({ email:email, password:password });
       if(res.error) throw res.error;
-      // Step 2 — verify role = admin in profiles table
-      var pr=await sb.from('profiles').select('role,full_name,status').eq('id',res.data.user.id).single();
+      var pr = await sb.from('profiles').select('role,full_name,status').eq('id', res.data.user.id).single();
       if(pr.error) throw new Error('Could not verify admin role.');
-      if(pr.data.role!=='admin'){ await sb.auth.signOut(); throw new Error('Access denied. This account does not have admin privileges.'); }
-      if(pr.data.status==='suspended'){ await sb.auth.signOut(); throw new Error('This admin account has been suspended.'); }
-      // Step 3 — store session info
+      if(pr.data.role !== 'admin'){ await sb.auth.signOut(); throw new Error('Access denied. This account does not have admin privileges.'); }
+      if(pr.data.status === 'suspended'){ await sb.auth.signOut(); throw new Error('This admin account has been suspended.'); }
       try{ localStorage.setItem('zy_admin_session', JSON.stringify({ name:pr.data.full_name||email, role:'admin', email:email, ts:Date.now() })); }catch(ex){}
-      // Step 4 — progress then redirect
-      runProgress(function(){ window.location.href='admin.html'; });
+      runProgress(function(){ window.location.href = 'admin.html'; });
     }catch(ex){
-      var m=(ex&&ex.message)||'Login failed.';
-      if(/invalid login/i.test(m)||/invalid credentials/i.test(m)) m='Incorrect email or password.';
+      var m = (ex&&ex.message) || 'Login failed.';
+      if(/invalid login/i.test(m) || /invalid credentials/i.test(m)) m = 'Incorrect email or password.';
       err(m);
-      btn.disabled=false; btnText.textContent='Sign In to Console'; spin.style.display='none';
+      btn.disabled = false; btnText.textContent = 'Sign In to Console'; spin.style.display = 'none';
     }
   });
 
-  // Already logged in as admin? Skip the form
-  (async function(){
-    try{
-      if(!sb) return;
-      var s=await sb.auth.getSession();
-      if(!s.data.session) return;
-      var pr=await sb.from('profiles').select('role').eq('id',s.data.session.user.id).single();
-      if(pr.data&&pr.data.role==='admin') window.location.href='admin.html';
-    }catch(ex){}
+  /* ── PWA install ────────────────────────────────────────── */
+  (function(){
+    if('serviceWorker' in navigator){ window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
+    var row=document.getElementById('installRow'), ibtn=document.getElementById('installBtn'), hint=document.getElementById('installHint');
+    var deferred=null;
+    var standalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
+    if(standalone) return;
+    window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); deferred=e; row.style.display='block'; hint.textContent=''; });
+    ibtn.addEventListener('click', async function(){
+      if(deferred){
+        deferred.prompt();
+        var choice=await deferred.userChoice;
+        deferred=null;
+        if(choice&&choice.outcome==='accepted') row.style.display='none';
+        else hint.textContent='Installation dismissed.';
+        return;
+      }
+      var ua=navigator.userAgent;
+      if(/iPhone|iPad|iPod/i.test(ua)) hint.textContent='On iPhone/iPad: tap the Share button, then "Add to Home Screen".';
+      else if(/Macintosh/i.test(ua)&&'ontouchend' in document) hint.textContent='Tap Share, then "Add to Home Screen".';
+      else hint.textContent='Open your browser menu and choose "Install ZY Admin" / "Install app".';
+    });
+    window.addEventListener('appinstalled', function(){ row.style.display='none'; });
+    setTimeout(function(){ if(!standalone&&row.style.display!=='block'){ row.style.display='block'; if(!deferred&&!hint.textContent){ hint.textContent='Install from your browser menu, or tap to see how.'; } } },1200);
   })();
-})();
 
-/* ---- PWA: service worker + install prompt ---- */
-(function(){
-  if('serviceWorker' in navigator){ window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
-  var row=document.getElementById('installRow'), btn=document.getElementById('installBtn'), hint=document.getElementById('installHint');
-  var deferred=null;
-  var standalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
-  if(standalone) return;
-  window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); deferred=e; row.style.display='block'; hint.textContent=''; });
-  btn.addEventListener('click', async function(){
-    if(deferred){
-      deferred.prompt();
-      var choice=await deferred.userChoice;
-      deferred=null;
-      if(choice&&choice.outcome==='accepted'){ row.style.display='none'; }
-      else{ hint.textContent='Installation dismissed.'; }
-      return;
-    }
-    var ua=navigator.userAgent;
-    if(/iPhone|iPad|iPod/i.test(ua)) hint.textContent='On iPhone/iPad: tap the Share button, then "Add to Home Screen".';
-    else if(/Macintosh/i.test(ua)&&'ontouchend' in document) hint.textContent='Tap Share, then "Add to Home Screen".';
-    else hint.textContent='Open your browser menu and choose "Install ZY Admin" / "Install app".';
-  });
-  window.addEventListener('appinstalled', function(){ row.style.display='none'; });
-  setTimeout(function(){ if(!standalone&&row.style.display!=='block'){ row.style.display='block'; if(!deferred&&!hint.textContent){ hint.textContent='Install from your browser menu, or tap to see how.'; } } },1200);
 })();
 </script>
 </body>
