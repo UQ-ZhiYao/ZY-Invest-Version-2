@@ -182,15 +182,17 @@
   });
 
   // Already logged in? Go straight to the dashboard.
-  try{
-    if(typeof authUser==='function'){
-      var u=authUser();
-      if(u && u.token){
+  (async function(){
+  try {
+    if (typeof sb !== 'undefined' && sb) {
+      const { data } = await sb.auth.getSession();
+      if (data.session) {
         window.location.href = 'members/dashboard.html';
         return;
       }
     }
-  }catch(e){}
+  } catch(e) {}
+})();
 
   var form=document.getElementById('loginForm'), btn=document.getElementById('submitBtn'),
       btnText=document.getElementById('btnText'), spin=document.getElementById('spinner'),
