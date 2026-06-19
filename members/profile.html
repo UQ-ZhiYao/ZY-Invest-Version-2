@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Profile — ZY-Invest</title>
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+<link rel="stylesheet" href="../assets/css/dashboard-portfolio.css">
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- ===================== TOP NAV — FUND INFORMATION ===================== -->
+  <header class="topnav">
+    <a href="../index.html" class="brand">
+      <img src="../assets/img/logo.png" alt="ZY-Invest">
+      <span class="bt"><b>ZY-Invest</b><span>Member Portal</span></span>
+    </a>
+    <nav class="nav-links">
+      <div class="nav-group">
+        <button class="nav-top">Fund <span class="caret">▾</span></button>
+        <div class="dropdown"><div class="dd-card">
+          <a class="dd-item" href="fund-overview.html"><b>Fund Overview</b><span>Mandate, objective &amp; key facts</span></a>
+          <a class="dd-item" href="factsheet.html"><b>Factsheet</b><span>Holdings allocation each financial year</span></a>
+          <a class="dd-item" href="shareholder-list.html"><b>Shareholder List</b><span>Unitholders, units held &amp; ownership</span></a>
+        </div></div>
+      </div>
+      <div class="nav-group">
+        <button class="nav-top">Performance <span class="caret">▾</span></button>
+        <div class="dropdown"><div class="dd-card">
+          <a class="dd-item" href="financial-result.html"><b>Financial Result</b><span>Income statement, balance sheet &amp; cash flow</span></a>
+          <a class="dd-item" href="performance-analysis.html"><b>Performance Analysis</b><span>Returns &amp; benchmark comparison (FBM KLCI)</span></a>
+          <a class="dd-item" href="nta-history.html"><b>NTA History</b><span>Chart &amp; daily NTA / NAV history</span></a>
+        </div></div>
+      </div>
+      <div class="nav-group">
+        <button class="nav-top">Documents <span class="caret">▾</span></button>
+        <div class="dropdown"><div class="dd-card">
+          <a class="dd-item" href="statement-download.html"><b>Statement Download</b><span>Factsheets &amp; annual reports</span></a>
+        </div></div>
+      </div>
+    </nav>
+    <div class="nav-right">
+      <button class="icon-btn" title="Search">⌕</button>
+      <button class="icon-btn" title="Notifications">🔔<span class="badge-dot"></span></button>
+      <div class="nav-user-wrap">
+        <div class="nav-user" id="userBtn">
+          <div class="nu-text" style="text-align:right;">
+            <div class="nu-name">Tan Hui Mei</div>
+            <div class="nu-role">ZYI-2024-0014</div>
+          </div>
+          <div class="avatar">THM</div>
+          <span class="nu-caret">▾</span>
+        </div>
+        <div class="user-menu" id="userMenu">
+          <div class="um-head">
+            <div class="avatar">THM</div>
+            <div>
+              <div class="um-name">Tan Hui Mei</div>
+              <div class="um-mail">huimei.tan@example.com</div>
+            </div>
+          </div>
+          <a class="um-item" href="profile.html">
+            <span class="um-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span>
+            <span><b>Profile</b><span>Personal &amp; account details</span></span>
+          </a>
+          <a class="um-item" href="profile.html#security">
+            <span class="um-ic"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+            <span><b>Password</b><span>Sign-in &amp; security</span></span>
+          </a>
+          <a class="um-item" href="profile.html#nominee">
+            <span class="um-ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20c0-3 2.5-4.6 5.5-4.6S14.5 17 14.5 20"/><circle cx="17" cy="9" r="2.6"/><path d="M16 15.6c2.6.2 4.5 1.7 4.5 4.4"/></svg></span>
+            <span><b>Nominee</b><span>Beneficiary nomination</span></span>
+          </a>
+          <div class="um-sep"></div>
+          <a class="um-item danger" href="../login.html">
+            <span class="um-ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>
+            <span><b>Sign out</b></span>
+          </a>
+        </div>
+      </div>
+      <a href="../login.html" class="btn-logout">Logout</a>
+    </div>
+  </header>
+
+  <!-- ===================== INDEX TICKER ===================== -->
+  <div class="ticker">
+    <div class="ticker-mask">
+      <div class="ticker-track" id="tickerTrack">
+        <span class="tk"><span class="flag">🇺🇸</span><span class="tname">S&amp;P 500</span><span class="tval">5,432.10</span><span class="tchg up">+0.42%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇺🇸</span><span class="tname">NASDAQ</span><span class="tval">17,210.5</span><span class="tchg up">+0.71%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇺🇸</span><span class="tname">DOW</span><span class="tval">39,150.2</span><span class="tchg up">+0.18%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇸🇬</span><span class="tname">STI</span><span class="tval">3,340.6</span><span class="tchg up">+0.30%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇭🇰</span><span class="tname">HANG SENG</span><span class="tval">18,902.4</span><span class="tchg down">−0.52%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇯🇵</span><span class="tname">NIKKEI 225</span><span class="tval">38,505.0</span><span class="tchg up">+0.88%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇲🇾</span><span class="tname">FBM KLCI</span><span class="tval">1,612.40</span><span class="tchg up">+0.60%</span></span>
+        <span class="tsep">•</span>
+        <!-- duplicate for seamless loop -->
+        <span class="tk"><span class="flag">🇺🇸</span><span class="tname">S&amp;P 500</span><span class="tval">5,432.10</span><span class="tchg up">+0.42%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇺🇸</span><span class="tname">NASDAQ</span><span class="tval">17,210.5</span><span class="tchg up">+0.71%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇺🇸</span><span class="tname">DOW</span><span class="tval">39,150.2</span><span class="tchg up">+0.18%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇸🇬</span><span class="tname">STI</span><span class="tval">3,340.6</span><span class="tchg up">+0.30%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇭🇰</span><span class="tname">HANG SENG</span><span class="tval">18,902.4</span><span class="tchg down">−0.52%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇯🇵</span><span class="tname">NIKKEI 225</span><span class="tval">38,505.0</span><span class="tchg up">+0.88%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇲🇾</span><span class="tname">FBM KLCI</span><span class="tval">1,612.40</span><span class="tchg up">+0.60%</span></span>
+        <span class="tsep">•</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== SHELL: SIDEBAR + MAIN ===================== -->
+  <div class="shell" id="shell">
+    <script>try{if(localStorage.getItem('zy-sb-collapsed')==='1'){document.getElementById('shell').classList.add('collapsed');}}catch(e){}</script>
+    <div class="sidebar-scrim" id="scrim"></div>
+
+    <!-- left sidebar: personal account -->
+    <aside class="sidebar" id="sidebar">
+      <button class="sb-toggle" id="sbToggle" title="Collapse menu"><span class="sb-bars"><span></span><span></span><span></span></span><span class="sb-tlbl">Menu</span></button>
+      <div class="sb-group">Account</div>
+      <a class="sb-item" href="dashboard.html">
+        <span class="sb-ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span>
+        <span class="sb-label">Account Summary</span>
+      </a>
+      <a class="sb-item">
+        <span class="sb-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 12V3"/><path d="M12 12l7.5 5"/></svg></span>
+        <span class="sb-label">Holdings</span>
+      </a>
+      <a class="sb-item">
+        <span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M4 8h14l-3-3"/><path d="M20 16H6l3 3"/></svg></span>
+        <span class="sb-label">Principal Transactions</span>
+      </a>
+      <a class="sb-item">
+        <span class="sb-ic"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg></span>
+        <span class="sb-label">Distributions</span>
+      </a>
+      <div class="sb-group">Records</div>
+      <a class="sb-item">
+        <span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/></svg></span>
+        <span class="sb-label">Statements</span>
+      </a>
+      <a class="sb-item">
+        <span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>
+        <span class="sb-label">Documents</span>
+      </a>
+      <div class="sb-spacer"></div>
+      <a class="sb-item logout" href="../login.html">
+        <span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>
+        <span class="sb-label">Sign out</span>
+      </a>
+    </aside>
+
+    <!-- main -->
+    <main class="main main-center">
+      <div class="ph-xl">
+        <h1>My <span class="ph-accent">Profile</span></h1>
+        <p>Manage your personal details, account information, and sign-in security.</p>
+      </div>
+
+      <div class="profile-wrap">
+        <!-- profile hero -->
+        <div class="prof-hero">
+          <div class="prof-av">THM</div>
+          <div class="prof-id">
+            <h2>Tan Hui Mei</h2>
+            <div class="pm">
+              <span>Member ID <b>ZYI-2024-0014</b></span>
+              <span>Investor since <b>Mar 2024</b></span>
+              <span>Base currency <b>MYR</b></span>
+            </div>
+          </div>
+          <span class="prof-badge">Verified Investor</span>
+        </div>
+
+        <!-- tabs -->
+        <div class="prof-tabs">
+          <button class="prof-tab on" data-pane="personal">Profile</button>
+          <button class="prof-tab" data-pane="security">Password &amp; Security</button>
+          <button class="prof-tab" data-pane="nominee">Nominee</button>
+        </div>
+
+        <!-- ============ PERSONAL PANE ============ -->
+        <div class="prof-pane on" data-pane="personal">
+          <div class="form-card">
+            <div class="fc-head"><div><h3>Personal Details</h3><p>Your contact and identity information on record.</p></div></div>
+            <div class="fc-body">
+              <div class="form-grid">
+                <div class="field"><label>Full Name</label><input value="Tan Hui Mei"></div>
+                <div class="field"><label>Preferred Name</label><input value="Hui Mei"></div>
+                <div class="field"><label>Email Address</label><input type="email" value="huimei.tan@example.com"></div>
+                <div class="field"><label>Mobile</label><input value="+60 12-345 6789"></div>
+                <div class="field fg-full"><label>Residential Address</label><input value="12, Jalan Bukit Bintang, 55100 Kuala Lumpur, Malaysia"></div>
+                <div class="field"><label>NRIC / Passport</label><input value="······-··-····" disabled><span class="locked"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg> Locked — contact the fund to update</span></div>
+                <div class="field"><label>Nationality</label><select><option>Malaysian</option><option>Singaporean</option><option>Other</option></select></div>
+              </div>
+            </div>
+            <div class="fc-foot"><button class="btn-line">Cancel</button><button class="btn-fill">Save Changes</button></div>
+          </div>
+
+          <div class="form-card">
+            <div class="fc-head"><div><h3>Distribution Bank Account</h3><p>Where your income distributions are paid in MYR.</p></div></div>
+            <div class="fc-body">
+              <div class="form-grid">
+                <div class="field"><label>Bank</label><input value="Malayan Banking Berhad (Maybank)"></div>
+                <div class="field"><label>Account Number</label><input value="············2048"></div>
+                <div class="field fg-full"><label>Account Holder Name</label><input value="Tan Hui Mei"></div>
+              </div>
+            </div>
+            <div class="fc-foot"><button class="btn-line">Cancel</button><button class="btn-fill">Save Changes</button></div>
+          </div>
+
+          <div class="form-card">
+            <div class="fc-head"><div><h3>Account Verification</h3><p>Your KYC status and investor classification.</p></div></div>
+            <div class="fc-body" style="padding-top:8px;padding-bottom:8px;">
+              <div class="kyc-row">
+                <span class="kyc-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span>
+                <span class="kyc-meta"><span class="kt">Identity Verification</span><span class="kd">NRIC verified · 18 Mar 2024</span></span>
+                <span class="pill-ok">Verified</span>
+              </div>
+              <div class="kyc-row">
+                <span class="kyc-ic"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg></span>
+                <span class="kyc-meta"><span class="kt">Proof of Address</span><span class="kd">Utility statement · 18 Mar 2024</span></span>
+                <span class="pill-ok">Verified</span>
+              </div>
+              <div class="kyc-row">
+                <span class="kyc-ic"><svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/></svg></span>
+                <span class="kyc-meta"><span class="kt">Investor Classification</span><span class="kd">Eligible to subscribe under the fund mandate</span></span>
+                <span class="pill-ok">Sophisticated Investor</span>
+              </div>
+              <div class="kyc-row">
+                <span class="kyc-ic"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0z"/><path d="M12 8v4l3 2"/></svg></span>
+                <span class="kyc-meta"><span class="kt">Risk Profile Assessment</span><span class="kd">Annual review due 30 Jun 2026</span></span>
+                <span class="pill-warn">Review due</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ SECURITY PANE ============ -->
+        <div class="prof-pane" data-pane="security" id="security">
+          <div class="form-card">
+            <div class="fc-head"><div><h3>Change Password</h3><p>Use at least 10 characters with a mix of letters, numbers, and symbols.</p></div></div>
+            <div class="fc-body">
+              <div class="form-grid">
+                <div class="field fg-full"><label>Current Password</label><input type="password" value="passw0rd123"></div>
+                <div class="field"><label>New Password</label><input type="password" placeholder="Enter new password"></div>
+                <div class="field"><label>Confirm New Password</label><input type="password" placeholder="Re-enter new password"></div>
+                <div class="field fg-full"><label>Password Strength</label><div class="sec-strength"><span class="s1"></span><span class="s1"></span><span class="s1"></span><span></span></div><span class="hint">Strong — last changed 14 Jan 2026.</span></div>
+              </div>
+            </div>
+            <div class="fc-foot"><button class="btn-line">Cancel</button><button class="btn-fill">Update Password</button></div>
+          </div>
+
+          <div class="form-card">
+            <div class="fc-head"><div><h3>Two-Factor Authentication</h3><p>Add an extra layer of security to your sign-in.</p></div></div>
+            <div class="fc-body" style="padding-top:6px;padding-bottom:6px;">
+              <div class="kyc-row">
+                <span class="kyc-ic"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></span>
+                <span class="kyc-meta"><span class="kt">Authenticator App</span><span class="kd">Time-based one-time passcode (TOTP)</span></span>
+                <button class="toggle-sw on" data-sw></button>
+              </div>
+              <div class="kyc-row">
+                <span class="kyc-ic"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M4 9h16"/></svg></span>
+                <span class="kyc-meta"><span class="kt">Email One-Time Passcode</span><span class="kd">Send a code to huimei.tan@example.com</span></span>
+                <button class="toggle-sw" data-sw></button>
+              </div>
+              <div class="kyc-row">
+                <span class="kyc-ic"><svg viewBox="0 0 24 24"><path d="M3 5a2 2 0 0 1 2-2h3l2 5-2 1a12 12 0 0 0 5 5l1-2 5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 3 5z"/></svg></span>
+                <span class="kyc-meta"><span class="kt">SMS Backup</span><span class="kd">+60 12-··· 6789</span></span>
+                <button class="toggle-sw on" data-sw></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-card">
+            <div class="fc-head"><div><h3>Active Sessions</h3><p>Devices currently signed in to your account.</p></div></div>
+            <div class="fc-body" style="padding-top:6px;padding-bottom:6px;">
+              <div class="sess-row">
+                <span class="kyc-ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></span>
+                <span class="sess-meta"><span class="st">Chrome · macOS <span class="sess-now">● This device</span></span><span class="sd">Kuala Lumpur, Malaysia · 19 Mar 2026, 3:48 PM</span></span>
+              </div>
+              <div class="sess-row">
+                <span class="kyc-ic"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></span>
+                <span class="sess-meta"><span class="st">ZY-Invest App · iPhone</span><span class="sd">Kuala Lumpur, Malaysia · 18 Mar 2026, 9:12 PM</span></span>
+                <button class="sess-revoke">Revoke</button>
+              </div>
+              <div class="sess-row">
+                <span class="kyc-ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></span>
+                <span class="sess-meta"><span class="st">Safari · iPad</span><span class="sd">Petaling Jaya, Malaysia · 14 Mar 2026, 8:30 AM</span></span>
+                <button class="sess-revoke">Revoke</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ NOMINEE PANE ============ -->
+        <div class="prof-pane" data-pane="nominee">
+          <!-- Summary first -->
+          <div class="form-card">
+            <div class="fc-head">
+              <div><h3>Nomination Summary</h3><p>Select a nominee to edit their details, or add a new one. Allocations always total 100%.</p></div>
+              <button class="btn-fill" id="nomAdd" style="padding:9px 16px;flex:none;width:auto;white-space:nowrap;">+ Add Nominee</button>
+            </div>
+            <div class="fc-body">
+              <div class="nom-total">
+                <div class="nom-total-bar" id="nomBar"></div>
+                <div class="nom-total-meta"><span>Total allocation across nominees</span><span class="nom-total-val ok" id="nomTotal">100%</span></div>
+              </div>
+              <div class="nom-list" id="nomList"></div>
+            </div>
+          </div>
+
+          <!-- Details second -->
+          <div class="form-card">
+            <div class="fc-head"><div><h3 id="nomFormTitle">Nominee Details</h3><p id="nomFormSub">Editing the selected nominee.</p></div><span class="pill-ok" id="nomFormBadge">Primary</span></div>
+            <div class="fc-body">
+              <div class="form-grid">
+                <div class="field"><label>Full Name</label><input id="nf-name" placeholder="Nominee full name"></div>
+                <div class="field"><label>Relationship</label><select id="nf-rel"><option>Spouse</option><option>Child</option><option>Parent</option><option>Sibling</option><option>Other</option></select></div>
+                <div class="field"><label>NRIC / Passport</label><input id="nf-nric" placeholder="NRIC or passport no."></div>
+                <div class="field"><label>Date of Birth</label><input id="nf-dob" placeholder="DD Mmm YYYY"></div>
+                <div class="field"><label>Mobile</label><input id="nf-mobile" placeholder="+60 ..."></div>
+                <div class="field"><label>Allocation <span class="nf-alloc-val" id="nf-allocVal">0%</span></label>
+                  <input type="range" min="0" max="100" step="5" value="0" id="nf-alloc" class="nom-range">
+                  <span class="hint">Other nominees adjust automatically so the total always stays 100%.</span>
+                </div>
+              </div>
+            </div>
+            <div class="fc-foot"><button class="btn-line" id="nomDelete">Remove Nominee</button><button class="btn-fill" id="nomSave">Save Changes</button></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ===================== FLOATING CHAT ASSISTANT ===================== -->
+<button class="fab" id="chatFab" title="Ask ZY Assistant">
+  <svg viewBox="0 0 100 100" aria-hidden="true"><g transform="translate(50,50)" fill="#fff"><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4"/><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4" transform="rotate(45)"/><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4" transform="rotate(90)"/><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4" transform="rotate(135)"/></g></svg>
+  <span class="fab-ping">1</span>
+</button>
+
+<section class="chat-pop" id="chatPop" aria-label="ZY Assistant">
+  <div class="chat-head">
+    <div class="ch-logo">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><g transform="translate(50,50)" fill="#1565C0"><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4"/><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4" transform="rotate(45)"/><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4" transform="rotate(90)"/><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4" transform="rotate(135)"/></g></svg>
+    </div>
+    <div class="ch-id"><b>ZY Assistant</b><span>Online · replies instantly</span></div>
+    <button class="ch-btn" id="chatMin" title="Minimize">⌄</button>
+  </div>
+  <div class="chat-body" id="chatBody">
+    <div class="chat-time">3:52 PM</div>
+    <div class="msg-label">ZY Assistant</div>
+    <div class="msg bot">
+      Welcome back, Hui Mei 👋 I can help with your account, distributions, and documents.
+      <br><br>
+      <span style="font-size:0.78rem;color:var(--fg-3);">Note: responses are a general guide. For formal confirmations, refer to your statements or contact the fund.</span>
+    </div>
+    <div class="chat-action"><button>View account summary</button></div>
+    <div class="msg user">When is my next distribution?</div>
+    <div class="msg bot">
+      Your next income distribution is the <b>FY26 interim</b>:
+      <ul>
+        <li>Expected ex-date <b>30 Nov 2026</b></li>
+        <li>Estimated on <b>12,345.68 units</b> held</li>
+        <li>Paid to Maybank ····2048 within 15 business days</li>
+      </ul>
+    </div>
+  </div>
+  <div class="chat-chips">
+    <button class="chat-chip">Explain my P&amp;L</button>
+    <button class="chat-chip">How is NTA computed?</button>
+    <button class="chat-chip">My documents</button>
+  </div>
+  <div class="chat-foot">
+    <button class="clip" title="Attach">📎</button>
+    <div class="field-box"><input type="text" id="chatInput" placeholder="Type a message…"></div>
+    <button class="send" id="chatSend" title="Send">➤</button>
+  </div>
+</section>
+
+<script>
+(function(){
+  var shell=document.getElementById('shell');
+  var toggle=document.getElementById('sbToggle');
+  var scrim=document.getElementById('scrim');
+
+  function isMobile(){ return window.matchMedia('(max-width:860px)').matches; }
+  // restore persisted collapsed state so the sidebar keeps its mode across pages
+  try{ if(localStorage.getItem('zy-sb-collapsed')==='1'){ shell.classList.add('collapsed'); } }catch(e){}
+  toggle.addEventListener('click',function(){
+    if(isMobile()){ shell.classList.toggle('nav-open'); }
+    else { var c=shell.classList.toggle('collapsed'); try{ localStorage.setItem('zy-sb-collapsed', c?'1':'0'); }catch(e){} }
+  });
+  scrim.addEventListener('click',function(){ shell.classList.remove('nav-open'); });
+
+  // user dropdown menu
+  (function(){
+    var wrap=document.querySelector('.nav-user-wrap'), btn=document.getElementById('userBtn');
+    if(!wrap||!btn) return;
+    btn.addEventListener('click',function(e){ e.stopPropagation(); wrap.classList.toggle('open'); });
+    document.addEventListener('click',function(e){ if(!wrap.contains(e.target)) wrap.classList.remove('open'); });
+  })();
+
+  // NTA chart hover tooltip — only show on hover, follow the line
+  (function(){
+    var main=document.querySelector('.chart-main');
+    var svg=main && main.querySelector('.chart-svg');
+    var tip=document.getElementById('ntaTip');
+    if(!main||!svg||!tip) return;
+    var path=svg.querySelector('.line');
+    var dEl=tip.querySelector('.ft-d'), vEl=tip.querySelector('.ft-v');
+    var len=path.getTotalLength();
+    // map x (0..1) to a date + NTA value
+    var start=new Date(2023,0,1), end=new Date(2026,2,19);
+    function fmtDate(t){ var d=new Date(start.getTime()+(end-start)*t);
+      return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+    function ntaAt(t){ var v=1.0003+(0.0242)*Math.pow(t,0.92); return 'RM '+v.toFixed(4); }
+    function move(e){
+      var r=svg.getBoundingClientRect();
+      var x=Math.min(Math.max((e.clientX-r.left)/r.width,0),1);
+      // find point on path at this x fraction (path x is monotonic with length here)
+      var pt=path.getPointAtLength(len*x);
+      var vb=svg.viewBox.baseVal;
+      var px=(pt.x/vb.width)*100, py=(pt.y/vb.height)*100;
+      tip.style.left=px+'%'; tip.style.top=(py-14)+'%';
+      dEl.textContent=fmtDate(x); vEl.textContent=ntaAt(x);
+    }
+    main.addEventListener('mouseenter',function(){ tip.style.display='block'; });
+    main.addEventListener('mousemove',move);
+    main.addEventListener('mouseleave',function(){ tip.style.display='none'; });
+  })();
+
+  // period toggle
+  document.querySelectorAll('.seg-ctrl').forEach(function(g){
+    g.querySelectorAll('button').forEach(function(b){
+      b.addEventListener('click',function(){ g.querySelectorAll('button').forEach(function(x){x.classList.remove('on');}); b.classList.add('on'); });
+    });
+  });
+
+  // floating chat
+  var fab=document.getElementById('chatFab'), min=document.getElementById('chatMin');
+  var body=document.getElementById('chatBody'), input=document.getElementById('chatInput'), send=document.getElementById('chatSend');
+  function openChat(){ document.body.classList.add('chat-open'); setTimeout(function(){ if(input) input.focus(); },240); var p=fab.querySelector('.fab-ping'); if(p) p.style.display='none'; }
+  function closeChat(){ document.body.classList.remove('chat-open'); }
+  fab.addEventListener('click',openChat);
+  min.addEventListener('click',closeChat);
+  function addMsg(text, who){ var m=document.createElement('div'); m.className='msg '+who; m.textContent=text; body.appendChild(m); body.scrollTop=body.scrollHeight; }
+  function sendMsg(){ var v=(input.value||'').trim(); if(!v) return; addMsg(v,'user'); input.value='';
+    setTimeout(function(){ addMsg('Thanks — a member-services teammate will follow up here. You can also open your statements under Documents.','bot'); },650); }
+  send.addEventListener('click',sendMsg);
+  input.addEventListener('keydown',function(e){ if(e.key==='Enter') sendMsg(); });
+  document.querySelectorAll('.chat-chip').forEach(function(c){ c.addEventListener('click',function(){ input.value=c.textContent; input.focus(); }); });
+
+  // profile tabs
+  (function(){
+    var tabs=document.querySelectorAll('.prof-tab');
+    var panes=document.querySelectorAll('.prof-pane');
+    if(!tabs.length) return;
+    function show(name){
+      tabs.forEach(function(t){ t.classList.toggle('on', t.dataset.pane===name); });
+      panes.forEach(function(p){ p.classList.toggle('on', p.dataset.pane===name); });
+    }
+    tabs.forEach(function(t){ t.addEventListener('click',function(){ show(t.dataset.pane); var h=(t.dataset.pane==='personal')?'':'#'+t.dataset.pane; history.replaceState(null,'',h||location.pathname); }); });
+    var hp=location.hash.replace('#',''); if(hp==='security'||hp==='nominee'){ show(hp); }
+    // 2FA toggles
+    document.querySelectorAll('[data-sw]').forEach(function(sw){ sw.addEventListener('click',function(){ sw.classList.toggle('on'); }); });
+    // revoke session
+    document.querySelectorAll('.sess-revoke').forEach(function(b){ b.addEventListener('click',function(){ b.closest('.sess-row').style.opacity='0.4'; b.textContent='Revoked'; b.disabled=true; b.style.color='var(--fg-3)'; }); });
+  })();
+
+  // ===== NOMINEE: data-driven summary + details + auto-balancing allocation =====
+  (function(){
+    var list=document.getElementById('nomList');
+    if(!list) return;
+    var bar=document.getElementById('nomBar'), totalEl=document.getElementById('nomTotal');
+    var f={ name:document.getElementById('nf-name'), rel:document.getElementById('nf-rel'),
+      nric:document.getElementById('nf-nric'), dob:document.getElementById('nf-dob'),
+      mobile:document.getElementById('nf-mobile'), alloc:document.getElementById('nf-alloc'), allocVal:document.getElementById('nf-allocVal') };
+    var title=document.getElementById('nomFormTitle'), sub=document.getElementById('nomFormSub'), badge=document.getElementById('nomFormBadge');
+    var addBtn=document.getElementById('nomAdd'), saveBtn=document.getElementById('nomSave'), delBtn=document.getElementById('nomDelete');
+    var colors=['var(--blue)','var(--green)','var(--orange)','#7E57C2'];
+
+    var data=[
+      { name:'Tan Wei Jie', rel:'Child', nric:'······-··-····', dob:'14 Aug 2008', mobile:'+60 12-987 6543', alloc:60 },
+      { name:'Lim Soo Kiang', rel:'Spouse', nric:'······-··-····', dob:'02 Feb 1985', mobile:'+60 13-222 3344', alloc:40 }
+    ];
+    var sel=0;
+
+    function clamp(v){ return Math.max(0, Math.min(100, v)); }
+    function fixRounding(){
+      var total=data.reduce(function(a,n){return a+n.alloc;},0), diff=100-total;
+      if(diff===0 || data.length===0) return;
+      var idx=-1, max=-1;
+      data.forEach(function(n,i){ if(i!==sel && n.alloc>max){ max=n.alloc; idx=i; } });
+      if(idx===-1) idx=sel;
+      data[idx].alloc=clamp(data[idx].alloc+diff);
+    }
+    // rebalance: set selected nominee to newVal, scale the others to fill the rest, keep total 100
+    function rebalance(newVal){
+      newVal=clamp(Math.round(newVal/5)*5);
+      var others=data.map(function(n,i){return i;}).filter(function(i){return i!==sel;});
+      if(others.length===0){ data[sel].alloc=100; return; }
+      var remaining=100-newVal;
+      var othersTotal=others.reduce(function(a,i){return a+data[i].alloc;},0);
+      if(othersTotal===0){ var each=remaining/others.length; others.forEach(function(i){ data[i].alloc=Math.round(each); }); }
+      else { others.forEach(function(i){ data[i].alloc=Math.round(data[i].alloc/othersTotal*remaining); }); }
+      data[sel].alloc=newVal;
+      fixRounding();
+    }
+
+    function renderSummary(){
+      bar.innerHTML='';
+      data.forEach(function(n,i){ var s=document.createElement('span'); s.style.width=n.alloc+'%'; s.style.background=colors[i%colors.length]; bar.appendChild(s); });
+      var total=data.reduce(function(a,n){return a+n.alloc;},0);
+      totalEl.textContent=total+'%';
+      totalEl.className='nom-total-val '+(total===100?'ok':'warn');
+      list.innerHTML='';
+      data.forEach(function(n,i){
+        var row=document.createElement('button'); row.type='button'; row.className='nom-item'+(i===sel?' active':'');
+        row.innerHTML='<span class="nom-dot" style="background:'+colors[i%colors.length]+'"></span>'+
+          '<span class="nom-meta"><span class="kt">'+(n.name||'New nominee')+'</span><span class="kd">'+n.rel+' · '+(i===0?'Primary':'Secondary')+' nominee</span></span>'+
+          '<span class="nom-alloc-pill">'+n.alloc+'%</span>';
+        row.addEventListener('click',function(){ sel=i; loadForm(); renderSummary(); });
+        list.appendChild(row);
+      });
+    }
+    function loadForm(){
+      var n=data[sel];
+      f.name.value=n.name; f.rel.value=n.rel; f.nric.value=n.nric; f.dob.value=n.dob; f.mobile.value=n.mobile;
+      f.alloc.value=n.alloc; f.allocVal.textContent=n.alloc+'%';
+      title.textContent = n.name ? 'Edit · '+n.name : 'New Nominee';
+      sub.textContent = n.name ? 'Update this nominee\u2019s details and allocation.' : 'Enter the new nominee\u2019s details, then save.';
+      badge.textContent = sel===0 ? 'Primary' : 'Secondary';
+    }
+
+    f.alloc.addEventListener('input',function(){
+      f.allocVal.textContent=f.alloc.value+'%';
+      rebalance(parseInt(f.alloc.value,10));
+      renderSummary();
+    });
+    saveBtn.addEventListener('click',function(){
+      var n=data[sel];
+      n.name=f.name.value.trim(); n.rel=f.rel.value; n.nric=f.nric.value.trim(); n.dob=f.dob.value.trim(); n.mobile=f.mobile.value.trim();
+      n.alloc=parseInt(f.alloc.value,10);
+      renderSummary();
+      saveBtn.textContent='Saved ✓'; setTimeout(function(){ saveBtn.textContent='Save Changes'; }, 1400);
+    });
+    addBtn.addEventListener('click',function(){
+      if(data.length>=4){ addBtn.textContent='Max 4 nominees'; setTimeout(function(){ addBtn.textContent='+ Add Nominee'; },1400); return; }
+      data.push({ name:'', rel:'Child', nric:'', dob:'', mobile:'', alloc:0 });
+      sel=data.length-1; loadForm(); renderSummary(); f.name.focus();
+    });
+    delBtn.addEventListener('click',function(){
+      if(data.length<=1){ delBtn.textContent='At least one required'; setTimeout(function(){ delBtn.textContent='Remove Nominee'; },1400); return; }
+      data.splice(sel,1); sel=0;
+      var t=data.reduce(function(a,n){return a+n.alloc;},0);
+      if(t!==100 && t>0){ data.forEach(function(n){ n.alloc=Math.round(n.alloc/t*100); }); fixRounding(); }
+      else if(t===0){ data[0].alloc=100; }
+      loadForm(); renderSummary();
+    });
+
+    renderSummary(); loadForm();
+  })();
+})();
+</script>
+<script src="../assets/js/member-search.js"></script>
+<script src="../assets/js/member-notifications.js"></script>
+</body>
+</html>

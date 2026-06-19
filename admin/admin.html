@@ -1,0 +1,1885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Console — ZY-Invest</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0D2A52">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ZY Admin">
+<meta name="application-name" content="ZY Admin">
+<link rel="icon" type="image/png" href="../assets/img/favicon.png">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+<link rel="stylesheet" href="../assets/css/dashboard-portfolio.css">
+<style>
+/* ===== ADMIN CHROME ===== */
+html,body{margin:0;padding:0;}
+body{background:var(--gray-50);overflow-x:hidden;}
+.adm-top { position:fixed; top:0; left:0; right:0; width:100%; z-index:60; height:62px; background:#0D2A52; color:#fff;
+  display:flex; align-items:center; gap:16px; padding:0 22px; }
+.adm-top .brand { display:flex; align-items:center; gap:10px; text-decoration:none; color:#fff; }
+.adm-top .brand img { height:38px; }
+.adm-top .brand .bt b { font-size:0.96rem; font-weight:600; display:block; line-height:1.1; }
+.adm-top .brand .bt span { font-size:0.64rem; letter-spacing:0.16em; text-transform:uppercase; color:rgba(255,255,255,.65); }
+.adm-badge { font-size:0.64rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#fff;
+  background:rgba(255,255,255,.14); padding:5px 10px; border-radius:999px; }
+.adm-right { margin-left:auto; display:flex; align-items:center; gap:14px; }
+.adm-clock { font-size:0.78rem; color:rgba(255,255,255,.7); font-variant-numeric:tabular-nums; }
+.adm-user { display:flex; align-items:center; gap:9px; }
+.adm-user .av { width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,#1565C0,#2E7D32); display:flex; align-items:center; justify-content:center; font-size:0.74rem; font-weight:700; }
+.adm-user .nm { font-size:0.82rem; font-weight:600; line-height:1.1; }
+.adm-user .rl { font-size:0.66rem; color:rgba(255,255,255,.6); }
+.adm-logout { font:inherit; font-size:0.8rem; font-weight:600; color:#fff; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2);
+  border-radius:var(--radius-md); padding:8px 14px; cursor:pointer; transition:background .2s; }
+.adm-logout:hover { background:rgba(220,38,38,.85); border-color:transparent; }
+
+.adm-shell { display:flex; min-height:calc(100vh - 62px); }
+.adm-side { width:236px; flex:none; background:#fff; border-right:1px solid var(--border); padding:16px 12px; display:flex; flex-direction:column; gap:3px; position:sticky; top:108px; height:calc(100vh - 108px); overflow-y:auto; align-self:flex-start; }
+.adm-side .grp { font-size:0.64rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--fg-3); padding:14px 12px 6px; }
+.adm-nav { display:flex; align-items:center; gap:11px; padding:10px 12px; border-radius:var(--radius-md); cursor:pointer;
+  font-size:0.9rem; font-weight:500; color:var(--gray-700); border:none; background:none; width:100%; text-align:left; transition:all var(--transition); }
+.adm-nav:hover { background:var(--gray-100); color:var(--gray-900); }
+.adm-nav.on { background:var(--blue-bg); color:var(--blue); font-weight:600; }
+.adm-nav .ic { width:20px; height:20px; flex:none; }
+.adm-nav .ic svg { width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+.adm-main { flex:1; min-width:0; padding:26px 30px; background:var(--gray-50); }
+
+.adm-pane { display:none; }
+.adm-pane.on { display:block; animation:apFade .25s ease; }
+@keyframes apFade { from{transform:translateY(6px);} to{transform:none;} }
+
+.ph { margin-bottom:20px; }
+.ph h1 { margin:0; font-size:1.5rem; font-weight:600; color:var(--fg-1); letter-spacing:-0.01em; }
+.ph p { margin:5px 0 0; font-size:0.9rem; color:var(--fg-3); }
+
+.row-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.row-2.wide-left { grid-template-columns:1.2fr 1fr; }
+.mt16 { margin-top:16px; }
+.callout { display:flex; gap:11px; align-items:flex-start; margin:0 22px 18px; padding:12px 14px; background:var(--orange-bg); border-radius:var(--radius-md); font-size:0.84rem; color:var(--fg-2); line-height:1.5; }
+.callout span { color:var(--orange); font-size:1rem; flex:none; }
+.tag-blue { font-size:0.74rem; font-weight:600; color:var(--blue); background:var(--blue-bg); padding:5px 11px; border-radius:var(--radius-pill); white-space:nowrap; }
+.tag-orange { font-size:0.74rem; font-weight:600; color:var(--orange); background:var(--orange-bg); padding:5px 11px; border-radius:var(--radius-pill); white-space:nowrap; }
+.tag-green { font-size:0.74rem; font-weight:600; color:var(--green); background:var(--green-bg); padding:5px 11px; border-radius:var(--radius-pill); white-space:nowrap; }
+.tag-red { font-size:0.74rem; font-weight:600; color:var(--red); background:var(--red-bg); padding:5px 11px; border-radius:var(--radius-pill); white-space:nowrap; }
+.cf-out{color:var(--red);font-weight:600;}
+.cf-in{color:var(--green);font-weight:600;}
+.td-sub { font-size:0.8rem; color:var(--fg-3); }
+.act-link { font-size:0.82rem; font-weight:600; color:var(--blue); cursor:pointer; background:none; border:none; padding:0; }
+
+/* filter bar */
+.filter-bar { display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+.search { flex:1; min-width:200px; display:flex; align-items:center; gap:8px; background:#fff; border:1px solid var(--border); border-radius:var(--radius-md); padding:9px 13px; }
+.search input { flex:1; border:none; outline:none; font:inherit; font-size:0.88rem; background:transparent; color:var(--fg-1); }
+.search .ic { color:var(--fg-3); }
+.chip { font:inherit; font-size:0.82rem; font-weight:500; color:var(--gray-700); background:#fff; border:1px solid var(--border); border-radius:var(--radius-pill); padding:8px 14px; cursor:pointer; transition:all var(--transition); }
+.chip:hover { border-color:var(--gray-400); }
+.chip.active { background:var(--blue); color:#fff; border-color:var(--blue); }
+
+.btn-sm { padding:9px 16px; font-size:0.84rem; flex:none; width:auto; }
+
+/* toast */
+.toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); z-index:200;
+  background:var(--fg-1); color:#fff; font-size:0.86rem; font-weight:500; padding:12px 20px; border-radius:var(--radius-md);
+  box-shadow:var(--shadow-lg); opacity:0; pointer-events:none; transition:opacity .25s, transform .25s; display:flex; align-items:center; gap:9px; }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+.toast .ok { color:#7BE495; }
+
+/* drawer (investor detail) */
+.drawer-scrim { position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:90; opacity:0; visibility:hidden; transition:.25s; }
+.drawer-scrim.open { opacity:1; visibility:visible; }
+.drawer { position:fixed; top:0; right:0; height:100vh; width:440px; max-width:92vw; background:#fff; z-index:91; box-shadow:-20px 0 60px rgba(0,0,0,.2);
+  transform:translateX(100%); transition:transform .3s ease; display:flex; flex-direction:column; }
+.drawer.open { transform:none; }
+.drawer-head { padding:20px 22px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:13px; }
+.drawer-head .av { width:46px; height:46px; border-radius:50%; background:linear-gradient(135deg,#1565C0,#2E7D32); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; flex:none; }
+.drawer-head h3 { margin:0; font-size:1.05rem; font-weight:600; color:var(--fg-1); }
+.drawer-head .sub { font-size:0.78rem; color:var(--fg-3); }
+.drawer-close { margin-left:auto; background:none; border:none; font-size:1.2rem; color:var(--fg-3); cursor:pointer; }
+.drawer-body { padding:22px; overflow-y:auto; flex:1; }
+.dl { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px; }
+.dl .k { font-size:0.68rem; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--fg-3); margin-bottom:4px; }
+.dl .v { font-size:0.95rem; font-weight:600; color:var(--fg-1); font-variant-numeric:tabular-nums; }
+
+/* secondary category bar */
+.adm-subbar{position:fixed;top:62px;left:0;right:0;width:100%;z-index:55;height:46px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:2px;padding:0 22px;}
+.adm-subbar .sb-lab{font-size:0.64rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--fg-3);margin-right:12px;}
+.sub-group{position:relative;height:100%;display:flex;align-items:center;}
+.sub-top{display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:var(--radius-md);font-size:0.86rem;font-weight:500;color:var(--gray-700);cursor:pointer;background:none;border:none;}
+.sub-top .caret{font-size:0.56rem;color:var(--gray-400);transition:transform var(--transition);}
+.sub-group:hover .sub-top{background:var(--gray-100);color:var(--gray-900);}
+.sub-group:hover .sub-top .caret{transform:rotate(180deg);}
+.sub-dd{position:absolute;top:100%;left:0;padding-top:6px;min-width:268px;opacity:0;visibility:hidden;transform:translateY(6px);transition:opacity var(--transition),transform var(--transition),visibility var(--transition);z-index:70;}
+.sub-group:hover .sub-dd{opacity:1;visibility:visible;transform:none;}
+.sub-dd-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:7px;}
+.sub-dd a{display:block;padding:9px 11px;border-radius:var(--radius-md);text-decoration:none;}
+.sub-dd a:hover{background:var(--gray-50);}
+.sub-dd a b{display:block;font-size:0.85rem;font-weight:600;color:var(--fg-1);margin-bottom:2px;}
+.sub-dd a span{display:block;font-size:0.74rem;color:var(--fg-3);line-height:1.4;}
+.adm-shell{min-height:calc(100vh - 108px);margin-top:108px;}
+
+/* modal */
+.modal-scrim{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:120;opacity:0;visibility:hidden;transition:.2s;}
+.modal-scrim.open{opacity:1;visibility:visible;}
+.modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-46%);z-index:121;width:540px;max-width:94vw;max-height:90vh;overflow-y:auto;background:#fff;border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);opacity:0;visibility:hidden;transition:opacity .22s,transform .22s,visibility .22s;}
+.modal.open{opacity:1;visibility:visible;transform:translate(-50%,-50%);}
+.modal-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;}
+.modal-head h3{margin:0;font-size:1.05rem;font-weight:600;color:var(--fg-1);}
+.modal-head .sub{font-size:0.8rem;color:var(--fg-3);margin-top:3px;}
+.modal-x{background:none;border:none;font-size:1.2rem;color:var(--fg-3);cursor:pointer;line-height:1;}
+.modal-body{padding:22px;}
+.modal-foot{padding:15px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;background:var(--gray-50);}
+.est-box{margin-top:18px;padding:14px 16px;background:var(--blue-bg);border-radius:var(--radius-md);display:flex;justify-content:space-between;align-items:center;}
+.est-box .k{font-size:0.78rem;color:var(--fg-2);}
+.est-box .v{font-size:1.2rem;font-weight:600;color:var(--blue);font-variant-numeric:tabular-nums;}
+.pill-pending{font-size:0.74rem;font-weight:600;color:var(--orange);background:var(--orange-bg);padding:5px 12px;border-radius:var(--radius-pill);white-space:nowrap;}
+.pill-rej{font-size:0.74rem;font-weight:600;color:var(--red);background:var(--red-bg);padding:5px 12px;border-radius:var(--radius-pill);white-space:nowrap;}
+.btn-mini{font:inherit;font-size:0.82rem;font-weight:600;color:#fff;background:var(--blue);border:none;border-radius:var(--radius-md);padding:8px 15px;cursor:pointer;transition:background var(--transition);}
+.btn-mini:hover{background:var(--blue-dark);}
+.tbl tr.clickable{cursor:pointer;}
+.status-actions{display:flex;gap:10px;margin-top:18px;}
+.sa-approve{flex:1;background:var(--green);color:#fff;border:none;border-radius:var(--radius-md);padding:12px;font:inherit;font-weight:600;cursor:pointer;}
+.sa-reject{flex:1;background:#fff;color:var(--red);border:1.5px solid var(--red);border-radius:var(--radius-md);padding:12px;font:inherit;font-weight:600;cursor:pointer;}
+.sa-pending{flex:1;background:#fff;color:var(--fg-2);border:1.5px solid var(--border-strong);border-radius:var(--radius-md);padding:12px;font:inherit;font-weight:600;cursor:pointer;}
+.td-mono{font-family:var(--font-mono);}
+.tbl .pos{color:var(--green);font-weight:600;}
+.tbl .neg{color:var(--red);font-weight:600;}
+.pnl-pill{display:inline-block;font-weight:600;font-variant-numeric:tabular-nums;padding:4px 11px;border-radius:var(--radius-pill);font-size:0.84rem;}
+.pnl-pill.pos{background:var(--green-bg);color:var(--green);}
+.pnl-pill.neg{background:var(--red-bg);color:var(--red);}
+.pnl-pill.zero{background:var(--gray-100);color:var(--fg-3);}
+.mem-pill{display:inline-block;font-size:0.74rem;font-weight:600;padding:4px 11px;border-radius:var(--radius-pill);white-space:nowrap;}
+.mem-pill.sh{background:var(--blue-bg);color:var(--blue);}
+.mem-pill.dir{background:var(--green-bg);color:var(--green);}
+.mem-pill.non{background:var(--gray-100);color:var(--fg-3);}
+.fee-pill{display:inline-block;font-size:0.74rem;font-weight:600;padding:4px 11px;border-radius:var(--radius-pill);}
+.fee-pill.base{background:var(--blue-bg);color:var(--blue);}
+.fee-pill.perf{background:var(--orange-bg);color:var(--orange);}
+.fee-formula{background:var(--gray-50);border:1px solid var(--border);border-radius:var(--radius-md);padding:13px 15px;font-family:var(--font-mono);font-size:0.8rem;color:var(--fg-1);line-height:1.7;white-space:pre-wrap;margin:0;}
+/* document upload / management */
+.file-drop{display:flex;align-items:center;gap:10px;border:1.5px dashed var(--border-strong);border-radius:var(--radius-md);padding:14px;cursor:pointer;color:var(--fg-3);font-size:0.84rem;transition:all var(--transition);}
+.file-drop:hover{border-color:var(--blue);background:var(--blue-bg);color:var(--blue);}
+.dm-filt{display:flex;flex-direction:column;gap:5px;}
+.dm-filt label{font-size:0.7rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--fg-3);}
+.dm-filt select{font:inherit;font-size:0.84rem;color:var(--fg-1);background:#fff;border:1px solid var(--border);border-radius:var(--radius-md);padding:8px 10px;min-width:118px;}
+.bulk-bar{display:none;align-items:center;gap:14px;background:var(--blue-bg);border:1px solid var(--blue-light);border-radius:var(--radius-md);padding:11px 16px;margin:14px 0 0;}
+.bulk-bar.show{display:flex;}
+.bulk-chk{display:flex;align-items:center;gap:9px;font-size:0.86rem;font-weight:600;color:var(--blue);cursor:pointer;}
+.bulk-chk input{width:16px;height:16px;accent-color:var(--blue);}
+.bulk-del{font:inherit;font-size:0.84rem;font-weight:600;color:var(--red);background:none;border:none;cursor:pointer;}
+.bulk-dl{font:inherit;font-size:0.84rem;font-weight:600;color:var(--blue);background:none;border:none;cursor:pointer;}
+.bulk-clear{font:inherit;font-size:0.84rem;font-weight:600;color:var(--fg-3);background:none;border:none;cursor:pointer;margin-left:auto;}
+.dm-tbl th input,.dm-tbl td input[type=checkbox]{width:16px;height:16px;accent-color:var(--blue);cursor:pointer;}
+.dm-tbl tr.sel{background:var(--blue-bg);}
+.dm-act{display:flex;gap:6px;}
+.dm-act button{width:30px;height:30px;min-width:30px;flex:none;box-sizing:border-box;border-radius:7px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--transition);padding:0;}
+.dm-act button svg{width:15px;height:15px;display:block;flex:none;stroke-width:1.8;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;}
+.dm-act .dl{color:var(--blue);background:var(--blue-bg);}.dm-act .dl:hover{filter:brightness(0.96);}
+.dm-act .pv{color:var(--fg-3);background:var(--gray-100);}.dm-act .pv:hover{filter:brightness(0.96);}
+.dm-act .rm{color:var(--red);background:var(--red-bg);}.dm-act .rm:hover{filter:brightness(0.97);}
+.vis-pill{display:inline-block;font-size:0.72rem;font-weight:600;padding:5px 10px;border-radius:var(--radius-pill);}
+.vis-pill.fund{background:var(--green-bg);color:var(--green);}
+.vis-pill.member{background:var(--blue-bg);color:var(--blue);}
+.vis-pill::before{content:'◆ ';font-size:0.6rem;}
+.dm-fname{font-size:0.76rem;color:var(--fg-3);font-family:var(--font-mono);}
+.type-pill{display:inline-block;font-size:0.74rem;font-weight:600;padding:5px 11px;border-radius:var(--radius-pill);white-space:nowrap;}
+.type-pill.tp-fact{background:var(--blue-bg);color:var(--blue);}
+.type-pill.tp-div{background:var(--green-bg);color:var(--green);}
+.type-pill.tp-sub{background:var(--blue-bg);color:var(--blue);}
+.type-pill.tp-red{background:var(--orange-bg);color:var(--orange);}
+.type-pill.tp-acct{background:var(--orange-bg);color:var(--orange);}
+.file-drop .fd-ic{font-size:1.1rem;}
+.file-drop.filled{border-style:solid;border-color:var(--green);background:var(--green-bg);color:var(--green);}
+.cmp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:0.7rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--fg-3);}
+.cmp-box{border:1px solid var(--border);border-radius:var(--radius-md);background:var(--gray-50);padding:14px;min-height:200px;}
+.cmp-empty{font-size:0.82rem;color:var(--fg-3);line-height:1.6;}
+.cmp-row{display:flex;justify-content:space-between;font-size:0.84rem;padding:7px 0;border-bottom:1px dashed var(--border);}
+.cmp-row:last-child{border-bottom:none;}
+.cmp-row .ck{color:var(--fg-3);}
+.cmp-row .cv{font-weight:600;color:var(--fg-1);font-variant-numeric:tabular-nums;}
+.cmp-row.tot .cv{color:var(--blue);}
+.adm-main .tbl thead th{cursor:pointer;user-select:none;white-space:nowrap;}
+.adm-main .tbl thead th:hover{color:var(--blue);}
+.adm-main .tbl thead th.sorted-asc::after{content:" ▲";font-size:0.68em;color:var(--blue);}
+.adm-main .tbl thead th.sorted-desc::after{content:" ▼";font-size:0.68em;color:var(--blue);}
+.rev-row{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--gray-100);font-size:0.9rem;}
+.rev-row:last-child{border-bottom:none;}
+.rev-row .rk{color:var(--fg-3);}
+.rev-row .rv{font-weight:600;color:var(--fg-1);font-variant-numeric:tabular-nums;}
+
+/* collapsible sidebar (member-style) */
+.adm-shell{position:relative;}
+.adm-side{transition:width var(--transition);}
+.adm-toggle{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--radius-md);cursor:pointer;background:none;border:none;color:var(--gray-700);width:100%;margin-bottom:6px;}
+.adm-toggle:hover{background:var(--gray-100);}
+.adm-toggle .bars{display:flex;flex-direction:column;gap:3px;flex:none;}
+.adm-toggle .bars span{width:18px;height:2px;background:var(--gray-700);border-radius:2px;}
+.adm-toggle .tlbl{font-size:0.78rem;font-weight:600;color:var(--fg-3);letter-spacing:0.04em;}
+.adm-shell.collapsed .adm-side{width:66px !important;}
+.adm-shell.collapsed .adm-side:not(:hover) .adm-nav{font-size:0;gap:0;justify-content:center;}
+.adm-shell.collapsed .adm-side:not(:hover) .adm-toggle{justify-content:center;}
+.adm-shell.collapsed .adm-side:not(:hover) .adm-toggle .tlbl{display:none;}
+.adm-shell.collapsed .adm-side:not(:hover) .grp{font-size:0;height:0;padding:6px 0;overflow:hidden;}
+.adm-shell.collapsed .adm-side:hover{position:fixed;left:0;top:108px;height:calc(100vh - 108px);width:236px !important;z-index:45;background:#fff;box-shadow:var(--shadow-lg);overflow-y:auto;}
+.adm-main.embedding{padding:0;}
+.adm-signout{color:var(--red);}
+.adm-signout:hover{background:var(--red-bg);color:var(--red);}
+.adm-signout .ic svg{stroke:var(--red);}
+.adm-pane[data-pane="embed"]{min-height:calc(100vh - 108px);}
+.adm-pane[data-pane="embed"] iframe{width:100%;height:calc(100vh - 108px);border:none;display:block;background:#fff;}
+
+/* trade buy/sell toggle */
+.trade-toggle{display:flex;border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:18px;}
+.trade-toggle button{flex:1;padding:11px;font:inherit;font-weight:600;font-size:0.9rem;background:#fff;color:var(--fg-3);border:none;cursor:pointer;transition:all var(--transition);}
+.trade-toggle button+button{border-left:1px solid var(--border);}
+.trade-toggle .tt-buy.active{background:var(--green);color:#fff;}
+.trade-toggle .tt-sell.active{background:var(--red);color:#fff;}
+.btn-fill.sell{background:var(--red);}
+.btn-fill.sell:hover{background:#b91c1c;}
+.btn-fill.buy{background:var(--green);}
+.btn-fill.buy:hover{background:#1b5e20;}
+.adv-toggle{display:inline-flex;align-items:center;gap:6px;font-size:0.82rem;font-weight:600;color:var(--blue);cursor:pointer;background:none;border:none;padding:6px 0 0;}
+.adv-box{display:none;margin-top:10px;padding:14px;border:1px dashed var(--border-strong);border-radius:var(--radius-md);background:var(--gray-50);}
+.adv-box.open{display:block;}
+/* wide landscape trade modal — no scroll */
+.trade-modal{width:780px;max-width:94vw;max-height:96vh;overflow-y:auto;}
+.trade-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;}
+.trade-col{display:flex;flex-direction:column;gap:12px;}
+.trade-col .two-up{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.trade-col .field{margin:0;}
+.trade-modal .adv-box{margin-top:8px;padding:12px;}
+.trade-modal .est-box{margin-top:auto;}
+/* investor profile modal — landscape, no scroll */
+.inv-modal{width:820px;max-width:94vw;max-height:96vh;overflow-y:auto;}
+.inv-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:14px 16px;background:var(--gray-50);border:1px solid var(--border);border-radius:var(--radius-md);margin-bottom:18px;}
+.inv-stats .k{font-size:0.66rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--fg-3);margin-bottom:4px;}
+.inv-stats .v{font-size:0.98rem;font-weight:600;color:var(--fg-1);font-variant-numeric:tabular-nums;}
+.inv-cols{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+.inv-col{display:flex;flex-direction:column;gap:13px;}
+.inv-col .field{margin:0;}
+.inv-sec-title{font-size:0.7rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--blue);margin-bottom:2px;}
+.sec-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--gray-100);}
+.sec-toggle-row .st-t{font-size:0.86rem;font-weight:600;color:var(--fg-1);}
+.sec-toggle-row .st-d{font-size:0.74rem;color:var(--fg-3);}
+.toggle-sw{position:relative;width:42px;height:24px;flex:none;border-radius:999px;background:var(--gray-200);border:none;cursor:pointer;transition:background var(--transition);}
+.toggle-sw::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:var(--shadow-sm);transition:transform var(--transition);}
+.toggle-sw.on{background:var(--blue);}
+.toggle-sw.on::after{transform:translateX(18px);}
+@media(max-width:680px){ .inv-cols{grid-template-columns:1fr;} .inv-stats{grid-template-columns:1fr 1fr;} }
+
+/* document generator */
+.dg-layout{display:grid;grid-template-columns:330px 1fr;gap:18px;align-items:start;}
+.dg-form{position:sticky;top:124px;}
+.dg-preview-wrap{border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;background:#fff;}
+.dg-preview-bar{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--border);font-size:0.82rem;font-weight:600;color:var(--fg-2);background:var(--gray-50);}
+.dg-stage{padding:24px;background:#eceef1;display:flex;justify-content:center;overflow:auto;max-height:calc(100vh - 220px);}
+.a4{width:595px;min-height:842px;background:#fff;box-shadow:0 6px 24px rgba(0,0,0,.16);padding:0;font-size:11px;color:#1f2933;line-height:1.5;flex:none;display:flex;flex-direction:column;}
+.a4 .doc-pad{padding:34px 38px 0;flex:1;}
+.a4 .doc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px;}
+.a4 .doc-hl{max-width:58%;}
+.a4 .doc-hl .iv-name{font-size:13px;font-weight:700;color:#0D2A52;margin-bottom:3px;}
+.a4 .doc-hl .iv-addr{font-size:9.5px;color:#54606e;line-height:1.6;}
+.a4 .doc-hr{text-align:right;font-size:9.5px;color:#54606e;line-height:1.85;}
+.a4 .doc-hr b{color:#1f2933;}
+.a4 .doc-brandrow{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--blue);padding-bottom:10px;margin-bottom:14px;}
+.a4 .doc-brandrow .bz{display:flex;align-items:center;gap:9px;}
+.a4 .doc-brandrow img{height:26px;}
+.a4 .doc-brandrow .bn{font-size:14px;font-weight:700;color:#0D2A52;}
+.a4 .doc-brandrow .bn span{display:block;font-size:7.5px;letter-spacing:0.16em;text-transform:uppercase;color:#8a94a0;font-weight:600;}
+.a4 .doc-banner{background:#0D2A52;color:#fff;text-align:center;font-size:13px;font-weight:700;letter-spacing:0.1em;padding:9px;border-radius:5px;margin-bottom:16px;text-transform:uppercase;}
+.a4 .iv-sech{font-size:10px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--blue);margin:0 0 7px;}
+.a4 .iv-grid{border:1px solid #d8dee6;border-radius:6px;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;margin-bottom:18px;}
+.a4 .iv-cell{display:flex;justify-content:space-between;gap:10px;padding:6px 11px;border-bottom:1px solid #eef1f5;font-size:9.5px;}
+.a4 .iv-cell:nth-child(odd){border-right:1px solid #eef1f5;}
+.a4 .iv-cell .l{color:#7a8693;}
+.a4 .iv-cell .v{font-weight:600;color:#1f2933;text-align:right;}
+.a4 table.dt{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:9.5px;}
+.a4 table.dt caption{caption-side:top;text-align:left;font-size:10px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--blue);padding:0 0 6px;}
+.a4 table.dt th{text-align:left;font-size:8px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#fff;background:#3a5a82;padding:6px 8px;}
+.a4 table.dt th.r{text-align:right;}
+.a4 table.dt td{padding:6px 8px;border-bottom:1px solid #eef1f5;}
+.a4 table.dt td.r{text-align:right;font-variant-numeric:tabular-nums;}
+.a4 table.dt tr.sub td{background:#f6f8fb;font-weight:600;}
+.a4 table.dt tr.total td{font-weight:700;color:#0D2A52;background:#eaf0f7;}
+.a4 .sumwrap{display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;border:1px solid #d8dee6;border-radius:6px;padding:12px 14px;margin-bottom:16px;}
+.a4 .sumrow{display:flex;justify-content:space-between;font-size:10px;padding:3px 0;border-bottom:1px dashed #e6eaf0;}
+.a4 .sumrow .v{font-weight:600;font-variant-numeric:tabular-nums;}
+.a4 .sumrow .v.g{color:var(--green);}
+.a4 .sumrow .v.r{color:var(--red);}
+.a4 .sumrow.big{font-size:11.5px;border-bottom:none;color:#0D2A52;}
+.a4 .sumrow.big .v{font-weight:700;}
+.a4 .notices{font-size:8.5px;color:#54606e;line-height:1.55;margin-top:8px;}
+.a4 .notices .nh{font-size:9.5px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#1f2933;margin-bottom:5px;}
+.a4 .notices ol{margin:0;padding-left:15px;}
+.a4 .notices li{margin-bottom:3px;}
+.a4 .doc-foot{border-top:1px solid #d8dee6;margin-top:auto;padding:9px 38px;display:flex;justify-content:space-between;gap:10px;font-size:8px;color:#7a8693;}
+.a4 .doc-foot .fl{display:flex;gap:14px;flex-wrap:wrap;}
+/* factsheet */
+.a4 .fs-tag{font-size:9.5px;color:#54606e;margin:-4px 0 12px;}
+.a4 .fs-tag b{color:#0D2A52;}
+.a4 .fs-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.a4 .fs-box{border:1px solid #d8dee6;border-radius:6px;padding:10px 12px;margin-bottom:12px;}
+.a4 .fs-box .fs-h{font-size:9px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--blue);margin-bottom:7px;}
+.a4 .fs-kv{display:flex;justify-content:space-between;font-size:9px;padding:3px 0;border-bottom:1px dashed #eef1f5;}
+.a4 .fs-kv .v{font-weight:600;}
+.a4 .fs-prose{font-size:8.7px;color:#54606e;line-height:1.55;}
+.a4 .fs-alloc{display:flex;align-items:center;gap:8px;font-size:9px;margin:5px 0;}
+.a4 .fs-alloc .nm{width:96px;flex:none;}
+.a4 .fs-alloc .track{flex:1;height:9px;background:#eef1f5;border-radius:5px;overflow:hidden;}
+.a4 .fs-alloc .track span{display:block;height:100%;background:var(--blue);}
+.a4 .fs-alloc .pc{width:40px;text-align:right;font-weight:600;}
+@media(max-width:920px){ .dg-layout{grid-template-columns:1fr;} .dg-form{position:static;} }
+
+/* print: only the A4 document */
+@media print{
+  @page{ size:A4; margin:0; }
+  body *{ visibility:hidden !important; }
+  #dg-doc, #dg-doc *{ visibility:visible !important; }
+  #dg-doc{ position:absolute; left:0; top:0; box-shadow:none !important; margin:0 !important; width:210mm; min-height:297mm; }
+  #dg-doc .doc-pad{ padding:14mm 13mm 0; }
+  #dg-doc .doc-foot{ padding:3mm 13mm; position:fixed; bottom:0; left:0; right:0; background:#fff; }
+}
+.ord-line{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-bottom:10px;}
+.ord-del{background:none;border:none;color:var(--red);cursor:pointer;font-size:1rem;padding:0 4px 10px;}
+.ord-add{font-size:0.82rem;font-weight:600;color:var(--blue);background:none;border:none;cursor:pointer;}
+
+@media(max-width:920px){ .row-2, .row-2.wide-left { grid-template-columns:1fr; } .metric-row { grid-template-columns:repeat(2,1fr); } }
+@media(max-width:700px){ .adm-side { display:none; } .adm-main { padding:20px 16px; } }
+</style>
+</head>
+<body>
+
+<!-- auth guard -->
+<script>
+(function(){
+  if('serviceWorker' in navigator){ window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
+  try{ var s=JSON.parse(localStorage.getItem('zy_admin_session')||'null'); if(!s||s.role!=='admin'){ location.replace('admin-login.html'); } }
+  catch(e){ location.replace('admin-login.html'); }
+})();
+</script>
+
+<!-- ===================== ADMIN TOP BAR ===================== -->
+<header class="adm-top">
+  <a href="admin.html" class="brand">
+    <img src="../assets/img/logo.png" alt="ZY-Invest">
+    <span class="bt"><b>ZY-Invest</b><span>Admin Console</span></span>
+  </a>
+  <span class="adm-badge">🔒 Restricted</span>
+  <div class="adm-right">
+    <span class="adm-clock" id="clock">—</span>
+    <div class="adm-user"><span class="av">NZY</span><span><span class="nm">Ng Zhi Yao</span><br><span class="rl">Fund Manager · Admin</span></span></div>
+    <button class="adm-logout" id="logout">Logout</button>
+  </div>
+</header>
+
+<!-- ===================== SECONDARY CATEGORY BAR ===================== -->
+<div class="adm-subbar">
+  <span class="sb-lab">Member Pages</span>
+  <div class="sub-group">
+    <button class="sub-top">Fund <span class="caret">▾</span></button>
+    <div class="sub-dd"><div class="sub-dd-card">
+      <a href="../members/fund-overview.html"><b>Fund Overview</b><span>Mandate, objective &amp; key facts</span></a>
+      <a href="../members/factsheet.html"><b>Factsheet</b><span>Holdings allocation each financial year</span></a>
+      <a href="../members/shareholder-list.html"><b>Shareholder List</b><span>Unitholders, units held &amp; ownership</span></a>
+    </div></div>
+  </div>
+  <div class="sub-group">
+    <button class="sub-top">Performance <span class="caret">▾</span></button>
+    <div class="sub-dd"><div class="sub-dd-card">
+      <a href="../members/financial-result.html"><b>Financial Result</b><span>Income statement, balance sheet &amp; cash flow</span></a>
+      <a href="../members/performance-analysis.html"><b>Performance Analysis</b><span>Returns &amp; benchmark comparison (FBM KLCI)</span></a>
+      <a href="../members/nta-history.html"><b>NTA History</b><span>Chart &amp; daily NTA / NAV history</span></a>
+    </div></div>
+  </div>
+  <div class="sub-group">
+    <button class="sub-top">Documents <span class="caret">▾</span></button>
+    <div class="sub-dd"><div class="sub-dd-card">
+      <a href="../members/statement-download.html"><b>Statement Download</b><span>Factsheets &amp; annual reports</span></a>
+    </div></div>
+  </div>
+</div>
+
+<div class="adm-shell" id="admShell">
+  <script>try{if(localStorage.getItem('zy_admin_sb')==='1'){document.getElementById('admShell').classList.add('collapsed');}}catch(e){}</script>
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="adm-side">
+    <button class="adm-toggle" id="admToggle" title="Collapse menu"><span class="bars"><span></span><span></span><span></span></span><span class="tlbl">Menu</span></button>
+    <div class="grp">Operations</div>
+    <button class="adm-nav on" data-pane="overview"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span>Overview</button>
+    <button class="adm-nav" data-pane="investors"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5 6-5s6 1.7 6 5"/><path d="M17 6.5a3 3 0 0 1 0 5.5M21 20c0-2.6-1.4-4.2-3.6-4.8"/></svg></span>Investors</button>
+    <button class="adm-nav" data-pane="portfolio"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v9l7.5 4.3A9 9 0 1 0 12 3z"/><path d="M12 3a9 9 0 0 1 7.5 13.3L12 12z"/></svg></span>Portfolio</button>
+    <button class="adm-nav" data-pane="instruments"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M8 16v-5M12 16V8M16 16v-7"/></svg></span>Instruments</button>
+    <button class="adm-nav" data-pane="trades"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 7h13l-3-3M20 17H7l3 3"/></svg></span>Trade Transactions</button>
+    <button class="adm-nav" data-pane="principal"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 8h14l-3-3"/><path d="M20 16H6l3 3"/></svg></span>Capital Injection</button>
+    <button class="adm-nav" data-pane="others"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="16" cy="12" r="1"/></svg></span>Others Transaction</button>
+    <button class="adm-nav" data-pane="dividend"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M8 7h6a2.5 2.5 0 0 1 0 5H9a2.5 2.5 0 0 0 0 5h7"/></svg></span>Dividend</button>
+    <button class="adm-nav" data-pane="settlement"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 7h18v12H3z"/><path d="M3 11h18"/><path d="M7 15h4"/></svg></span>Settlement</button>
+    <button class="adm-nav" data-pane="nta"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 17l5-5 4 4 8-8"/><path d="M21 8v5h-5"/></svg></span>Compute NTA</button>
+    <div class="grp">Management</div>
+    <button class="adm-nav" data-pane="distributions"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/></svg></span>Distributions</button>
+    <button class="adm-nav" data-pane="remuneration"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="16.5" cy="14.5" r="1.3"/></svg></span>Remuneration</button>
+    <div class="grp">Documents</div>
+    <button class="adm-nav" data-pane="docmanage"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M9 13h6"/></svg></span>Documents</button>
+    <div style="flex:1;min-height:12px;"></div>
+    <button class="adm-nav adm-signout" id="admSignout"><span class="ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>Sign out</button>
+  </aside>
+
+  <!-- ===================== MAIN ===================== -->
+  <main class="adm-main">
+
+    <!-- OVERVIEW -->
+    <section class="adm-pane on" data-pane="overview">
+      <div class="ph"><h1>Fund Overview</h1><p>Operational snapshot of the fund as at today.</p></div>
+      <div class="metric-row">
+        <div class="mc"><div class="label">Active Investors</div><div class="value blue">23</div><div class="sub">1 pending KYC</div></div>
+        <div class="mc"><div class="label">Units in Issue</div><div class="value">958,300</div><div class="sub">4 members this month</div></div>
+        <div class="mc"><div class="label">NAV (Mark-to-Market)</div><div class="value">RM 981,707</div><div class="sub">as of 19 Mar 2026</div></div>
+        <div class="mc"><div class="label">Current NTA</div><div class="value green">RM 1.0245</div><div class="sub">+0.42% today</div></div>
+      </div>
+      <div class="row-2 wide-left mt16">
+        <div class="panel"><div class="panel-head"><h3>Recent Activity</h3><button class="act-link" data-goto="principal">View principal →</button></div>
+          <table class="tbl"><thead><tr><th>Date</th><th>Event</th><th>Investor</th><th class="td-right">Amount (RM)</th></tr></thead><tbody>
+            <tr><td>19 Mar 2026</td><td><span class="tag-blue">Subscription</span></td><td>Tan Hui Mei</td><td class="td-right">25,000</td></tr>
+            <tr><td>18 Mar 2026</td><td><span class="tag-orange">Distribution</span></td><td>All unitholders</td><td class="td-right">33,460</td></tr>
+            <tr><td>15 Mar 2026</td><td><span class="tag-blue">Subscription</span></td><td>Lim Wealth Trust</td><td class="td-right">50,000</td></tr>
+            <tr><td>12 Mar 2026</td><td><span class="tag-blue">Redemption</span></td><td>Cheah Boon Hwa</td><td class="td-right">18,000</td></tr>
+          </tbody></table>
+        </div>
+        <div class="panel"><div class="panel-head"><h3>Action Items</h3></div>
+          <div style="padding:8px;">
+            <div class="kyc-row" style="padding:13px 14px;"><span class="kyc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span><span class="kyc-meta"><span class="kt">KYC review</span><span class="kd">Farhan Rahman — new investor</span></span><span class="pill-warn">Pending</span></div>
+            <div class="kyc-row" style="padding:13px 14px;"><span class="kyc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 17l5-5 4 4 8-8"/></svg></span><span class="kyc-meta"><span class="kt">Daily NTA</span><span class="kd">Not yet computed for 19 Mar</span></span><span class="pill-warn">Due</span></div>
+            <div class="kyc-row" style="padding:13px 14px;"><span class="kyc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 2h9l5 5v15H6z"/></svg></span><span class="kyc-meta"><span class="kt">FY26 tax vouchers</span><span class="kd">2 documents awaiting review</span></span><span class="pill-warn">Review</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INVESTORS -->
+    <section class="adm-pane" data-pane="investors">
+      <div class="ph"><h1>Investors</h1><p>Members of the fund and their holdings. Click a row to manage.</p></div>
+      <div class="metric-row">
+        <div class="mc"><div class="label">Active Investors</div><div class="value blue">23</div><div class="sub">1 added FY26</div></div>
+        <div class="mc"><div class="label">Pending KYC</div><div class="value">1</div><div class="sub">Farhan Rahman</div></div>
+        <div class="mc"><div class="label">Units in Issue</div><div class="value">958,300</div><div class="sub">RM 981,707 NAV</div></div>
+        <div class="mc"><div class="label">Top-3 Concentration</div><div class="value">62.8%</div><div class="sub">Founder + family + trust</div></div>
+      </div>
+      <div class="filter-bar mt16">
+        <div class="search"><span class="ic">⌕</span><input placeholder="Search by name, ID or email…" id="invSearch"></div>
+        <button class="chip active" data-mem="">All</button><button class="chip" data-mem="Shareholder">Shareholder</button><button class="chip" data-mem="Director">Director</button><button class="chip" data-mem="Non-member">Non-member</button>
+        <button class="btn-fill btn-sm" id="newInvestor">+ New Investor</button>
+      </div>
+      <div class="panel"><div class="panel-head"><h3>Members</h3><span class="td-sub" id="invCount">11 of record</span></div>
+        <table class="tbl"><thead><tr><th>Account ID</th><th>Name</th><th>Membership</th><th class="td-right">Units</th><th class="td-right">% of Fund</th><th class="td-right">Value (RM)</th><th>Status</th></tr></thead>
+        <tbody id="invBody"></tbody></table>
+      </div>
+    </section>
+
+    <!-- PORTFOLIO -->
+    <section class="adm-pane" data-pane="portfolio">
+      <div class="ph"><h1>Portfolio</h1><p>Manage the fund’s holdings, weights and latest prices. Mark-to-market drives the daily NTA.</p></div>
+      <div class="metric-row">
+        <div class="mc"><div class="label">Holdings</div><div class="value blue" id="pfCount">7</div><div class="sub">across 6 sectors</div></div>
+        <div class="mc"><div class="label">Equity Exposure</div><div class="value">92.4%</div><div class="sub">of NAV</div></div>
+        <div class="mc"><div class="label">Cash &amp; MMF</div><div class="value">7.6%</div><div class="sub">RM 74,610</div></div>
+        <div class="mc"><div class="label">Last Priced</div><div class="value">17:00 MYT</div><div class="sub">Bursa close · today</div></div>
+      </div>
+      <div class="panel mt16"><div class="panel-head"><h3>Holdings</h3><button class="btn-mini" id="btnTrade">+ New Trade</button></div>
+        <table class="tbl"><thead><tr><th>Instrument</th><th>Product</th><th>Sector</th><th class="td-right">Units</th><th class="td-right">Last Price</th><th class="td-right">Market Value (RM)</th><th class="td-right">Weight</th></tr></thead>
+        <tbody id="pfBody"></tbody></table>
+      </div>
+    </section>
+
+    <!-- INSTRUMENTS -->
+    <section class="adm-pane" data-pane="instruments">
+      <div class="ph"><h1>Instruments &amp; Products</h1><p>Maintain the master list of tradable instruments and assets across all product types.</p></div>
+      <div class="metric-row">
+        <div class="mc"><div class="label">Instruments</div><div class="value blue" id="inCount">—</div><div class="sub">all products</div></div>
+        <div class="mc"><div class="label">Securities</div><div class="value" id="inSec">—</div><div class="sub">listed equities</div></div>
+        <div class="mc"><div class="label">Alternatives</div><div class="value" id="inAlt">—</div><div class="sub">PE, derivatives, collectibles</div></div>
+        <div class="mc"><div class="label">Cash &amp; Funds</div><div class="value" id="inCash">—</div><div class="sub">cash funds, cash on hand</div></div>
+      </div>
+      <div class="filter-bar mt16">
+        <div class="search"><span class="ic">⌕</span><input placeholder="Search instruments…" id="inSearch"></div>
+        <button class="chip active" data-prod="">All</button>
+        <button class="chip" data-prod="Securities">Securities</button>
+        <button class="chip" data-prod="Derivatives">Derivatives</button>
+        <button class="chip" data-prod="Cash Funds">Cash Funds</button>
+        <button class="chip" data-prod="Collectibles">Collectibles</button>
+        <button class="chip" data-prod="Private Equity">Private Equity</button>
+        <button class="chip" data-prod="Cash on Hand">Cash on Hand</button>
+        <button class="btn-fill btn-sm" id="openInstModal">+ Add Instrument</button>
+      </div>
+      <div class="panel"><div class="panel-head"><h3>Instrument Master</h3><span class="td-sub" id="inListCount"></span></div>
+        <table class="tbl"><thead><tr><th>Instrument</th><th>Product</th><th>Sector</th><th>Currency</th><th>Status</th></tr></thead>
+        <tbody id="inBody"></tbody></table>
+      </div>
+    </section>
+
+    <!-- TRADE TRANSACTIONS -->
+    <section class="adm-pane" data-pane="trades">
+      <div class="ph"><h1>Trade Transactions</h1><p>Log of every instrument buy and sell. SELL trades feed the Settlement records automatically.</p></div>
+      <div class="metric-row">
+        <div class="mc"><div class="label">Trades</div><div class="value blue" id="ttCount">0</div><div class="sub" id="ttShown">all instruments</div></div>
+        <div class="mc"><div class="label">Buys</div><div class="value green" id="ttBuys">0</div><div class="sub">positions opened / added</div></div>
+        <div class="mc"><div class="label">Sells</div><div class="value" id="ttSells" style="color:var(--orange);">0</div><div class="sub">positions reduced / closed</div></div>
+        <div class="mc"><div class="label">Total Fees</div><div class="value" id="ttFees">RM 0.00</div><div class="sub">brokerage &amp; commission</div></div>
+      </div>
+      <div class="filter-bar mt16">
+        <div class="search"><span class="ic">⌕</span><input placeholder="Search instrument…" id="tt-search"></div>
+        <button class="chip active" data-tt="">All</button>
+        <button class="chip" data-tt="Buy">Buy</button>
+        <button class="chip" data-tt="Sell">Sell</button>
+        <button class="btn-fill btn-sm" id="ttNewTrade">+ New Trade</button>
+      </div>
+      <div class="panel"><div class="panel-head"><h3>Transaction Log</h3><span class="td-sub" id="ttListCount"></span></div>
+        <table class="tbl"><thead><tr><th>Date</th><th>Action</th><th>Instrument</th><th>Product</th><th class="td-right">Units</th><th class="td-right">Price (RM)</th><th class="td-right">Fee (RM)</th><th class="td-right">Cash Flow (RM)</th></tr></thead>
+        <tbody id="ttBody"></tbody></table>
+      </div>
+    </section>
+
+    <!-- PRINCIPAL TRANSACTIONS -->
+    <section class="adm-pane" data-pane="principal">
+      <div class="ph"><h1>Capital Injection</h1><p>Investor capital injections and redemptions. Click any transaction to review and set its status.</p></div>
+      <div class="panel"><div class="panel-head"><h3>All Capital Injections</h3><button class="btn-mini" id="openPtModal">+ Post Transaction</button></div>
+        <table class="tbl"><thead><tr><th>Date</th><th>Investor</th><th>Type</th><th class="td-right">Amount (RM)</th><th class="td-right">NTA</th><th class="td-right">Units</th><th>Status</th></tr></thead>
+        <tbody id="ptBody"></tbody></table>
+      </div>
+    </section>
+
+    <!-- DISTRIBUTIONS -->
+    <section class="adm-pane" data-pane="distributions">
+      <div class="ph"><h1>Distributions</h1><p>Declared interim, final and special distributions for the fund.</p></div>
+      <div class="panel"><div class="panel-head"><h3>Distribution History</h3><button class="btn-mini" id="openDistModal">+ Declare Distribution</button></div>
+        <table class="tbl"><thead><tr><th>FY</th><th>Type</th><th class="td-right">DPS (sen)</th><th class="td-right">Ex-Date</th><th class="td-right">Payment</th><th class="td-right">Gross (RM)</th><th>Status</th></tr></thead>
+        <tbody id="dBody"></tbody></table>
+      </div>
+    </section>
+
+    <!-- SETTLEMENT (realized gains — auto-generated) -->
+    <section class="adm-pane" data-pane="settlement">
+      <div class="ph"><h1>Settlement</h1><p>Realized profit &amp; loss on closed positions — auto-generated from SELL trades, matched against weighted-average cost.</p></div>
+      <div class="metric-row">
+        <div class="mc"><div class="label">Total Realised P&amp;L</div><div class="value green" id="stlPnl">RM 0</div><div class="sub">net of gains &amp; losses</div></div>
+        <div class="mc"><div class="label">Total Gains</div><div class="value green" id="stlGain">RM 0</div><div class="sub" id="stlGainN">0 winning trades</div></div>
+        <div class="mc"><div class="label">Total Losses</div><div class="value" id="stlLoss" style="color:var(--red);">RM 0</div><div class="sub" id="stlLossN">0 losing trades</div></div>
+        <div class="mc"><div class="label">Total Settlements</div><div class="value blue" id="stlCount2">0</div><div class="sub" id="stlWin">0% win rate</div></div>
+      </div>
+      <div class="panel mt16"><div class="panel-head"><h3>Settlement Records</h3>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <select id="stl-fy" style="font:inherit;font-size:0.84rem;border:1.5px solid var(--border);border-radius:var(--radius-md);padding:7px 11px;color:var(--fg-1);background:#fff;"><option value="">All FY</option><option>FY2026</option><option>FY2025</option></select>
+          <div class="search" style="min-width:240px;"><span class="ic">⌕</span><input placeholder="Search instrument, class, sector…" id="stl-search"></div>
+        </div>
+      </div>
+        <table class="tbl"><thead><tr><th>Sell Date</th><th>Instrument</th><th>Class</th><th class="td-right">Units Sold</th><th class="td-right">VWAP Cost (RM)</th><th class="td-right">Sale Price (RM)</th><th class="td-right">Cost Basis (RM)</th><th class="td-right">Proceeds (RM)</th><th class="td-right">Realised P&amp;L (RM)</th><th class="td-right">Return %</th></tr></thead>
+        <tbody id="stlBody"></tbody></table>
+        <div style="padding:14px 20px;border-top:1px solid var(--border);font-size:0.82rem;color:var(--fg-3);">Settlement records are auto-generated when SELL trades are entered in Trade Transactions. Manual editing is not permitted.</div>
+      </div>
+    </section>
+
+    <!-- COMPUTE NTA -->
+    <section class="adm-pane" data-pane="nta">
+      <div class="ph"><h1>Compute Daily NTA</h1><p>Revalue the portfolio, divide by units in issue, and record the day's NTA.</p></div>
+      <div class="metric-row">
+        <div class="mc"><div class="label">Last NTA</div><div class="value">RM 1.0233</div><div class="sub">18 Mar 2026</div></div>
+        <div class="mc"><div class="label">Today's NTA</div><div class="value blue" id="ntaToday">—</div><div class="sub">run job to compute</div></div>
+        <div class="mc"><div class="label">Units in Issue</div><div class="value">958,300</div><div class="sub">23 members</div></div>
+        <div class="mc"><div class="label">Revaluation</div><div class="value">RM 981,707</div><div class="sub">mark-to-market</div></div>
+      </div>
+      <div class="panel mt16"><div class="panel-head"><h3>Compute Job — 19 Mar 2026</h3></div>
+        <div style="padding:20px;"><ol style="margin:0;padding-left:18px;font-size:0.9rem;color:var(--fg-2);line-height:1.9;">
+          <li><b>Fetch prices</b> — 24 instruments revalued at today's close.</li>
+          <li><b>Compute market value</b> — units × last price + cash.</li>
+          <li><b>Divide by units in issue</b> — gross NAV ÷ 958,300 units.</li>
+          <li><b>Record NTA</b> — timestamp and publish to members.</li>
+        </ol></div>
+        <div class="callout"><span>⚠</span><div><b>Before running:</b> ensure all subscriptions, redemptions and distributions dated on or before 19 Mar 2026 have been posted.</div></div>
+        <div class="fc-foot"><button class="btn-line btn-sm" id="nta-preview">Preview</button><button class="btn-fill btn-sm" id="nta-run">Run Computation</button></div>
+      </div>
+
+      <div class="ph" style="margin-top:26px;"><h2 style="font-size:1.15rem;font-weight:600;color:var(--fg-1);margin:0;">Fee Schedule</h2><p style="margin:5px 0 0;">Management and performance fees that accrue into the daily NTA computation.</p></div>
+      <div class="panel mt16"><div class="panel-head"><h3>Active Fee Schedules</h3><button class="btn-mini" id="openFeeModal">+ Add Fee Schedule</button></div>
+        <table class="tbl"><thead><tr><th>Type</th><th class="td-right">Rate</th><th>Basis</th><th class="td-right">Hurdle Rate</th><th>Valid From</th><th>Valid To</th><th>Status</th><th>Description</th></tr></thead>
+        <tbody id="feeBody"></tbody></table>
+      </div>
+      <div class="panel mt16"><div class="panel-head"><h3>How Daily Fee Accrual Works</h3></div>
+        <div class="row-2" style="padding:18px;">
+          <div>
+            <div style="font-size:0.86rem;font-weight:600;color:var(--blue);margin-bottom:9px;">Base Fee (daily)</div>
+            <pre class="fee-formula">Base Fee = AUM × rate% / 365</pre>
+            <p style="font-size:0.82rem;color:var(--fg-3);margin:10px 0 0;line-height:1.6;">Accrues every calendar day regardless of performance. Deducted from NTA daily.</p>
+          </div>
+          <div>
+            <div style="font-size:0.86rem;font-weight:600;color:var(--orange);margin-bottom:9px;">Performance Fee (daily)</div>
+            <pre class="fee-formula">Annualised = NTA^(365 / days_since_inception) − 1
+If Annualised &gt; Hurdle Rate:
+   Excess   = Annualised − Hurdle Rate
+   Daily Fee = Units × (Excess ÷ 365) × Rate</pre>
+            <p style="font-size:0.82rem;color:var(--fg-3);margin:10px 0 0;line-height:1.6;">Accrues daily only when the fund's annualised return since inception exceeds the hurdle. Inception NTA = 1.0000.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- OTHERS TRANSACTION -->
+    <section class="adm-pane" data-pane="others">
+      <div class="ph"><h1>Others Transaction</h1><p>Non-principal cash movements — fees, expenses, FX and adjustments.</p></div>
+      <div class="metric-row">
+        <div class="mc"><div class="label">Entries</div><div class="value blue" id="otCount">5</div><div class="sub">this month</div></div>
+        <div class="mc"><div class="label">Total Expenses</div><div class="value">RM 16,940</div><div class="sub">FY26 to date</div></div>
+        <div class="mc"><div class="label">FX Adjustments</div><div class="value">RM 2,310</div><div class="sub">net inflow</div></div>
+        <div class="mc"><div class="label">Pending</div><div class="value">1</div><div class="sub">awaiting approval</div></div>
+      </div>
+      <div class="panel mt16"><div class="panel-head"><h3>All Other Transactions</h3><button class="btn-mini" id="openOtModal">+ Add Transaction</button></div>
+        <table class="tbl"><thead><tr><th>Date</th><th>Category</th><th>Description</th><th class="td-right">Amount (RM)</th><th>Direction</th></tr></thead>
+        <tbody id="otBody"></tbody></table>
+      </div>
+    </section>
+
+    <!-- DIVIDEND (received) -->
+    <section class="adm-pane" data-pane="dividend">
+      <div class="ph"><h1>Dividend Income</h1><p>Dividends and coupons received from portfolio holdings. Recorded as income to the fund.</p></div>
+      <div class="metric-row">
+        <div class="mc"><div class="label">Received YTD</div><div class="value green" id="dvYtd">RM 0</div><div class="sub">FY26 to date</div></div>
+        <div class="mc"><div class="label">Entries</div><div class="value blue" id="dvCount">0</div><div class="sub">this financial year</div></div>
+        <div class="mc"><div class="label">Pending</div><div class="value" id="dvPending">0</div><div class="sub">awaiting receipt</div></div>
+        <div class="mc"><div class="label">Avg Yield</div><div class="value">3.6%</div><div class="sub">on equity holdings</div></div>
+      </div>
+      <div class="panel mt16"><div class="panel-head"><h3>Dividend Receipts</h3><button class="btn-mini" id="openDvModal">+ Record Dividend</button></div>
+        <table class="tbl"><thead><tr><th>Ex-Date</th><th>Pay Date</th><th>Instrument</th><th>Type</th><th class="td-right">DPS (RM)</th><th class="td-right">Units</th><th class="td-right">Gross (RM)</th><th>Status</th></tr></thead>
+        <tbody id="dvBody"></tbody></table>
+      </div>
+    </section>
+
+    <section class="adm-pane" data-pane="remuneration">
+      <div class="ph"><h1>Remuneration</h1><p>Management, performance and director fees payable by the fund.</p></div>
+      <div class="metric-row">
+        <div class="mc"><div class="label">Management Fee YTD</div><div class="value blue">RM 13,500</div><div class="sub">1.5% p.a. of NAV</div></div>
+        <div class="mc"><div class="label">Performance Fee</div><div class="value">RM 8,200</div><div class="sub">10% over hurdle</div></div>
+        <div class="mc"><div class="label">Director Fees</div><div class="value">RM 6,000</div><div class="sub">FY26</div></div>
+        <div class="mc"><div class="label">Total Remuneration</div><div class="value">RM 27,700</div><div class="sub">FY26 to date</div></div>
+      </div>
+      <div class="panel mt16"><div class="panel-head"><h3>Remuneration Schedule</h3><button class="btn-mini" id="openRemModal">+ Add Entry</button></div>
+        <table class="tbl"><thead><tr><th>Date</th><th>Recipient</th><th>Type</th><th class="td-right">Amount (RM)</th><th>Period</th><th>Status</th></tr></thead>
+        <tbody id="remBody"></tbody></table>
+      </div>
+    </section>
+
+    <!-- EMBED (member pages shown inside the admin shell) -->
+    <section class="adm-pane" data-pane="embed">
+      <iframe id="embedFrame" title="Member page"></iframe>
+    </section>
+
+    <!-- DOCUMENTS (upload + management merged) -->
+    <section class="adm-pane" data-pane="docmanage">
+      <div class="ph" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;"><div><h1>Document Management</h1><p>View, download, preview, upload and delete all issued PDF statements and factsheets.</p></div><button class="btn-fill btn-sm" id="openDuModal" style="white-space:nowrap;">+ Upload Document</button></div>
+      <div class="metric-row">
+        <div class="mc"><div class="label">Total Documents</div><div class="value blue" id="dmTotal">0</div><div class="sub" id="dmTotalSub">0 files in library</div></div>
+        <div class="mc"><div class="label">Statements Issued</div><div class="value" id="dmStmts">0</div><div class="sub">Sub · Red · Dividend</div></div>
+        <div class="mc"><div class="label">Account Statements</div><div class="value" id="dmAcct">0</div><div class="sub">Annual FY reports</div></div>
+        <div class="mc"><div class="label">Factsheets</div><div class="value" id="dmFact">0</div><div class="sub">Monthly fund reports</div></div>
+      </div>
+      <div class="filter-bar mt16" style="gap:10px;align-items:flex-end;">
+        <div class="search" style="flex:2;"><span class="ic">⌕</span><input placeholder="Name or title…" id="dmSearch"></div>
+        <div class="dm-filt"><label>Type</label><select id="dmType"><option value="">All Types</option><option>Factsheet</option><option>Account Statement</option><option>Dividend Statement</option><option>Subscription Statement</option><option>Redemption Statement</option></select></div>
+        <div class="dm-filt"><label>Investor</label><select id="dmInv"><option value="">All Investors</option></select></div>
+        <div class="dm-filt"><label>Financial Year</label><select id="dmFy"><option value="">All FYs</option><option>FY2026</option><option>FY2025</option><option>FY2024</option><option>FY2023</option><option>FY2022</option></select></div>
+        <div class="dm-filt"><label>Visibility</label><select id="dmVis"><option value="">All</option><option>Fund</option><option>Member</option></select></div>
+        <button class="btn-line btn-sm" id="dmClear" style="white-space:nowrap;">⟳ Clear</button>
+      </div>
+      <div class="bulk-bar" id="dmBulk">
+        <label class="bulk-chk"><input type="checkbox" id="dmBulkAll"><span id="dmSelCount">0 selected</span></label>
+        <button class="bulk-del" id="dmBulkDelete">🗑 Delete Selected</button>
+        <button class="bulk-dl" id="dmBulkDownload">⬇ Download Selected</button>
+        <button class="bulk-clear" id="dmBulkClear">✕ Clear</button>
+      </div>
+      <div class="panel"><div class="panel-head"><h3>Documents</h3><span class="td-sub" id="dmCount"></span></div>
+        <table class="tbl dm-tbl"><thead><tr><th style="width:40px;"><input type="checkbox" id="dmHeadChk"></th><th>Document</th><th>Type</th><th>Investor</th><th>FY</th><th>Visibility</th><th>Date</th><th style="width:120px;">Actions</th></tr></thead>
+        <tbody id="dmBody"></tbody></table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- investor drawer -->
+<!-- investor profile modal -->
+<div class="modal inv-modal" id="invModal">
+  <div class="modal-head"><div style="display:flex;align-items:center;gap:13px;"><span class="av" id="dwAv" style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#1565C0,#2E7D32);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;">—</span><div><h3 id="dwName">—</h3><div class="sub" id="dwId">—</div></div></div><button class="modal-x" data-close>✕</button></div>
+  <div class="modal-body">
+    <div class="inv-stats">
+      <div><div class="k">Units Held</div><div class="v" id="dwUnits">—</div></div>
+      <div><div class="k">% of Fund</div><div class="v" id="dwPct">—</div></div>
+      <div><div class="k">Current Value</div><div class="v" id="dwVal">—</div></div>
+      <div><div class="k">Holder Since</div><div class="v" id="dwSince">—</div></div>
+    </div>
+    <div class="inv-cols">
+      <div class="inv-col">
+        <div class="inv-sec-title">Profile &amp; Account</div>
+        <div class="field"><label>Full Name</label><input type="text" id="dw-name"></div>
+        <div class="two-up" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div class="field"><label>Account ID</label><input type="text" id="dw-acct"></div>
+          <div class="field"><label>Investor ID</label><input type="text" id="dw-secid"></div>
+        </div>
+        <div class="field"><label>Email</label><input type="email" id="dw-email"></div>
+        <div class="two-up" style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px;">
+          <div class="field"><label>Bank</label><input type="text" id="dw-bank" placeholder="e.g. Maybank"></div>
+          <div class="field"><label>Bank Account No.</label><input type="text" id="dw-acctno" placeholder="—"></div>
+        </div>
+        <div class="two-up" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div class="field"><label>Membership</label><select id="dw-member"><option>Shareholder</option><option>Director</option><option>Non-member</option></select></div>
+          <div class="field"><label>Account Status</label><select id="dw-status"><option>Active</option><option>Pending</option><option>Suspended</option></select></div>
+        </div>
+        <p id="dw-memhint" style="font-size:0.76rem;color:var(--fg-3);margin:2px 0 0;line-height:1.5;"></p>
+      </div>
+      <div class="inv-col">
+        <div class="inv-sec-title">Password &amp; Security</div>
+        <div class="field"><label>Password</label>
+          <div style="position:relative;"><input type="password" id="dw-pw" placeholder="Set / view password" style="padding-right:54px;"><button type="button" id="dw-pwToggle" style="position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;font:inherit;font-size:0.78rem;font-weight:600;color:var(--blue);cursor:pointer;">Show</button></div>
+          <span style="font-size:0.72rem;color:var(--fg-3);">Admin can view and change this at any time.</span>
+        </div>
+        <div class="sec-toggle-row"><div><div class="st-t">Two-Factor Authentication</div><div class="st-d">Require an OTP at sign-in</div></div><button type="button" class="toggle-sw on" id="dw-2fa"></button></div>
+        <div class="sec-toggle-row"><div><div class="st-t">Login Notifications</div><div class="st-d">Email on each new sign-in</div></div><button type="button" class="toggle-sw" id="dw-notif"></button></div>
+        <button type="button" class="btn-line btn-sm" id="dw-revoke" style="width:100%;margin-top:2px;">Sign out all sessions</button>
+      </div>
+    </div>
+  </div>
+  <div class="modal-foot" style="justify-content:space-between;">
+    <button class="btn-line btn-sm" id="dwDelete" style="color:var(--red);border-color:var(--red);">Delete Investor</button>
+    <div style="display:flex;gap:10px;"><button class="btn-line btn-sm" data-close>Cancel</button><button class="btn-fill btn-sm" id="dwSave">Save Changes</button></div>
+  </div>
+</div>
+
+<!-- ===================== MODALS ===================== -->
+<div class="modal-scrim" id="modalScrim"></div>
+
+<!-- principal modal -->
+<div class="modal" id="ptModal">
+  <div class="modal-head"><div><h3>Post Principal Transaction</h3><div class="sub">Units are issued or cancelled at the prevailing NTA.</div></div><button class="modal-x" data-close>✕</button></div>
+  <div class="modal-body">
+    <div class="form-grid">
+      <div class="field fg-full"><label>Investor</label><select id="pt-investor"></select></div>
+      <div class="field"><label>Type</label><select id="pt-type"><option>Subscription</option><option>Redemption</option></select></div>
+      <div class="field"><label>Trade Date</label><input type="date" id="pt-date" value="2026-03-19"></div>
+      <div class="field"><label>Amount (RM)</label><input type="text" id="pt-amount" placeholder="25,000.00"></div>
+      <div class="field"><label>NTA per Unit (RM)</label><input type="text" id="pt-nta" value="1.0245"></div>
+      <div class="field fg-full"><label>Units (auto)</label><input type="text" id="pt-units" value="—" disabled><span class="hint">Units = amount ÷ NTA, computed on amount entry.</span></div>
+      <div class="field fg-full"><label>Note</label><input type="text" id="pt-note" placeholder="e.g. Monthly subscription via bank transfer"></div>
+    </div>
+  </div>
+  <div class="modal-foot"><button class="btn-line btn-sm" data-close>Cancel</button><button class="btn-fill btn-sm" id="pt-post">Post Transaction</button></div>
+</div>
+
+<!-- distribution modal -->
+<div class="modal" id="distModal">
+  <div class="modal-head"><div><h3>Declare Distribution</h3><div class="sub">Lodge an interim, final or special distribution.</div></div><button class="modal-x" data-close>✕</button></div>
+  <div class="modal-body">
+    <div class="form-grid">
+      <div class="field"><label>Financial Year</label><select id="d-fy"><option>FY2026</option><option>FY2025</option></select></div>
+      <div class="field"><label>Type</label><select id="d-type"><option>Interim</option><option>Final</option><option>Special</option></select></div>
+      <div class="field"><label>Ex-Date</label><input type="date" id="d-ex" value="2026-11-30"></div>
+      <div class="field"><label>Payment Date</label><input type="date" id="d-pay" value="2026-12-15"></div>
+      <div class="field"><label>DPS (sen)</label><input type="text" id="d-dps" placeholder="4.25"></div>
+      <div class="field"><label>Source of Funds</label><select id="d-src"><option>Revenue income</option><option>Realised gains</option><option>Other</option></select></div>
+      <div class="field fg-full"><label>Notes</label><input type="text" id="d-note" placeholder="e.g. FY26 interim — 80% of net revenue income"></div>
+    </div>
+    <div class="est-box"><span class="k">Estimated gross payout · <span id="d-dps-echo">— sen</span> × 958,300 units</span><span class="v" id="d-payout">RM —</span></div>
+    <div style="display:none" id="d-per1k"></div>
+  </div>
+  <div class="modal-foot"><button class="btn-line btn-sm" id="d-draft">Save Draft</button><button class="btn-fill btn-sm" id="d-declare">Declare →</button></div>
+</div>
+
+<!-- trade modal (buy / sell) -->
+<div class="modal trade-modal" id="tradeModal">
+  <div class="modal-head"><div><h3 id="tradeTitle">Buy</h3><div class="sub" id="tradeSub">Add to or open a position.</div></div><button class="modal-x" data-close>✕</button></div>
+  <div class="modal-body">
+    <div class="trade-toggle"><button class="tt-buy active" data-act="Buy">Buy</button><button class="tt-sell" data-act="Sell">Sell</button></div>
+    <div class="trade-cols">
+      <div class="trade-col">
+        <div class="field"><label>Instrument</label><select id="tr-inst"></select>
+          <button type="button" class="adv-toggle" id="tr-newToggle">＋ New instrument (first time)</button>
+          <div class="adv-box" id="tr-newBox">
+            <div class="form-grid">
+              <div class="field"><label>Name</label><input type="text" id="tr-nName" placeholder="e.g. Tenaga Nasional"></div>
+              <div class="field"><label>Ticker / Code</label><input type="text" id="tr-nTicker" placeholder="e.g. 5347.KL"></div>
+              <div class="field"><label>Product Type</label><select id="tr-nProduct"><option>Securities</option><option>Derivatives</option><option>Cash Funds</option><option>Collectibles</option><option>Private Equity</option><option>Cash on Hand</option></select></div>
+              <div class="field"><label>Sector</label><select id="tr-nSector"><option>Healthcare</option><option>Financials</option><option>Technology</option><option>Telcos</option><option>Consumer</option><option>Industrials</option><option>Utilities</option><option>Energy</option><option>Real Estate</option><option>Cash</option><option>Alternatives</option><option>N/A</option></select></div>
+            </div>
+          </div>
+        </div>
+        <div class="two-up">
+          <div class="field"><label>Trade Date</label><input type="date" id="tr-date" value="2026-03-19"></div>
+          <div class="field"><label>Fee / Commission (RM)</label><input type="text" id="tr-fee" placeholder="0.00"></div>
+        </div>
+        <div class="field"><label>Note</label><input type="text" id="tr-note" placeholder="Optional"></div>
+      </div>
+      <div class="trade-col">
+        <div class="two-up">
+          <div class="field" id="tr-fUnits"><label>Units / Quantity</label><input type="text" id="tr-units" placeholder="1,000"></div>
+          <div class="field" id="tr-fPrice"><label>Price (RM)</label><input type="text" id="tr-price" placeholder="4.32"></div>
+        </div>
+        <button type="button" class="adv-toggle" id="tr-multiToggle">＋ Multiple orders in one transaction</button>
+        <div class="adv-box" id="tr-multiBox">
+          <div id="tr-lines"></div>
+          <button type="button" class="ord-add" id="tr-addLine">＋ Add order line</button>
+        </div>
+        <div class="est-box"><span class="k">Consideration <span id="tr-cons-lbl"></span></span><span class="v" id="tr-cons">RM —</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-foot"><button class="btn-line btn-sm" data-close>Cancel</button><button class="btn-fill btn-sm" id="tr-confirm">Confirm</button></div>
+</div>
+
+<!-- dividend modal -->
+<div class="modal" id="dvModal">
+  <div class="modal-head"><div><h3>Record Dividend</h3><div class="sub">Log a dividend or coupon received from a holding.</div></div><button class="modal-x" data-close>✕</button></div>
+  <div class="modal-body">
+    <div class="form-grid">
+      <div class="field fg-full"><label>Instrument</label><select id="dv-inst"></select></div>
+      <div class="field"><label>Type</label><select id="dv-type"><option>Interim</option><option>Final</option><option>Special</option><option>Coupon</option></select></div>
+      <div class="field"><label>Ex-Date</label><input type="date" id="dv-exdate" value="2026-03-12"></div>
+      <div class="field"><label>Pay Date</label><input type="date" id="dv-date" value="2026-03-19"></div>
+      <div class="field"><label>DPS — per unit (RM)</label><input type="text" id="dv-dps" placeholder="0.12"></div>
+      <div class="field"><label>Units Held (auto)</label><input type="text" id="dv-units" value="—" disabled></div>
+    </div>
+    <div class="est-box"><span class="k">Gross Dividend <span style="color:var(--fg-3);font-weight:400;">(DPS × units)</span></span><span class="v" id="dv-gross" style="color:var(--green);">RM —</span></div>
+  </div>
+  <div class="modal-foot"><button class="btn-line btn-sm" data-close>Cancel</button><button class="btn-fill btn-sm" id="dv-confirm">Record Dividend</button></div>
+</div>
+
+<!-- instrument modal (add / edit) -->
+<div class="modal" id="instModal">
+  <div class="modal-head"><div><h3 id="instTitle">Add Instrument</h3><div class="sub">Define a tradable instrument or asset.</div></div><button class="modal-x" data-close>✕</button></div>
+  <div class="modal-body">
+    <div class="form-grid">
+      <div class="field"><label>Name</label><input type="text" id="in-name" placeholder="e.g. Tenaga Nasional"></div>
+      <div class="field"><label>Ticker / Code</label><input type="text" id="in-ticker" placeholder="e.g. 5347.KL"></div>
+      <div class="field"><label>Product Type</label><select id="in-product"><option>Securities</option><option>Derivatives</option><option>Cash Funds</option><option>Collectibles</option><option>Private Equity</option><option>Cash on Hand</option></select></div>
+      <div class="field"><label>Sector</label><select id="in-sector"><option>Healthcare</option><option>Financials</option><option>Technology</option><option>Telcos</option><option>Consumer</option><option>Industrials</option><option>Utilities</option><option>Energy</option><option>Real Estate</option><option>Cash</option><option>Alternatives</option><option>N/A</option></select></div>
+      <div class="field"><label>Currency</label><select id="in-ccy"><option>MYR</option><option>USD</option><option>SGD</option></select></div>
+      <div class="field"><label>Status</label><select id="in-status"><option>Active</option><option>Watchlist</option><option>Suspended</option></select></div>
+    </div>
+  </div>
+  <div class="modal-foot"><button class="btn-line btn-sm" data-close>Cancel</button><button class="btn-fill btn-sm" id="in-save">Save Instrument</button></div>
+</div>
+
+<!-- status control modal -->
+<div class="modal" id="statusModal">
+  <div class="modal-head"><div><h3>Review Transaction</h3><div class="sub" id="st-sub">—</div></div><button class="modal-x" data-close>✕</button></div>
+  <div class="modal-body">
+    <div class="rev-row"><span class="rk">Investor</span><span class="rv" id="st-inv">—</span></div>
+    <div class="rev-row"><span class="rk">Type</span><span class="rv" id="st-type">—</span></div>
+    <div class="rev-row"><span class="rk">Amount</span><span class="rv" id="st-amt">—</span></div>
+    <div class="rev-row"><span class="rk">Units</span><span class="rv" id="st-units">—</span></div>
+    <div class="rev-row"><span class="rk">Current Status</span><span class="rv" id="st-cur">—</span></div>
+    <div class="status-actions">
+      <button class="sa-approve" id="st-approve">✓ Approve</button>
+      <button class="sa-reject" id="st-reject">✕ Reject</button>
+    </div>
+    <div style="text-align:center;margin-top:12px;"><button class="act-link" id="st-pending">Set back to Pending</button></div>
+  </div>
+</div>
+
+<!-- document upload modal -->
+<div class="modal trade-modal" id="duModal">
+  <div class="modal-head"><div><h3>Upload Document</h3><div class="sub">Add a factsheet or investor statement to the library.</div></div><button class="modal-x" data-close>✕</button></div>
+  <div class="modal-body">
+    <div class="trade-cols">
+      <div class="trade-col">
+        <div class="field"><label>Document Type</label><select id="du-type">
+          <option value="Factsheet">Factsheet</option>
+          <option value="Account Statement">Account Statement</option>
+          <option value="Dividend Statement">Dividend Statement</option>
+          <option value="Subscription Statement">Subscription Statement</option>
+        </select></div>
+        <div class="field" id="du-scope-wrap"><label>Investor</label><select id="du-scope"></select></div>
+        <div class="two-up">
+          <div class="field"><label>Period / As-at</label><input type="date" id="du-period" value="2026-05-31"></div>
+          <div class="field"><label>Financial Year</label><select id="du-fy"><option>—</option><option>FY2026</option><option>FY2025</option><option>FY2024</option><option>FY2023</option><option>FY2022</option></select></div>
+        </div>
+        <div class="field"><label>Status</label><select id="du-status"><option>Published</option><option>Draft</option></select></div>
+        <div class="field"><label>File</label><div class="file-drop" id="du-file"><span class="fd-ic">⤓</span><span id="du-fname">Click to attach PDF — or generate from computed data</span></div></div>
+      </div>
+      <div class="trade-col">
+        <div class="cmp-head"><span>Statement Data</span><button type="button" class="btn-mini" id="du-compute">⚙ Compute</button></div>
+        <div class="cmp-box" id="du-cmp"><div class="cmp-empty">For statements, click <b>Compute</b> to pull the investor's figures (units, NAV, value, dividend, etc.) needed for this document.</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-foot"><button class="btn-line btn-sm" data-close>Cancel</button><button class="btn-fill btn-sm" id="du-save">Upload Document</button></div>
+</div>
+
+<!-- fee schedule modal -->
+<div class="modal" id="feeModal2">
+  <div class="modal-head"><div><h3>Add Fee Schedule</h3><div class="sub">Define a management or performance fee that accrues into the daily NTA.</div></div><button class="modal-x" data-close>✕</button></div>
+  <div class="modal-body">
+    <div class="callout" style="margin:0 0 16px;"><span>⚠</span><div>Fee periods of the same type must not overlap. Set <b>Valid To</b> on the previous schedule before adding a new one.</div></div>
+    <div class="form-grid">
+      <div class="field"><label>Fee Type</label><select id="fee-type2"><option value="base">Base Fee</option><option value="performance">Performance Fee</option></select></div>
+      <div class="field"><label>Rate (% per annum)</label><input type="text" id="fee-rate" placeholder="e.g. 1.00 for 1%"></div>
+      <div class="field"><label>Valid From</label><input type="date" id="fee-from" value="2026-06-15"></div>
+      <div class="field"><label>Valid To <span style="font-weight:400;color:var(--fg-3);">(blank = open-ended)</span></label><input type="date" id="fee-to"></div>
+      <div class="field" id="fee-hurdle-wrap" style="display:none;"><label>Hurdle Rate (% p.a.)</label><input type="text" id="fee-hurdle" placeholder="e.g. 7.00"></div>
+      <div class="field fg-full"><label>Description</label><input type="text" id="fee-desc" placeholder="e.g. FY2024 base charge"></div>
+    </div>
+  </div>
+  <div class="modal-foot"><button class="btn-line btn-sm" data-close>Cancel</button><button class="btn-fill btn-sm" id="fee-add">Add Fee Schedule</button></div>
+</div>
+
+<!-- others transaction modal -->
+<div class="modal" id="otModal">
+  <div class="modal-head"><div><h3>Add Other Transaction</h3><div class="sub">Record a fee, expense, FX or adjustment.</div></div><button class="modal-x" data-close>✕</button></div>
+  <div class="modal-body">
+    <div class="form-grid">
+      <div class="field"><label>Date</label><input type="date" id="ot-date" value="2026-03-19"></div>
+      <div class="field"><label>Category</label><select id="ot-cat"><option>Management Fee</option><option>Audit Fee</option><option>Bank Charges</option><option>FX Adjustment</option><option>Brokerage</option><option>Other Expense</option></select></div>
+      <div class="field fg-full"><label>Description</label><input type="text" id="ot-desc" placeholder="e.g. Quarterly trustee fee"></div>
+      <div class="field"><label>Amount (RM)</label><input type="text" id="ot-amt" placeholder="1,200.00"></div>
+      <div class="field"><label>Direction</label><select id="ot-dir"><option>Outflow</option><option>Inflow</option></select></div>
+    </div>
+  </div>
+  <div class="modal-foot"><button class="btn-line btn-sm" data-close>Cancel</button><button class="btn-fill btn-sm" id="ot-add">Add Transaction</button></div>
+</div>
+
+<!-- remuneration modal -->
+<div class="modal" id="remModal">
+  <div class="modal-head"><div><h3>Add Remuneration Entry</h3><div class="sub">Schedule a fee or remuneration payment.</div></div><button class="modal-x" data-close>✕</button></div>
+  <div class="modal-body">
+    <div class="form-grid">
+      <div class="field"><label>Date</label><input type="date" id="rem-date" value="2026-03-31"></div>
+      <div class="field"><label>Recipient</label><input type="text" id="rem-who" placeholder="e.g. Fund Manager"></div>
+      <div class="field"><label>Type</label><select id="rem-type"><option>Management Fee</option><option>Performance Fee</option><option>Director Fee</option><option>Salary</option><option>Bonus</option></select></div>
+      <div class="field"><label>Amount (RM)</label><input type="text" id="rem-amt" placeholder="4,500.00"></div>
+      <div class="field fg-full"><label>Period</label><input type="text" id="rem-period" placeholder="e.g. Q1 FY26"></div>
+    </div>
+  </div>
+  <div class="modal-foot"><button class="btn-line btn-sm" data-close>Cancel</button><button class="btn-fill btn-sm" id="rem-add">Add Entry</button></div>
+</div>
+
+<div class="toast" id="toast"><span class="ok">✓</span><span id="toastMsg">Saved</span></div>
+
+<script>
+(function(){
+  // ---- data ----
+  var INVESTORS=[
+    {id:'ZYI-2021-0001', acct:'ACC-100001', name:'Ng Zhi Yao', email:'zhiyao@zy-invest.com', nric:'880214-14-5071', member:'Director', units:'312,400.00', pct:32.6, val:'320,063.80', joined:'13 Dec 2021', status:'Active'},
+    {id:'ZYI-2021-0002', acct:'ACC-100002', name:'Ng Family Holdings', email:'family@nghold.my', nric:'—', member:'Shareholder', units:'188,200.00', pct:19.6, val:'192,820.90', joined:'13 Dec 2021', status:'Active'},
+    {id:'ZYI-2024-0014', acct:'ACC-100014', name:'Tan Hui Mei', email:'huimei.tan@example.com', nric:'910702-10-5388', member:'Shareholder', units:'96,800.00', pct:10.1, val:'99,171.60', joined:'12 Mar 2024', status:'Active'},
+    {id:'ZYI-2022-0004', acct:'ACC-100004', name:'Lim Wealth Trust', email:'admin@limwealth.my', nric:'—', member:'Shareholder', units:'74,500.00', pct:7.8, val:'76,325.25', joined:'06 Jun 2022', status:'Active'},
+    {id:'ZYI-2022-0005', acct:'ACC-100005', name:'Cheah Boon Hwa', email:'bhcheah@example.com', nric:'750118-08-6043', member:'Shareholder', units:'61,300.00', pct:6.4, val:'62,801.85', joined:'12 Sep 2022', status:'Active'},
+    {id:'ZYI-2023-0006', acct:'ACC-100006', name:'Wong Mei Ling', email:'mlwong@example.com', nric:'880925-14-5202', member:'Shareholder', units:'48,900.00', pct:5.1, val:'50,098.05', joined:'18 Jan 2023', status:'Active'},
+    {id:'ZYI-2023-0007', acct:'ACC-100007', name:'Raj & Associates', email:'contact@rajassoc.my', nric:'—', member:'Shareholder', units:'39,600.00', pct:4.1, val:'40,570.20', joined:'04 Apr 2023', status:'Active'},
+    {id:'ZYI-2023-0008', acct:'ACC-100008', name:'Sim Kok Wai', email:'kwsim@example.com', nric:'820303-05-5511', member:'Director', units:'33,200.00', pct:3.5, val:'34,013.40', joined:'22 Aug 2023', status:'Active'},
+    {id:'ZYI-2023-0009', acct:'ACC-100009', name:'Abdullah bin Hassan', email:'abdullah.h@example.com', nric:'790612-03-5179', member:'Shareholder', units:'27,800.00', pct:2.9, val:'28,481.10', joined:'30 Nov 2023', status:'Active'},
+    {id:'ZYI-2024-0010', acct:'ACC-100010', name:'Goh Family Office', email:'office@gohfo.my', nric:'—', member:'Shareholder', units:'21,400.00', pct:2.2, val:'21,924.30', joined:'14 Feb 2024', status:'Active'},
+    {id:'ZYI-2026-0024', acct:'ACC-100024', name:'Farhan Rahman', email:'farhan.r@example.com', nric:'950820-14-5733', member:'Non-member', units:'0.00', pct:0.0, val:'0.00', joined:'18 Mar 2026', status:'Pending'}
+  ];
+  function initials(n){ return n.split(' ').filter(Boolean).slice(0,2).map(function(w){return w[0];}).join('').toUpperCase(); }
+  function pill(s){ return s==='Active'?'<span class="pill-ok">Active</span>':'<span class="pill-warn">Pending</span>'; }
+  function memPill(t){ if(t==='Director')return '<span class="mem-pill dir">Director</span>'; if(t==='Non-member')return '<span class="mem-pill non">Non-member</span>'; return '<span class="mem-pill sh">Shareholder</span>'; }
+  var BANKS=['Maybank','CIMB Bank','Public Bank','RHB Bank','Hong Leong Bank'];
+  INVESTORS.forEach(function(m,i){ if(!m.bank){ m.bank=BANKS[i%BANKS.length]; m.acctno='5'+(121884300+i*137); m.pw='ZyInvest@'+(1000+i*7); } });
+
+  // ---- tab switching ----
+  var navs=document.querySelectorAll('.adm-nav'), panes=document.querySelectorAll('.adm-pane');
+  function go(name){
+    navs.forEach(function(n){ n.classList.toggle('on', n.dataset.pane===name); });
+    panes.forEach(function(p){ p.classList.toggle('on', p.dataset.pane===name); });
+    document.querySelector('.adm-main').classList.toggle('embedding', name==='embed');
+    window.scrollTo(0,0);
+  }
+  navs.forEach(function(n){ n.addEventListener('click',function(){ go(n.dataset.pane); }); });
+  document.querySelectorAll('[data-goto]').forEach(function(b){ b.addEventListener('click',function(){ go(b.dataset.goto); }); });
+
+  // ---- sidebar collapse (persisted, member-style) ----
+  var admShell=document.getElementById('admShell');
+  document.getElementById('admToggle').addEventListener('click',function(){ var c=admShell.classList.toggle('collapsed'); try{ localStorage.setItem('zy_admin_sb', c?'1':'0'); }catch(e){} });
+
+  // ---- secondary bar: open member pages INSIDE the admin shell (admin sidebar stays) ----
+  var embedFrame=document.getElementById('embedFrame');
+  function sizeEmbed(){ try{ var d=embedFrame.contentDocument; if(d&&d.documentElement){ embedFrame.style.height=Math.max(d.documentElement.scrollHeight, window.innerHeight-108)+'px'; } }catch(e){} }
+  embedFrame.addEventListener('load',function(){ sizeEmbed(); setTimeout(sizeEmbed,250); });
+  window.addEventListener('resize',sizeEmbed);
+  document.querySelectorAll('.adm-subbar .sub-dd a').forEach(function(a){
+    a.addEventListener('click',function(e){ e.preventDefault(); var href=a.getAttribute('href'); embedFrame.src=href+(href.indexOf('?')>-1?'&':'?')+'embed=1'; go('embed'); });
+  });
+
+  // ---- toast ----
+  var toast=document.getElementById('toast'), toastMsg=document.getElementById('toastMsg'), tT;
+  function notify(msg){ toastMsg.textContent=msg; toast.classList.add('show'); clearTimeout(tT); tT=setTimeout(function(){ toast.classList.remove('show'); },2600); }
+
+  // ---- render investors ----
+  var invBody=document.getElementById('invBody'), invMem='', invQ='';
+  function renderInvestors(){
+    invBody.innerHTML='';
+    var list=INVESTORS.filter(function(m){
+      if(invMem && m.member!==invMem) return false;
+      if(invQ && (m.name+' '+m.id+' '+m.acct+' '+m.email).toLowerCase().indexOf(invQ)===-1) return false;
+      return true;
+    });
+    list.forEach(function(m){
+      var tr=document.createElement('tr'); tr.className='clickable';
+      tr.innerHTML='<td class="td-sub" style="font-size:0.78rem;">'+m.acct+'</td>'
+        +'<td class="hold-name"><b>'+m.name+'</b><span>'+m.id+'</span></td>'
+        +'<td>'+memPill(m.member)+'</td>'
+        +'<td class="td-right">'+m.units+'</td>'
+        +'<td class="td-right">'+m.pct.toFixed(1)+'%</td>'
+        +'<td class="td-right">'+m.val+'</td>'
+        +'<td>'+pill(m.status)+'</td>';
+      tr.addEventListener('click',function(){ openDrawer(m); });
+      invBody.appendChild(tr);
+    });
+    document.getElementById('invCount').textContent=list.length+' of record';
+  }
+  renderInvestors();
+  document.getElementById('invSearch').addEventListener('input',function(){ invQ=this.value.toLowerCase(); renderInvestors(); });
+  document.querySelectorAll('.filter-bar .chip').forEach(function(c){ c.addEventListener('click',function(){ document.querySelectorAll('.filter-bar .chip').forEach(function(x){x.classList.remove('active');}); c.classList.add('active'); invMem=c.dataset.mem; renderInvestors(); }); });
+
+  document.getElementById('newInvestor').addEventListener('click',function(){
+    var id='ZYI-2026-00'+(INVESTORS.length+13), acct='ACC-1000'+(INVESTORS.length+25);
+    var m={id:id, acct:acct, name:'', email:'', nric:'', member:'Non-member', units:'0.00', pct:0.0, val:'0.00', joined:'19 Mar 2026', status:'Pending'};
+    INVESTORS.unshift(m); renderInvestors(); fillInvestorSelect(); openDrawer(m, true);
+  });
+
+  // ---- investor profile modal (view / edit / delete) ----
+  var curInv=null;
+  var MEMHINT={
+    'Shareholder':'Family members and investors — eligible to subscribe for and hold units in the fund.',
+    'Director':'Admin / fund manager with indirect interest. Remuneration may be applied to subscribe for units.',
+    'Non-member':'Registered account holder, not permitted to invest or hold units.'
+  };
+  function refreshMemHint(){ document.getElementById('dw-memhint').textContent=MEMHINT[document.getElementById('dw-member').value]||''; }
+  document.getElementById('dw-member').addEventListener('change',refreshMemHint);
+  function openDrawer(m){
+    curInv=m;
+    document.getElementById('dwAv').textContent=initials(m.name||'? ?');
+    document.getElementById('dwName').textContent=m.name||'New Investor';
+    document.getElementById('dwId').textContent=m.id+' · '+m.status;
+    document.getElementById('dwUnits').textContent=m.units;
+    document.getElementById('dwPct').textContent=m.pct.toFixed(1)+'%';
+    document.getElementById('dwVal').textContent='RM '+m.val;
+    document.getElementById('dwSince').textContent=m.joined;
+    document.getElementById('dw-name').value=m.name;
+    document.getElementById('dw-acct').value=m.acct;
+    document.getElementById('dw-secid').value=m.id;
+    document.getElementById('dw-email').value=m.email;
+    document.getElementById('dw-bank').value=m.bank||'';
+    document.getElementById('dw-acctno').value=m.acctno||'';
+    document.getElementById('dw-member').value=m.member;
+    document.getElementById('dw-status').value=m.status;
+    document.getElementById('dw-pw').value=m.pw||''; document.getElementById('dw-pw').type='password'; document.getElementById('dw-pwToggle').textContent='Show';
+    refreshMemHint();
+    openModal('invModal');
+  }
+  document.getElementById('dwSave').addEventListener('click',function(){
+    if(!curInv) return;
+    var nm=document.getElementById('dw-name').value.trim();
+    if(!nm){ notify('Enter the investor name'); return; }
+    curInv.name=nm;
+    curInv.acct=document.getElementById('dw-acct').value.trim();
+    curInv.id=document.getElementById('dw-secid').value.trim();
+    curInv.email=document.getElementById('dw-email').value.trim();
+    curInv.bank=document.getElementById('dw-bank').value.trim();
+    curInv.acctno=document.getElementById('dw-acctno').value.trim();
+    curInv.pw=document.getElementById('dw-pw').value;
+    curInv.member=document.getElementById('dw-member').value;
+    curInv.status=document.getElementById('dw-status').value;
+    renderInvestors(); fillInvestorSelect(); closeModals(); notify('Profile saved — '+nm);
+  });
+  document.getElementById('dwDelete').addEventListener('click',function(){
+    if(!curInv) return;
+    if(!confirm('Delete '+(curInv.name||'this investor')+'? This cannot be undone.')) return;
+    INVESTORS=INVESTORS.filter(function(x){return x!==curInv;});
+    renderInvestors(); fillInvestorSelect(); closeModals(); notify('Investor deleted');
+  });
+  document.getElementById('dw-2fa').addEventListener('click',function(){ this.classList.toggle('on'); });
+  document.getElementById('dw-pwToggle').addEventListener('click',function(){ var f=document.getElementById('dw-pw'); if(f.type==='password'){ f.type='text'; this.textContent='Hide'; } else { f.type='password'; this.textContent='Show'; } });
+  document.getElementById('dw-notif').addEventListener('click',function(){ this.classList.toggle('on'); });
+  document.getElementById('dw-revoke').addEventListener('click',function(){ notify('All sessions signed out for '+(curInv?curInv.name:'investor')); });
+
+  // ---- modal infra ----
+  var modalScrim=document.getElementById('modalScrim');
+  function openModal(id){ document.getElementById(id).classList.add('open'); modalScrim.classList.add('open'); }
+  function closeModals(){ document.querySelectorAll('.modal').forEach(function(m){ m.classList.remove('open'); }); modalScrim.classList.remove('open'); }
+  modalScrim.addEventListener('click',closeModals);
+  document.querySelectorAll('[data-close]').forEach(function(b){ b.addEventListener('click',closeModals); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeModals(); });
+
+  // ---- principal investor select ----
+  function fillInvestorSelect(){
+    var sel=document.getElementById('pt-investor'); sel.innerHTML='';
+    INVESTORS.forEach(function(m){ var o=document.createElement('option'); o.textContent=m.name; sel.appendChild(o); });
+  }
+  fillInvestorSelect();
+  function parseNum(s){ return parseFloat((s||'').replace(/,/g,''))||0; }
+  function fmt(n){ return n.toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  var ptAmount=document.getElementById('pt-amount'), ptNta=document.getElementById('pt-nta'), ptUnits=document.getElementById('pt-units');
+  function recalcUnits(){ var a=parseNum(ptAmount.value), nta=parseNum(ptNta.value); ptUnits.value=(a>0&&nta>0)?fmt(a/nta):'—'; }
+  ptAmount.addEventListener('input',recalcUnits); ptNta.addEventListener('input',recalcUnits);
+
+  // ---- principal data + render + status control ----
+  var PT=[
+    {date:'19 Mar 2026', inv:'Tan Hui Mei', type:'Subscription', amt:25000, nta:1.0245, status:'Pending'},
+    {date:'18 Mar 2026', inv:'Farhan Rahman', type:'Subscription', amt:40000, nta:1.0233, status:'Pending'},
+    {date:'15 Mar 2026', inv:'Lim Wealth Trust', type:'Subscription', amt:50000, nta:1.0168, status:'Approved'},
+    {date:'12 Mar 2026', inv:'Cheah Boon Hwa', type:'Redemption', amt:18000, nta:1.0142, status:'Approved'},
+    {date:'06 Mar 2026', inv:'Wong Mei Ling', type:'Subscription', amt:21500, nta:1.0098, status:'Approved'},
+    {date:'28 Feb 2026', inv:'Sim Kok Wai', type:'Redemption', amt:9000, nta:1.0061, status:'Rejected'}
+  ];
+  function statusPill(s){ if(s==='Approved') return '<span class="pill-ok">Approved</span>'; if(s==='Rejected') return '<span class="pill-rej">Rejected</span>'; return '<span class="pill-pending">Pending</span>'; }
+  function typeTag(t){ return t==='Subscription'?'<span class="tag-blue">Subscription</span>':'<span class="tag-orange">Redemption</span>'; }
+  var ptBody=document.getElementById('ptBody');
+  function renderPT(){
+    ptBody.innerHTML='';
+    PT.forEach(function(r,i){
+      var tr=document.createElement('tr'); tr.className='clickable';
+      tr.innerHTML='<td>'+r.date+'</td><td>'+r.inv+'</td><td>'+typeTag(r.type)+'</td><td class="td-right">'+fmt(r.amt)+'</td><td class="td-right">'+r.nta.toFixed(4)+'</td><td class="td-right">'+fmt(r.amt/r.nta)+'</td><td>'+statusPill(r.status)+'</td>';
+      tr.addEventListener('click',function(){ openStatus(i); });
+      ptBody.appendChild(tr);
+    });
+  }
+  renderPT();
+  document.getElementById('openPtModal').addEventListener('click',function(){ openModal('ptModal'); });
+  document.getElementById('pt-post').addEventListener('click',function(){
+    var inv=document.getElementById('pt-investor').value, type=document.getElementById('pt-type').value;
+    var amt=parseNum(ptAmount.value), nta=parseNum(ptNta.value);
+    if(amt<=0){ notify('Enter a valid amount'); return; }
+    var dt=document.getElementById('pt-date').value; var d=new Date(dt);
+    var ds=isNaN(d)?'19 Mar 2026':d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+    PT.unshift({date:ds, inv:inv, type:type, amt:amt, nta:nta, status:'Pending'});
+    renderPT(); closeModals();
+    notify(type+' of RM '+fmt(amt)+' posted for '+inv+' — pending approval');
+    ptAmount.value=''; ptUnits.value='—'; document.getElementById('pt-note').value='';
+  });
+
+  // status control modal
+  var stIdx=-1;
+  function openStatus(i){
+    stIdx=i; var r=PT[i];
+    document.getElementById('st-sub').textContent=r.date;
+    document.getElementById('st-inv').textContent=r.inv;
+    document.getElementById('st-type').textContent=r.type;
+    document.getElementById('st-amt').textContent='RM '+fmt(r.amt);
+    document.getElementById('st-units').textContent=fmt(r.amt/r.nta);
+    document.getElementById('st-cur').innerHTML=statusPill(r.status);
+    openModal('statusModal');
+  }
+  function setStatus(s){ if(stIdx<0) return; var nm=PT[stIdx].inv; PT[stIdx].status=s; renderPT(); closeModals(); notify('Transaction '+s.toLowerCase()+' — '+nm); }
+  document.getElementById('st-approve').addEventListener('click',function(){ setStatus('Approved'); });
+  document.getElementById('st-reject').addEventListener('click',function(){ setStatus('Rejected'); });
+  document.getElementById('st-pending').addEventListener('click',function(){ setStatus('Pending'); });
+
+  // ---- instruments master (shared) ----
+  var INSTRUMENTS=[
+    {name:'Hartalega Holdings', ticker:'5168.KL', product:'Securities', sector:'Healthcare', ccy:'MYR', status:'Active'},
+    {name:'Public Bank Berhad', ticker:'1295.KL', product:'Securities', sector:'Financials', ccy:'MYR', status:'Active'},
+    {name:'IHH Healthcare', ticker:'5225.KL', product:'Securities', sector:'Healthcare', ccy:'MYR', status:'Active'},
+    {name:'DiGi.Com', ticker:'6947.KL', product:'Securities', sector:'Telcos', ccy:'MYR', status:'Active'},
+    {name:'Apple Inc', ticker:'AAPL', product:'Securities', sector:'Technology', ccy:'USD', status:'Active'},
+    {name:'Microsoft', ticker:'MSFT', product:'Securities', sector:'Technology', ccy:'USD', status:'Active'},
+    {name:'AirAsia', ticker:'5099.KL', product:'Securities', sector:'Consumer', ccy:'MYR', status:'Watchlist'},
+    {name:'KLCI Dec Futures', ticker:'FKLI', product:'Derivatives', sector:'N/A', ccy:'MYR', status:'Active'},
+    {name:'Affin Money Market Fund', ticker:'AMMF', product:'Cash Funds', sector:'Cash', ccy:'MYR', status:'Active'},
+    {name:'Patek Philippe 5711A', ticker:'—', product:'Collectibles', sector:'Alternatives', ccy:'MYR', status:'Active'},
+    {name:'Grab Holdings Pre-IPO', ticker:'—', product:'Private Equity', sector:'Technology', ccy:'USD', status:'Active'},
+    {name:'MYR Cash Account', ticker:'—', product:'Cash on Hand', sector:'Cash', ccy:'MYR', status:'Active'}
+  ];
+
+  // ---- portfolio holdings + trades ----
+  var PF=[
+    {name:'Hartalega Holdings', tk:'5168.KL', product:'Securities', sec:'Healthcare', units:55000, price:2.45},
+    {name:'Public Bank Berhad', tk:'1295.KL', product:'Securities', sec:'Financials', units:28500, price:4.32},
+    {name:'IHH Healthcare', tk:'5225.KL', product:'Securities', sec:'Healthcare', units:18200, price:6.14},
+    {name:'DiGi.Com', tk:'6947.KL', product:'Securities', sec:'Telcos', units:23800, price:3.81},
+    {name:'Apple Inc', tk:'AAPL', product:'Securities', sec:'Technology', units:300, price:998.18},
+    {name:'AirAsia', tk:'5099.KL', product:'Securities', sec:'Consumer', units:42000, price:0.72},
+    {name:'Affin Money Market Fund', tk:'AMMF', product:'Cash Funds', sec:'Cash', units:60000, price:1.00},
+    {name:'Patek Philippe 5711A', tk:'—', product:'Collectibles', sec:'Alternatives', units:1, price:185000},
+    {name:'MYR Cash Account', tk:'—', product:'Cash on Hand', sec:'Cash', units:74610, price:1.00}
+  ];
+  function prodPill(p){ return '<span class="tag-blue">'+p+'</span>'; }
+  var pfBody=document.getElementById('pfBody');
+  function renderPF(){
+    var total=0; PF.forEach(function(h){ total+=h.units*h.price; });
+    var maxW=0; PF.forEach(function(h){ var w=total?(h.units*h.price)/total*100:0; if(w>maxW)maxW=w; });
+    var scaleMax=Math.min(100,maxW)||1;
+    pfBody.innerHTML='';
+    PF.forEach(function(h){
+      var mv=h.units*h.price, w=total?mv/total*100:0;
+      var barW=Math.min(100, w/scaleMax*100);
+      var tr=document.createElement('tr');
+      if((h.product||'')==='Cash on Hand'){ tr.dataset.pin='last'; }
+      tr.innerHTML='<td class="hold-name"><b>'+h.name+'</b><span>'+h.tk+'</span></td><td>'+prodPill(h.product||'Securities')+'</td><td class="td-sub">'+h.sec+'</td>'
+        +'<td class="td-right">'+h.units.toLocaleString('en-MY')+'</td>'
+        +'<td class="td-right">'+h.price.toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2})+'</td>'
+        +'<td class="td-right">'+mv.toLocaleString('en-MY',{maximumFractionDigits:0})+'</td>'
+        +'<td class="td-right"><div class="alloc-cell" style="justify-content:flex-end;"><div class="alloc-bar" style="max-width:80px;"><span style="width:'+barW.toFixed(0)+'%"></span></div><span class="alloc-pct">'+w.toFixed(1)+'%</span></div></td>';
+      pfBody.appendChild(tr);
+    });
+    document.getElementById('pfCount').textContent=PF.length;
+    sortTable(pfBody.closest('table'), 6, 'desc'); // preset: weight descending, cash pinned last
+  }
+  renderPF();
+
+  // ---- trade transactions log ----
+  var TT=[
+    {date:'19 Mar 2026', action:'Buy', inst:'Hartalega Holdings', tk:'5168.KL', product:'Securities', units:5000, price:2.45, fee:30, value:12250},
+    {date:'17 Mar 2026', action:'Sell', inst:'AirAsia', tk:'5099.KL', product:'Securities', units:8000, price:0.72, fee:25, value:5760},
+    {date:'15 Mar 2026', action:'Buy', inst:'Public Bank Berhad', tk:'1295.KL', product:'Securities', units:5000, price:4.32, fee:28, value:21600}
+  ];
+  var ttBody=document.getElementById('ttBody'), ttFilter='', ttQ='';
+  function ttActionTag(a){ return a==='Buy'?'<span class="tag-green">Buy</span>':'<span class="tag-red">Sell</span>'; }
+  function renderTT(){
+    if(!ttBody) return;
+    ttBody.innerHTML='';
+    var buys=0, sells=0, fees=0, shown=0;
+    TT.forEach(function(r){
+      fees+=r.fee||0; if(r.action==='Buy')buys++; else sells++;
+      if(ttFilter && r.action!==ttFilter) return;
+      if(ttQ && (r.inst+' '+(r.tk||'')).toLowerCase().indexOf(ttQ)===-1) return;
+      shown++;
+      var tr=document.createElement('tr');
+      var isBuy=r.action==='Buy';
+      var flow=(isBuy?'−':'+')+r.value.toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2});
+      tr.innerHTML='<td>'+r.date+'</td><td>'+ttActionTag(r.action)+'</td>'
+        +'<td class="hold-name"><b>'+r.inst+'</b><span>'+(r.tk||'—')+'</span></td>'
+        +'<td class="td-sub">'+(r.product||'Securities')+'</td>'
+        +'<td class="td-right">'+fmt(r.units)+'</td>'
+        +'<td class="td-right">'+r.price.toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:4})+'</td>'
+        +'<td class="td-right">'+(r.fee?fmt(r.fee):'—')+'</td>'
+        +'<td class="td-right '+(isBuy?'cf-out':'cf-in')+'">'+flow+'</td>';
+      ttBody.appendChild(tr);
+    });
+    if(shown===0){ ttBody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:26px;color:var(--fg-3);">No trades match.</td></tr>'; }
+    document.getElementById('ttCount').textContent=TT.length;
+    document.getElementById('ttBuys').textContent=buys;
+    document.getElementById('ttSells').textContent=sells;
+    document.getElementById('ttFees').textContent='RM '+fees.toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2});
+    document.getElementById('ttListCount').textContent=shown+' of '+TT.length;
+  }
+  renderTT();
+  document.getElementById('tt-search').addEventListener('input',function(){ ttQ=this.value.toLowerCase(); renderTT(); });
+  document.querySelectorAll('.adm-pane[data-pane="trades"] .chip').forEach(function(c){ c.addEventListener('click',function(){ document.querySelectorAll('.adm-pane[data-pane="trades"] .chip').forEach(function(x){x.classList.remove('active');}); c.classList.add('active'); ttFilter=c.dataset.tt; renderTT(); }); });
+  document.getElementById('ttNewTrade').addEventListener('click',function(){ document.getElementById('btnTrade').click(); });
+
+  // trade (single button + buy/sell toggle + advanced: new instrument & multi-order)
+  var tradeAction='Buy', newInst=false, multi=false;
+  function trLines(){ return [].map.call(document.querySelectorAll('#tr-lines .ord-line'),function(l){ return {u:parseNum(l.querySelector('.ol-u').value), p:parseNum(l.querySelector('.ol-p').value)}; }); }
+  function trTotals(){
+    if(multi){ var u=0,c=0; trLines().forEach(function(x){ u+=x.u; c+=x.u*x.p; }); return {units:u, cost:c, price:u?c/u:0}; }
+    var u=parseNum(document.getElementById('tr-units').value), p=parseNum(document.getElementById('tr-price').value); return {units:u, cost:u*p, price:p};
+  }
+  function recalcCons(){
+    var t=trTotals(), f=parseNum(document.getElementById('tr-fee').value);
+    var cons=tradeAction==='Buy'?t.cost+f:t.cost-f;
+    document.getElementById('tr-cons-lbl').textContent=tradeAction==='Buy'?'(orders + fee)':'(orders − fee)';
+    document.getElementById('tr-cons').textContent=(t.units>0&&t.price>0)?'RM '+cons.toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2}):'RM —';
+  }
+  document.getElementById('tr-fee').addEventListener('input',recalcCons);
+  document.getElementById('tr-units').addEventListener('input',recalcCons);
+  document.getElementById('tr-price').addEventListener('input',recalcCons);
+  function populateInst(){
+    var sel=document.getElementById('tr-inst'); sel.innerHTML='';
+    var src=tradeAction==='Buy'?INSTRUMENTS:PF;
+    src.forEach(function(x){ var o=document.createElement('option'); o.value=x.name; var code=x.ticker||x.tk||''; o.textContent=x.name+(code&&code!=='—'?' ('+code+')':''); sel.appendChild(o); });
+  }
+  function setAction(action){
+    tradeAction=action;
+    document.querySelector('.tt-buy').classList.toggle('active',action==='Buy');
+    document.querySelector('.tt-sell').classList.toggle('active',action==='Sell');
+    document.getElementById('tradeSub').textContent=action==='Buy'?'Buying adds to or opens a position (any product type).':'Selling reduces or closes a holding.';
+    var cf=document.getElementById('tr-confirm'); cf.textContent=action==='Buy'?'Confirm Buy':'Confirm Sell'; cf.classList.toggle('sell',action==='Sell'); cf.classList.toggle('buy',action==='Buy');
+    document.getElementById('tr-newToggle').style.display=action==='Buy'?'inline-flex':'none';
+    if(action!=='Buy' && newInst){ toggleNew(false); }
+    populateInst(); recalcCons();
+  }
+  function toggleNew(on){
+    newInst=(on!==undefined)?on:!newInst;
+    document.getElementById('tr-newBox').classList.toggle('open',newInst);
+    document.getElementById('tr-inst').style.display=newInst?'none':'';
+    document.getElementById('tr-newToggle').textContent=newInst?'– Use existing instrument':'＋ New instrument (first time)';
+  }
+  document.getElementById('tr-newToggle').addEventListener('click',function(){ toggleNew(); });
+  function addLine(){
+    var div=document.createElement('div'); div.className='ord-line';
+    div.innerHTML='<div class="field" style="margin:0;"><label>Units</label><input type="text" class="ol-u" placeholder="500"></div>'
+      +'<div class="field" style="margin:0;"><label>Price (RM)</label><input type="text" class="ol-p" placeholder="4.30"></div>'
+      +'<button type="button" class="ord-del" title="Remove">✕</button>';
+    div.querySelector('.ord-del').addEventListener('click',function(){ div.remove(); recalcCons(); });
+    [].forEach.call(div.querySelectorAll('input'),function(i){ i.addEventListener('input',recalcCons); });
+    document.getElementById('tr-lines').appendChild(div);
+  }
+  function toggleMulti(on){
+    multi=(on!==undefined)?on:!multi;
+    document.getElementById('tr-multiBox').classList.toggle('open',multi);
+    document.getElementById('tr-fUnits').style.display=multi?'none':'';
+    document.getElementById('tr-fPrice').style.display=multi?'none':'';
+    document.getElementById('tr-multiToggle').textContent=multi?'– Single order':'＋ Multiple orders in one transaction';
+    if(multi && document.querySelectorAll('#tr-lines .ord-line').length===0){ addLine(); addLine(); }
+    recalcCons();
+  }
+  document.getElementById('tr-multiToggle').addEventListener('click',function(){ toggleMulti(); });
+  document.getElementById('tr-addLine').addEventListener('click',addLine);
+  [].forEach.call(document.querySelectorAll('.trade-toggle button'),function(b){ b.addEventListener('click',function(){ setAction(b.dataset.act); }); });
+  document.getElementById('btnTrade').addEventListener('click',function(){
+    document.getElementById('tradeTitle').textContent='New Trade';
+    document.getElementById('tr-units').value=''; document.getElementById('tr-price').value=''; document.getElementById('tr-fee').value=''; document.getElementById('tr-note').value='';
+    document.getElementById('tr-nName').value=''; document.getElementById('tr-nTicker').value='';
+    document.getElementById('tr-lines').innerHTML='';
+    if(newInst) toggleNew(false); if(multi) toggleMulti(false);
+    setAction('Buy'); openModal('tradeModal');
+  });
+  document.getElementById('tr-confirm').addEventListener('click',function(){
+    var t=trTotals();
+    if(t.units<=0||t.price<=0){ notify('Enter units and price'); return; }
+    var name, inst;
+    if(tradeAction==='Buy' && newInst){
+      name=document.getElementById('tr-nName').value.trim();
+      if(!name){ notify('Enter the new instrument name'); return; }
+      inst={name:name, ticker:document.getElementById('tr-nTicker').value.trim()||'—', product:document.getElementById('tr-nProduct').value, sector:document.getElementById('tr-nSector').value, ccy:'MYR', status:'Active'};
+      if(!INSTRUMENTS.some(function(x){return x.name===name;})){ INSTRUMENTS.unshift(inst); renderINST(); }
+    } else { name=document.getElementById('tr-inst').value; inst=INSTRUMENTS.filter(function(x){return x.name===name;})[0]||{}; }
+    var h=PF.filter(function(x){return x.name===name;})[0];
+    if(tradeAction==='Buy'){
+      if(h){ var tc=h.units*h.price+t.cost; h.units+=t.units; h.price=h.units?tc/h.units:t.price; }
+      else { PF.unshift({name:name, tk:inst.ticker||inst.tk||'—', product:inst.product||'Securities', sec:inst.sector||'—', units:t.units, price:t.price}); }
+    } else {
+      if(!h){ notify('No holding to sell'); return; }
+      if(t.units>h.units){ notify('Cannot sell more than held ('+fmt(h.units)+')'); return; }
+      h.units-=t.units; if(h.units<=0.0001){ PF=PF.filter(function(x){return x!==h;}); }
+    }
+    renderPF(); closeModals();
+    TT.unshift({date:(function(){var dt=new Date(document.getElementById('tr-date').value);return isNaN(dt)?'19 Mar 2026':dt.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});})(), action:tradeAction, inst:name, tk:(inst.ticker||inst.tk||'—'), product:(inst.product||'Securities'), units:t.units, price:t.price, fee:parseNum(document.getElementById('tr-fee').value), value:t.cost});
+    if(typeof renderTT==='function') renderTT();
+    notify(tradeAction+' '+fmt(t.units)+' · '+name+' @ avg RM '+t.price.toFixed(2));
+  });
+
+  // ---- instruments page ----
+  var inBody=document.getElementById('inBody');
+  function instStatus(s){ if(s==='Active')return '<span class="pill-ok">Active</span>'; if(s==='Suspended')return '<span class="pill-rej">Suspended</span>'; return '<span class="pill-warn">'+s+'</span>'; }
+  var inFilter='';
+  function renderINST(){
+    inBody.innerHTML='';
+    var q=(document.getElementById('inSearch').value||'').toLowerCase();
+    var list=INSTRUMENTS.filter(function(x){ return (!inFilter||x.product===inFilter) && (!q||(x.name+' '+x.ticker).toLowerCase().indexOf(q)>-1); });
+    list.forEach(function(x){
+      var idx=INSTRUMENTS.indexOf(x);
+      var tr=document.createElement('tr'); tr.className='clickable';
+      tr.innerHTML='<td class="hold-name"><b>'+x.name+'</b><span>'+x.ticker+'</span></td><td>'+prodPill(x.product)+'</td><td class="td-sub">'+x.sector+'</td><td>'+x.ccy+'</td><td>'+instStatus(x.status)+'</td>';
+      tr.addEventListener('click',function(){ openInst(idx); });
+      inBody.appendChild(tr);
+    });
+    document.getElementById('inListCount').textContent=list.length+' of '+INSTRUMENTS.length;
+    document.getElementById('inCount').textContent=INSTRUMENTS.length;
+    document.getElementById('inSec').textContent=INSTRUMENTS.filter(function(x){return x.product==='Securities';}).length;
+    document.getElementById('inAlt').textContent=INSTRUMENTS.filter(function(x){return x.product==='Private Equity'||x.product==='Collectibles'||x.product==='Derivatives';}).length;
+    document.getElementById('inCash').textContent=INSTRUMENTS.filter(function(x){return x.product==='Cash Funds'||x.product==='Cash on Hand';}).length;
+  }
+  renderINST();
+  document.getElementById('inSearch').addEventListener('input',renderINST);
+  document.querySelectorAll('.adm-pane[data-pane="instruments"] .chip').forEach(function(c){ c.addEventListener('click',function(){ document.querySelectorAll('.adm-pane[data-pane="instruments"] .chip').forEach(function(x){x.classList.remove('active');}); c.classList.add('active'); inFilter=c.dataset.prod; renderINST(); }); });
+  var inEdit=-1;
+  function openInst(idx){
+    inEdit=idx;
+    document.getElementById('instTitle').textContent=idx>=0?'Edit Instrument':'Add Instrument';
+    var x=idx>=0?INSTRUMENTS[idx]:{name:'',ticker:'',product:'Securities',sector:'Healthcare',ccy:'MYR',status:'Active'};
+    document.getElementById('in-name').value=x.name; document.getElementById('in-ticker').value=x.ticker==='—'?'':x.ticker;
+    document.getElementById('in-product').value=x.product; document.getElementById('in-sector').value=x.sector;
+    document.getElementById('in-ccy').value=x.ccy; document.getElementById('in-status').value=x.status;
+    openModal('instModal');
+  }
+  document.getElementById('openInstModal').addEventListener('click',function(){ openInst(-1); });
+  document.getElementById('in-save').addEventListener('click',function(){
+    var name=document.getElementById('in-name').value.trim();
+    if(!name){ notify('Enter instrument name'); return; }
+    var obj={name:name, ticker:document.getElementById('in-ticker').value.trim()||'—', product:document.getElementById('in-product').value, sector:document.getElementById('in-sector').value, ccy:document.getElementById('in-ccy').value, status:document.getElementById('in-status').value};
+    if(inEdit>=0){ INSTRUMENTS[inEdit]=obj; notify('Instrument updated — '+name); }
+    else { INSTRUMENTS.unshift(obj); notify('Instrument added — '+name); }
+    renderINST(); closeModals();
+  });
+
+  // ---- distributions ----
+  var UNITS=958300;
+  var dDps=document.getElementById('d-dps');
+  var DIST=[
+    {fy:'FY2025', type:'Interim', dps:3.20, ex:'30 Jun 2025', pay:'15 Jul 2025', status:'Paid'},
+    {fy:'FY2025', type:'Final', dps:2.10, ex:'15 Dec 2025', pay:'15 Jan 2026', status:'Paid'},
+    {fy:'FY2024', type:'Interim', dps:3.80, ex:'30 Jun 2024', pay:'15 Jul 2024', status:'Paid'}
+  ];
+  var distEdit=-1;
+  function distStatusPill(s){ if(s==='Paid')return '<span class="pill-ok">Paid</span>'; if(s==='Declared')return '<span class="pill-ok">Declared</span>'; return '<span class="pill-warn">'+s+'</span>'; }
+  var dBody=document.getElementById('dBody');
+  function renderDIST(){
+    dBody.innerHTML='';
+    DIST.forEach(function(r,i){
+      var gross=Math.round(r.dps/100*UNITS);
+      var tr=document.createElement('tr'); tr.className='clickable';
+      tr.innerHTML='<td>'+r.fy+'</td><td><span class="tag-blue">'+r.type+'</span></td><td class="td-right">'+r.dps.toFixed(2)+'</td><td class="td-right">'+r.ex+'</td><td class="td-right">'+r.pay+'</td><td class="td-right">'+gross.toLocaleString('en-MY')+'</td><td>'+distStatusPill(r.status)+'</td>';
+      tr.addEventListener('click',function(){ openDist(i); });
+      dBody.appendChild(tr);
+    });
+  }
+  renderDIST();
+  function recalcDist(){
+    var dps=parseNum(dDps.value);
+    document.getElementById('d-dps-echo').textContent=(dps?dps.toFixed(2):'—')+' sen';
+    var gross=dps/100*UNITS;
+    document.getElementById('d-payout').textContent= dps? 'RM '+gross.toLocaleString('en-MY',{maximumFractionDigits:0}) : 'RM —';
+  }
+  dDps.addEventListener('input',recalcDist);
+  function openDist(i){
+    distEdit=i;
+    var head=document.querySelector('#distModal h3'); var dec=document.getElementById('d-declare'), draft=document.getElementById('d-draft');
+    if(i>=0){ var r=DIST[i]; document.getElementById('d-fy').value=r.fy; document.getElementById('d-type').value=r.type; setDate('d-ex',r.ex); setDate('d-pay',r.pay); dDps.value=r.dps; head.textContent='Edit Distribution'; dec.textContent='Save Changes'; draft.style.display='none'; }
+    else { dDps.value=''; document.getElementById('d-note').value=''; head.textContent='Declare Distribution'; dec.textContent='Declare →'; draft.style.display=''; }
+    recalcDist(); openModal('distModal');
+  }
+  function fdate(id){ var v=document.getElementById(id).value; var d=new Date(v); return isNaN(d)?'—':d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+  function declare(asDraft){
+    var fy=document.getElementById('d-fy').value, type=document.getElementById('d-type').value, dps=parseNum(dDps.value);
+    if(dps<=0){ notify('Enter DPS in sen'); return; }
+    if(distEdit>=0){
+      var r=DIST[distEdit]; r.fy=fy; r.type=type; r.dps=dps; r.ex=fdate('d-ex'); r.pay=fdate('d-pay');
+      renderDIST(); closeModals(); notify('Distribution updated — '+fy+' '+type); return;
+    }
+    DIST.unshift({fy:fy, type:type, dps:dps, ex:fdate('d-ex'), pay:fdate('d-pay'), status:asDraft?'Draft':'Declared'});
+    renderDIST(); closeModals();
+    notify(asDraft? 'Draft saved — '+fy+' '+type : fy+' '+type+' distribution declared ('+dps.toFixed(2)+' sen)');
+  }
+  document.getElementById('d-declare').addEventListener('click',function(){ declare(false); });
+  document.getElementById('d-draft').addEventListener('click',function(){ declare(true); });
+  document.getElementById('openDistModal').addEventListener('click',function(){ openDist(-1); });
+
+  // ---- others transaction ----
+  var OT=[
+    {date:'19 Mar 2026', cat:'Management Fee', desc:'Monthly management fee accrual', amt:1125, dir:'Outflow', status:'Approved'},
+    {date:'17 Mar 2026', cat:'Brokerage', desc:'Bursa trade commissions', amt:430, dir:'Outflow', status:'Approved'},
+    {date:'14 Mar 2026', cat:'FX Adjustment', desc:'USD holdings revaluation', amt:2310, dir:'Inflow', status:'Approved'},
+    {date:'10 Mar 2026', cat:'Audit Fee', desc:'FY25 statutory audit', amt:8500, dir:'Outflow', status:'Pending'},
+    {date:'05 Mar 2026', cat:'Bank Charges', desc:'Wire transfer fees', amt:75, dir:'Outflow', status:'Approved'}
+  ];
+  var otBody=document.getElementById('otBody');
+  var otEdit=-1;
+  function dirTag(d){ return d==='Inflow'?'<span class="tag-green">Inflow</span>':'<span class="tag-red">Outflow</span>'; }
+  function renderOT(){
+    otBody.innerHTML='';
+    OT.forEach(function(r,i){
+      var tr=document.createElement('tr'); tr.className='clickable';
+      tr.innerHTML='<td>'+r.date+'</td><td>'+r.cat+'</td><td class="td-sub">'+r.desc+'</td><td class="td-right">'+fmt(r.amt)+'</td><td>'+dirTag(r.dir)+'</td>';
+      tr.addEventListener('click',function(){ openOt(i); });
+      otBody.appendChild(tr);
+    });
+    document.getElementById('otCount').textContent=OT.length;
+  }
+  renderOT();
+  function setDate(id,human){ var d=new Date(human); if(!isNaN(d)){ document.getElementById(id).value=d.toISOString().slice(0,10); } }
+  function openOt(i){
+    otEdit=i;
+    var head=document.querySelector('#otModal h3'); var btn=document.getElementById('ot-add');
+    if(i>=0){ var r=OT[i]; setDate('ot-date',r.date); document.getElementById('ot-cat').value=r.cat; document.getElementById('ot-desc').value=r.desc==='—'?'':r.desc; document.getElementById('ot-amt').value=r.amt; document.getElementById('ot-dir').value=r.dir; head.textContent='Edit Transaction'; btn.textContent='Save Changes'; }
+    else { document.getElementById('ot-amt').value=''; document.getElementById('ot-desc').value=''; head.textContent='Add Other Transaction'; btn.textContent='Add Transaction'; }
+    openModal('otModal');
+  }
+  document.getElementById('openOtModal').addEventListener('click',function(){ openOt(-1); });
+  document.getElementById('ot-add').addEventListener('click',function(){
+    var amt=parseNum(document.getElementById('ot-amt').value);
+    if(amt<=0){ notify('Enter a valid amount'); return; }
+    var dt=new Date(document.getElementById('ot-date').value); var ds=isNaN(dt)?'19 Mar 2026':dt.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+    var cat=document.getElementById('ot-cat').value, desc=document.getElementById('ot-desc').value||'—', dir=document.getElementById('ot-dir').value;
+    if(otEdit>=0){ var r=OT[otEdit]; r.date=ds; r.cat=cat; r.desc=desc; r.amt=amt; r.dir=dir; notify('Transaction updated — '+cat); }
+    else { OT.unshift({date:ds, cat:cat, desc:desc, amt:amt, dir:dir, status:'Pending'}); notify('Transaction added — '+cat); }
+    renderOT(); closeModals();
+  });
+
+  // ---- remuneration ----
+  var REM=[
+    {date:'31 Mar 2026', who:'Fund Manager', type:'Management Fee', amt:4500, period:'Q1 FY26', status:'Approved'},
+    {date:'31 Mar 2026', who:'Ng Zhi Yao', type:'Performance Fee', amt:8200, period:'FY25 over hurdle', status:'Pending'},
+    {date:'31 Dec 2025', who:'Board of Directors', type:'Director Fee', amt:6000, period:'FY25', status:'Approved'},
+    {date:'30 Nov 2025', who:'Fund Manager', type:'Management Fee', amt:4250, period:'Q4 FY25', status:'Approved'}
+  ];
+  var remBody=document.getElementById('remBody');
+  var remEdit=-1;
+  function renderREM(){
+    remBody.innerHTML='';
+    REM.forEach(function(r,i){
+      var tr=document.createElement('tr'); tr.className='clickable';
+      tr.innerHTML='<td>'+r.date+'</td><td class="hold-name"><b>'+r.who+'</b></td><td><span class="tag-blue">'+r.type+'</span></td><td class="td-right">'+fmt(r.amt)+'</td><td class="td-sub">'+r.period+'</td><td>'+statusPill(r.status)+'</td>';
+      tr.addEventListener('click',function(){ openRem(i); });
+      remBody.appendChild(tr);
+    });
+  }
+  renderREM();
+  function openRem(i){
+    remEdit=i;
+    var head=document.querySelector('#remModal h3'); var btn=document.getElementById('rem-add');
+    if(i>=0){ var r=REM[i]; setDate('rem-date',r.date); document.getElementById('rem-who').value=r.who; document.getElementById('rem-type').value=r.type; document.getElementById('rem-amt').value=r.amt; document.getElementById('rem-period').value=r.period==='—'?'':r.period; head.textContent='Edit Remuneration'; btn.textContent='Save Changes'; }
+    else { document.getElementById('rem-amt').value=''; document.getElementById('rem-who').value=''; document.getElementById('rem-period').value=''; head.textContent='Add Remuneration Entry'; btn.textContent='Add Entry'; }
+    openModal('remModal');
+  }
+  document.getElementById('openRemModal').addEventListener('click',function(){ openRem(-1); });
+  document.getElementById('rem-add').addEventListener('click',function(){
+    var amt=parseNum(document.getElementById('rem-amt').value), who=document.getElementById('rem-who').value.trim();
+    if(!who||amt<=0){ notify('Enter recipient and amount'); return; }
+    var dt=new Date(document.getElementById('rem-date').value); var ds=isNaN(dt)?'31 Mar 2026':dt.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+    var type=document.getElementById('rem-type').value, period=document.getElementById('rem-period').value||'—';
+    if(remEdit>=0){ var r=REM[remEdit]; r.date=ds; r.who=who; r.type=type; r.amt=amt; r.period=period; notify('Remuneration updated — '+who); }
+    else { REM.unshift({date:ds, who:who, type:type, amt:amt, period:period, status:'Pending'}); notify('Remuneration entry added — '+who); }
+    renderREM(); closeModals();
+  });
+
+  // ---- dividend income (received from holdings) ----
+  var DV=[
+    {ex:'05 Mar 2026', date:'14 Mar 2026', inst:'Public Bank Berhad', type:'Final', dps:0.17, units:30000, status:'Received'},
+    {ex:'20 Feb 2026', date:'28 Feb 2026', inst:'DiGi.Com', type:'Interim', dps:0.042, units:23800, status:'Received'},
+    {ex:'06 Feb 2026', date:'15 Feb 2026', inst:'Hartalega Holdings', type:'Interim', dps:0.025, units:55000, status:'Received'},
+    {ex:'20 Mar 2026', date:'31 Mar 2026', inst:'IHH Healthcare', type:'Final', dps:0.06, units:18200, status:'Pending'}
+  ];
+  function dvTypeTag(t){ return '<span class="tag-blue">'+t+'</span>'; }
+  var dvBody=document.getElementById('dvBody');
+  var dvEdit=-1;
+  function renderDV(){
+    dvBody.innerHTML='';
+    var ytd=0, pend=0;
+    DV.forEach(function(r,i){
+      var gross=r.dps*r.units;
+      if(r.status==='Received') ytd+=gross; else pend++;
+      var tr=document.createElement('tr'); tr.className='clickable';
+      tr.innerHTML='<td>'+(r.ex||'—')+'</td><td>'+r.date+'</td><td class="hold-name"><b>'+r.inst+'</b></td><td>'+dvTypeTag(r.type)+'</td>'
+        +'<td class="td-right">'+r.dps.toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:4})+'</td>'
+        +'<td class="td-right">'+fmt(r.units)+'</td>'
+        +'<td class="td-right">'+gross.toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2})+'</td>'
+        +'<td>'+(r.status==='Received'?'<span class="pill-ok">Received</span>':'<span class="pill-warn">Pending</span>')+'</td>';
+      tr.addEventListener('click',function(){ openDv(i); });
+      dvBody.appendChild(tr);
+    });
+    document.getElementById('dvYtd').textContent='RM '+ytd.toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2});
+    document.getElementById('dvCount').textContent=DV.length;
+    document.getElementById('dvPending').textContent=pend;
+  }
+  renderDV();
+  function dvUnitsFor(name){ var h=PF.filter(function(x){return x.name===name;})[0]; return h?h.units:0; }
+  function dvRecalc(){
+    var u=dvUnitsFor(document.getElementById('dv-inst').value), dps=parseNum(document.getElementById('dv-dps').value);
+    document.getElementById('dv-units').value=u?fmt(u):'—';
+    document.getElementById('dv-gross').textContent=(u>0&&dps>0)?'RM '+(u*dps).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2}):'RM —';
+  }
+  function dvFillSelect(){
+    var sel=document.getElementById('dv-inst'); sel.innerHTML='';
+    PF.forEach(function(h){ var o=document.createElement('option'); o.value=h.name; o.textContent=h.name+(h.tk&&h.tk!=='—'?' ('+h.tk+')':''); sel.appendChild(o); });
+  }
+  function openDv(i){
+    dvEdit=i; dvFillSelect();
+    var head=document.querySelector('#dvModal h3'); var btn=document.getElementById('dv-confirm');
+    if(i>=0){ var r=DV[i]; document.getElementById('dv-inst').value=r.inst; document.getElementById('dv-type').value=r.type; setDate('dv-exdate',r.ex); setDate('dv-date',r.date); document.getElementById('dv-dps').value=r.dps; head.textContent='Edit Dividend'; btn.textContent='Save Changes'; }
+    else { document.getElementById('dv-dps').value=''; head.textContent='Record Dividend'; btn.textContent='Record Dividend'; }
+    dvRecalc(); openModal('dvModal');
+  }
+  document.getElementById('openDvModal').addEventListener('click',function(){ openDv(-1); });
+  document.getElementById('dv-inst').addEventListener('change',dvRecalc);
+  document.getElementById('dv-dps').addEventListener('input',dvRecalc);
+  document.getElementById('dv-confirm').addEventListener('click',function(){
+    var name=document.getElementById('dv-inst').value, dps=parseNum(document.getElementById('dv-dps').value), u=dvUnitsFor(name);
+    if(dps<=0||u<=0){ notify('Select a holding and enter DPS'); return; }
+    var dt=new Date(document.getElementById('dv-date').value); var ds=isNaN(dt)?'19 Mar 2026':dt.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+    var ex=new Date(document.getElementById('dv-exdate').value); var es=isNaN(ex)?'—':ex.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+    var type=document.getElementById('dv-type').value;
+    if(dvEdit>=0){ var r=DV[dvEdit]; r.ex=es; r.date=ds; r.inst=name; r.type=type; r.dps=dps; r.units=u; notify('Dividend updated — '+name); }
+    else { DV.unshift({ex:es, date:ds, inst:name, type:type, dps:dps, units:u, status:'Received'}); notify('Dividend recorded — '+name+' · RM '+(dps*u).toLocaleString('en-MY',{maximumFractionDigits:0})); }
+    renderDV(); closeModals();
+  });
+
+  // ---- settlement (realized gains — auto-generated, read-only) ----
+  // Algorithm: each SELL trade closes units against the holding's weighted-average (VWAP) cost.
+  var STL=[
+    {date:'17 Mar 2026', fy:'FY2026', inst:'AirAsia', tk:'5099.KL', cls:'Securities', sector:'Consumer', units:8000, vwap:0.6520, sell:0.7200},
+    {date:'09 Mar 2026', fy:'FY2026', inst:'Microsoft', tk:'MSFT', cls:'Securities', sector:'Technology', units:140, vwap:1620.0000, sell:1875.2300},
+    {date:'28 Feb 2026', fy:'FY2026', inst:'Genting Bhd', tk:'3182.KL', cls:'Securities', sector:'Consumer', units:12000, vwap:4.8500, sell:4.4000},
+    {date:'14 Feb 2026', fy:'FY2026', inst:'Public Bank Berhad', tk:'1295.KL', cls:'Securities', sector:'Financials', units:5000, vwap:3.9500, sell:4.3200},
+    {date:'20 Dec 2025', fy:'FY2025', inst:'Tenaga Nasional', tk:'5347.KL', cls:'Securities', sector:'Utilities', units:3000, vwap:10.8000, sell:11.5000},
+    {date:'05 Nov 2025', fy:'FY2025', inst:'KLCI Dec Futures', tk:'FKLI', cls:'Derivatives', sector:'Index', units:5, vwap:1545.0000, sell:1502.0000}
+  ];
+  function d4(n){ return n.toLocaleString('en-MY',{minimumFractionDigits:4,maximumFractionDigits:4}); }
+  function d2(n){ return n.toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  var stlBody=document.getElementById('stlBody'), stlFY='', stlQ='';
+  function renderSTL(){
+    stlBody.innerHTML='';
+    var pnlTotal=0, gains=0, losses=0, win=0, lose=0, shown=0;
+    STL.forEach(function(r){
+      if(stlFY && r.fy!==stlFY) return;
+      if(stlQ && (r.inst+' '+r.cls+' '+r.sector+' '+r.tk).toLowerCase().indexOf(stlQ)===-1) return;
+      shown++;
+      var costBasis=r.vwap*r.units, proceeds=r.sell*r.units, pnl=proceeds-costBasis, ret=costBasis?(pnl/costBasis*100):0;
+      pnlTotal+=pnl; if(pnl>0){gains+=pnl;win++;} else if(pnl<0){losses+=pnl;lose++;}
+      var zero=Math.abs(pnl)<0.005;
+      var pcls=zero?'zero':(pnl>=0?'pos':'neg'), sign=zero?'':(pnl>=0?'+':'−');
+      var pnlTxt=zero?'—':sign+d2(Math.abs(pnl));
+      var retTxt=(zero?'':sign)+Math.abs(ret).toFixed(2)+'%';
+      var tr=document.createElement('tr');
+      tr.innerHTML='<td>'+r.date+'</td><td class="hold-name"><b>'+r.inst+'</b><span>'+r.tk+'</span></td><td class="td-sub">'+r.cls+'</td>'
+        +'<td class="td-right">'+fmt(r.units)+'</td>'
+        +'<td class="td-right">'+d4(r.vwap)+'</td>'
+        +'<td class="td-right">'+d4(r.sell)+'</td>'
+        +'<td class="td-right">'+d2(costBasis)+'</td>'
+        +'<td class="td-right">'+d2(proceeds)+'</td>'
+        +'<td class="td-right"><span class="pnl-pill '+pcls+'">'+pnlTxt+'</span></td>'
+        +'<td class="td-right"><span class="pnl-pill '+pcls+'">'+retTxt+'</span></td>';
+      stlBody.appendChild(tr);
+    });
+    if(shown===0){ stlBody.innerHTML='<tr><td colspan="10" style="text-align:center;padding:28px;color:var(--fg-3);">No settlement records match.</td></tr>'; }
+    document.getElementById('stlPnl').textContent=(pnlTotal<0?'−':'')+'RM '+d2(Math.abs(pnlTotal));
+    document.getElementById('stlPnl').className='value '+(pnlTotal>=0?'green':'');
+    document.getElementById('stlPnl').style.color=pnlTotal>=0?'':'var(--red)';
+    document.getElementById('stlGain').textContent='RM '+d2(gains);
+    document.getElementById('stlGainN').textContent=win+' winning trade'+(win===1?'':'s');
+    document.getElementById('stlLoss').textContent='−RM '+d2(Math.abs(losses));
+    document.getElementById('stlLossN').textContent=lose+' losing trade'+(lose===1?'':'s');
+    document.getElementById('stlCount2').textContent=shown;
+    var wr=(win+lose)?Math.round(win/(win+lose)*100):0;
+    document.getElementById('stlWin').textContent=wr+'% win rate';
+  }
+  renderSTL();
+  document.getElementById('stl-fy').addEventListener('change',function(){ stlFY=this.value; renderSTL(); });
+  document.getElementById('stl-search').addEventListener('input',function(){ stlQ=this.value.toLowerCase(); renderSTL(); });
+
+  // ---- compute NTA ----
+  // fee schedule
+  (function(){
+    var feeBody=document.getElementById('feeBody'); if(!feeBody) return;
+    var FEES=[
+      {type:'base', rate:0.10, basis:'daily', hurdle:null, from:'1 Apr 2026', to:'Open-ended', status:'Active', desc:'0.1% p.a. base management fee, accrued daily (1/365 per day)'},
+      {type:'performance', rate:10.00, basis:'daily', hurdle:7.00, from:'1 Apr 2026', to:'Open-ended', status:'Active', desc:'10% performance fee on daily excess return above 7% p.a. hurdle'}
+    ];
+    function render(){
+      feeBody.innerHTML='';
+      FEES.forEach(function(f){
+        var tr=document.createElement('tr');
+        tr.innerHTML='<td><span class="fee-pill '+(f.type==='base'?'base':'perf')+'">'+f.type+'</span></td>'
+          +'<td class="td-right"><b>'+f.rate.toFixed(2)+'% p.a.</b></td>'
+          +'<td>'+f.basis+'</td>'
+          +'<td class="td-right">'+(f.hurdle!=null?f.hurdle.toFixed(2)+'% p.a.':'—')+'</td>'
+          +'<td>'+f.from+'</td>'
+          +'<td>'+(f.to==='Open-ended'?'<span style="color:var(--green);">Open-ended</span>':f.to)+'</td>'
+          +'<td>'+(f.status==='Active'?'<span class="pill-ok">Active</span>':'<span class="pill-pending">'+f.status+'</span>')+'</td>'
+          +'<td class="td-sub">'+f.desc+'</td>';
+        feeBody.appendChild(tr);
+      });
+    }
+    render();
+    var typeSel=document.getElementById('fee-type2'), hurdleWrap=document.getElementById('fee-hurdle-wrap');
+    typeSel.addEventListener('change',function(){ hurdleWrap.style.display=this.value==='performance'?'':'none'; });
+    document.getElementById('openFeeModal').addEventListener('click',function(){ openModal('feeModal2'); });
+    document.getElementById('fee-add').addEventListener('click',function(){
+      var rate=parseNum(document.getElementById('fee-rate').value);
+      if(rate<=0){ notify('Enter a valid rate'); return; }
+      var type=typeSel.value;
+      function fd(id){ var v=document.getElementById(id).value; if(!v) return null; var d=new Date(v); return isNaN(d)?null:d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); }
+      var hurdle=type==='performance'?parseNum(document.getElementById('fee-hurdle').value):null;
+      FEES.push({type:type, rate:rate, basis:'daily', hurdle:hurdle||(type==='performance'?7:null), from:fd('fee-from')||'15 Jun 2026', to:fd('fee-to')||'Open-ended', status:'Active', desc:document.getElementById('fee-desc').value||((type==='base'?'Base':'Performance')+' fee schedule')});
+      render(); closeModals(); notify('Fee schedule added — '+type);
+      document.getElementById('fee-rate').value=''; document.getElementById('fee-desc').value=''; document.getElementById('fee-hurdle').value='';
+    });
+  })();
+
+  document.getElementById('nta-run').addEventListener('click',function(){
+    var b=this; b.disabled=true; b.textContent='Computing…';
+    setTimeout(function(){ document.getElementById('ntaToday').textContent='RM 1.0245'; b.disabled=false; b.textContent='Run Computation'; notify('NTA computed: RM 1.0245 (+0.12%) — published'); },1100);
+  });
+  document.getElementById('nta-preview').addEventListener('click',function(){ notify('Preview: gross NAV RM 981,707 ÷ 958,300 units = RM 1.0245'); });
+
+  // ---- logout + clock ----
+  document.getElementById('logout').addEventListener('click',function(){ try{ localStorage.removeItem('zy_admin_session'); }catch(e){} location.replace('admin-login.html'); });
+  document.getElementById('admSignout').addEventListener('click',function(){ try{ localStorage.removeItem('zy_admin_session'); }catch(e){} location.replace('admin-login.html'); });
+  function tick(){ var d=new Date(); document.getElementById('clock').textContent=d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' · '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+' MYT'; }
+  tick(); setInterval(tick,30000);
+
+  // ---- documents (upload + management) ----
+  (function(){
+    var duBody=document.getElementById('duBody'), dmBody=document.getElementById('dmBody'); if(!dmBody) return;
+    var NAV=1.0245;
+    function us(s){ return s.replace(/[^A-Za-z0-9]+/g,'_').replace(/^_|_$/g,''); }
+    var DOCS=[
+      {date:'15 Jun 2026', name:'ZY-Invest Monthly Factsheet — 30 May 2026', file:'ZY-Invest_Monthly_Factsheet_-_30_May_2026.pdf', type:'Factsheet', scope:'Fund-wide', fy:'—', vis:'Fund', size:'212 KB', status:'Published'},
+      {date:'15 Jun 2026', name:'ZY-Invest Monthly Factsheet — 30 May 2026', file:'ZY-Invest_Monthly_Factsheet_-_30_May_2026.pdf', type:'Factsheet', scope:'Fund-wide', fy:'—', vis:'Fund', size:'212 KB', status:'Published'},
+      {date:'04 May 2026', name:'ZY-Invest Monthly Factsheet — 29 April 2026', file:'ZY-Invest_Monthly_Factsheet_-_29_April_2026.pdf', type:'Factsheet', scope:'Fund-wide', fy:'—', vis:'Fund', size:'212 KB', status:'Published'},
+      {date:'07 Apr 2026', name:'Redemption Statement — Ng Zhi Yao', file:'Redemption_Statement_-_Ng_Zhi_Yao_(2022-11-29).pdf', type:'Redemption Statement', scope:'Ng Zhi Yao', fy:'FY2023', vis:'Member', size:'142 KB', status:'Published'},
+      {date:'07 Apr 2026', name:'Redemption Statement — Ng Zhi Yao', file:'Redemption_Statement_-_Ng_Zhi_Yao_(2022-07-28).pdf', type:'Redemption Statement', scope:'Ng Zhi Yao', fy:'FY2022', vis:'Member', size:'142 KB', status:'Published'},
+      {date:'07 Apr 2026', name:'Redemption Statement — Ng Zhi Yao', file:'Redemption_Statement_-_Ng_Zhi_Yao_(2022-04-08).pdf', type:'Redemption Statement', scope:'Ng Zhi Yao', fy:'FY2022', vis:'Member', size:'142 KB', status:'Published'},
+      {date:'06 Apr 2026', name:'Dividend Statement — W.P. & W.S. Siah', file:'Dividend_Statement_-_W.P._&_W.S._Siah.pdf', type:'Dividend Statement', scope:'W.P. & W.S. Siah', fy:'FY2025', vis:'Member', size:'141 KB', status:'Published'},
+      {date:'06 Apr 2026', name:'Dividend Statement — W.P. & W.S. Siah', file:'Dividend_Statement_-_W.P._&_W.S._Siah.pdf', type:'Dividend Statement', scope:'W.P. & W.S. Siah', fy:'FY2025', vis:'Member', size:'141 KB', status:'Published'},
+      {date:'28 Mar 2026', name:'Account Statement — Tan Hui Mei', file:'Account_Statement_-_Tan_Hui_Mei_(FY2025).pdf', type:'Account Statement', scope:'Tan Hui Mei', fy:'FY2025', vis:'Member', size:'96 KB', status:'Published'},
+      {date:'06 Mar 2026', name:'Subscription Statement — Lim Wealth Trust', file:'Subscription_Statement_-_Lim_Wealth_Trust.pdf', type:'Subscription Statement', scope:'Lim Wealth Trust', fy:'FY2026', vis:'Member', size:'90 KB', status:'Published'}
+    ];
+    function typePill(t){
+      var k=t.replace(' Statement','');
+      var c={'Factsheet':'tp-fact','Dividend':'tp-div','Subscription':'tp-sub','Redemption':'tp-red','Account':'tp-acct'}[k]||'tp-acct';
+      return '<span class="type-pill '+c+'">◆ '+k.toUpperCase()+'</span>';
+    }
+    function visPill(v){ return '<span class="vis-pill '+(v==='Fund'?'fund':'member')+'">'+v.toUpperCase()+'</span>'; }
+    function docStatus(s){ if(s==='Published')return '<span class="pill-ok">Published</span>'; if(s==='Archived')return '<span class="pill-rej">Archived</span>'; return '<span class="pill-pending">Draft</span>'; }
+
+    function renderDU(){
+      if(!duBody) return;
+      duBody.innerHTML='';
+      DOCS.slice(0,6).forEach(function(d){
+        var tr=document.createElement('tr');
+        tr.innerHTML='<td>'+d.date+'</td><td class="hold-name"><b>'+d.name+'</b><span class="dm-fname">'+d.file+'</span></td><td>'+typePill(d.type)+'</td><td class="td-sub">'+d.scope+'</td><td>'+d.fy+'</td><td class="td-right">'+d.size+'</td><td>'+docStatus(d.status)+'</td>';
+        duBody.appendChild(tr);
+      });
+      document.getElementById('duYtd').textContent=DOCS.length;
+      document.getElementById('duMonth').textContent=DOCS.filter(function(d){return /Jun 2026/.test(d.date);}).length;
+      document.getElementById('duPending').textContent=DOCS.filter(function(d){return d.status==='Draft';}).length;
+    }
+
+    // ---- document management: filters + multi-select ----
+    var dmSel=new Set();
+    function dmFilteredIdx(){
+      var q=(document.getElementById('dmSearch').value||'').toLowerCase();
+      var ft=document.getElementById('dmType').value, fi=document.getElementById('dmInv').value, fy=document.getElementById('dmFy').value, fv=document.getElementById('dmVis').value;
+      var out=[];
+      DOCS.forEach(function(d,i){
+        if(ft && d.type!==ft) return;
+        if(fi && d.scope!==fi) return;
+        if(fy && d.fy!==fy) return;
+        if(fv && d.vis!==fv) return;
+        if(q && (d.name+' '+d.file+' '+d.scope).toLowerCase().indexOf(q)<0) return;
+        out.push(i);
+      });
+      return out;
+    }
+    function renderDM(){
+      dmBody.innerHTML='';
+      var idxs=dmFilteredIdx();
+      idxs.forEach(function(i){
+        var d=DOCS[i];
+        var tr=document.createElement('tr'); if(dmSel.has(i)) tr.className='sel';
+        tr.innerHTML='<td><input type="checkbox" data-i="'+i+'"'+(dmSel.has(i)?' checked':'')+'></td>'
+          +'<td class="hold-name"><b>'+d.name+'</b><span class="dm-fname">'+d.file+' · '+d.size+'</span></td>'
+          +'<td>'+typePill(d.type)+'</td><td class="td-sub">'+d.scope+'</td><td>'+d.fy+'</td><td>'+visPill(d.vis)+'</td><td class="td-sub">'+d.date+'</td>'
+          +'<td><div class="dm-act"><button class="dl" title="Download" data-act="dl" data-i="'+i+'"><svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 11l5 4 5-4"/><path d="M5 21h14"/></svg></button><button class="pv" title="Preview" data-act="pv" data-i="'+i+'"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="rm" title="Delete" data-act="rm" data-i="'+i+'"><svg viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><path d="M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13"/></svg></button></div></td>';
+        dmBody.appendChild(tr);
+      });
+      document.getElementById('dmCount').textContent=idxs.length+' documents';
+      document.getElementById('dmTotal').textContent=DOCS.length;
+      document.getElementById('dmTotalSub').textContent=DOCS.length+' files in library';
+      document.getElementById('dmStmts').textContent=DOCS.filter(function(d){return /Dividend|Subscription|Redemption/.test(d.type);}).length;
+      document.getElementById('dmAcct').textContent=DOCS.filter(function(d){return d.type==='Account Statement';}).length;
+      document.getElementById('dmFact').textContent=DOCS.filter(function(d){return d.type==='Factsheet';}).length;
+      // bulk bar
+      var bar=document.getElementById('dmBulk'); bar.classList.toggle('show',dmSel.size>0);
+      document.getElementById('dmSelCount').textContent=dmSel.size+' selected';
+      var head=document.getElementById('dmHeadChk'); head.checked=idxs.length>0 && idxs.every(function(i){return dmSel.has(i);});
+      document.getElementById('dmBulkAll').checked=head.checked;
+      // row checkbox + action handlers
+      dmBody.querySelectorAll('input[type=checkbox]').forEach(function(cb){ cb.addEventListener('change',function(){ var i=+cb.dataset.i; if(cb.checked)dmSel.add(i); else dmSel.delete(i); renderDM(); }); });
+      dmBody.querySelectorAll('.dm-act button').forEach(function(b){ b.addEventListener('click',function(e){ e.stopPropagation(); var i=+b.dataset.i, a=b.dataset.act, d=DOCS[i];
+        if(a==='dl'){ notify('Downloading — '+d.file); }
+        else if(a==='pv'){ notify('Preview — '+d.name); }
+        else { var n=d.name; DOCS.splice(i,1); dmSel.clear(); renderDU(); renderDM(); notify('Deleted — '+n); }
+      }); });
+    }
+    function fillInvFilter(){ var sel=document.getElementById('dmInv'); var seen={}; DOCS.forEach(function(d){ if(d.scope!=='Fund-wide'&&!seen[d.scope]){ seen[d.scope]=1; var o=document.createElement('option'); o.textContent=d.scope; sel.appendChild(o); } }); }
+    fillInvFilter();
+    renderDU(); renderDM();
+    ['dmSearch','dmType','dmInv','dmFy','dmVis'].forEach(function(id){ document.getElementById(id).addEventListener('input',function(){ dmSel.clear(); renderDM(); }); document.getElementById(id).addEventListener('change',function(){ dmSel.clear(); renderDM(); }); });
+    document.getElementById('dmClear').addEventListener('click',function(){ ['dmSearch','dmType','dmInv','dmFy','dmVis'].forEach(function(id){ document.getElementById(id).value=''; }); dmSel.clear(); renderDM(); });
+    function toggleAll(on){ var idxs=dmFilteredIdx(); idxs.forEach(function(i){ if(on)dmSel.add(i); else dmSel.delete(i); }); renderDM(); }
+    document.getElementById('dmHeadChk').addEventListener('change',function(){ toggleAll(this.checked); });
+    document.getElementById('dmBulkAll').addEventListener('change',function(){ toggleAll(this.checked); });
+    document.getElementById('dmBulkClear').addEventListener('click',function(){ dmSel.clear(); renderDM(); });
+    document.getElementById('dmBulkDownload').addEventListener('click',function(){ notify('Downloading '+dmSel.size+' document'+(dmSel.size>1?'s':'')+'…'); });
+    document.getElementById('dmBulkDelete').addEventListener('click',function(){ var n=dmSel.size; var keep=[]; DOCS.forEach(function(d,i){ if(!dmSel.has(i)) keep.push(d); }); DOCS.length=0; keep.forEach(function(d){DOCS.push(d);}); dmSel.clear(); renderDU(); renderDM(); notify('Deleted '+n+' document'+(n>1?'s':'')); });
+
+    // ---- upload modal ----
+    var duType=document.getElementById('du-type'), duScope=document.getElementById('du-scope'), duScopeWrap=document.getElementById('du-scope-wrap'), duFile=document.getElementById('du-file'), duFileSet=false;
+    function fillScope(){ duScope.innerHTML=''; INVESTORS.forEach(function(m){ var o=document.createElement('option'); o.value=m.name; o.textContent=m.name; duScope.appendChild(o); }); }
+    fillScope();
+    function syncScope(){ duScopeWrap.style.display = duType.value==='Factsheet' ? 'none' : ''; resetCompute(); }
+    duType.addEventListener('change',syncScope);
+    duScope.addEventListener('change',resetCompute);
+    function resetCompute(){ document.getElementById('du-cmp').innerHTML='<div class="cmp-empty">For statements, click <b>Compute</b> to pull the investor\u2019s figures (units, NAV, value, dividend, etc.) needed for this document.</div>'; }
+    duFile.addEventListener('click',function(){ duFileSet=true; duFile.classList.add('filled'); document.getElementById('du-fname').textContent='statement-draft.pdf · attached'; });
+
+    function invByName(n){ for(var i=0;i<INVESTORS.length;i++){ if(INVESTORS[i].name===n) return INVESTORS[i]; } return null; }
+    document.getElementById('du-compute').addEventListener('click',function(){
+      var type=duType.value, box=document.getElementById('du-cmp');
+      if(type==='Factsheet'){
+        box.innerHTML='<div class="cmp-row"><span class="ck">Fund NAV / unit</span><span class="cv">RM 1.0245</span></div>'
+          +'<div class="cmp-row"><span class="ck">Fund Size (AUM)</span><span class="cv">RM 981,707</span></div>'
+          +'<div class="cmp-row"><span class="ck">Units in Circulation</span><span class="cv">958,300</span></div>'
+          +'<div class="cmp-row"><span class="ck">NTA Change (MTD)</span><span class="cv">+1.2%</span></div>'
+          +'<div class="cmp-row"><span class="ck">Top Holding Weight</span><span class="cv">14.2%</span></div>';
+        notify('Fund-level figures computed'); return;
+      }
+      var m=invByName(duScope.value); if(!m){ notify('Select an investor'); return; }
+      var units=parseNum(m.units), val=units*NAV;
+      var html='<div class="cmp-row"><span class="ck">Investor</span><span class="cv">'+m.name+'</span></div>'
+        +'<div class="cmp-row"><span class="ck">Account ID</span><span class="cv">'+m.acct+'</span></div>'
+        +'<div class="cmp-row"><span class="ck">Units Held</span><span class="cv">'+m.units+'</span></div>'
+        +'<div class="cmp-row"><span class="ck">NAV / Unit</span><span class="cv">RM '+NAV.toFixed(4)+'</span></div>';
+      if(type==='Account Statement'){
+        html+='<div class="cmp-row"><span class="ck">% of Fund</span><span class="cv">'+m.pct.toFixed(1)+'%</span></div>'
+          +'<div class="cmp-row tot"><span class="ck">Current Value</span><span class="cv">RM '+fmt(val)+'</span></div>';
+      } else if(type==='Dividend Statement'){
+        var interim=units*0.021, fin=units*0.010;
+        html+='<div class="cmp-row"><span class="ck">Interim DPS (2.10 sen)</span><span class="cv">RM '+fmt(interim)+'</span></div>'
+          +'<div class="cmp-row"><span class="ck">Final DPS (1.00 sen)</span><span class="cv">RM '+fmt(fin)+'</span></div>'
+          +'<div class="cmp-row tot"><span class="ck">Total Dividend</span><span class="cv">RM '+fmt(interim+fin)+'</span></div>';
+      } else {
+        html+='<div class="cmp-row"><span class="ck">Subscription Price</span><span class="cv">RM '+NAV.toFixed(4)+'</span></div>'
+          +'<div class="cmp-row tot"><span class="ck">Amount Subscribed</span><span class="cv">RM '+fmt(val)+'</span></div>';
+      }
+      box.innerHTML=html; notify('Statement figures computed for '+m.name);
+    });
+    document.getElementById('openDuModal').addEventListener('click',function(){
+      duType.value='Factsheet'; syncScope(); duFileSet=false; duFile.classList.remove('filled'); document.getElementById('du-fname').textContent='Click to attach PDF — or generate from computed data';
+      openModal('duModal');
+    });
+    document.getElementById('du-save').addEventListener('click',function(){
+      var type=duType.value, scope=type==='Factsheet'?'Fund-wide':duScope.value;
+      var dt=new Date(document.getElementById('du-period').value); var per=isNaN(dt)?'May 2026':dt.toLocaleDateString('en-GB',{month:'short',year:'numeric'});
+      var name=type==='Factsheet'?('ZY-Invest Monthly Factsheet — '+per):(type.replace(' Statement','')+' Statement — '+scope);
+      var fyv=document.getElementById('du-fy')?document.getElementById('du-fy').value:'—';
+      DOCS.unshift({date:'16 Jun 2026', name:name, file:us(name)+'.pdf', type:type, scope:scope, fy:(type==='Factsheet'?'—':(fyv||'FY2026')), vis:(type==='Factsheet'?'Fund':'Member'), size:(Math.round(80+Math.random()*180))+' KB', status:document.getElementById('du-status').value});
+      renderDU(); renderDM(); closeModals(); notify('Uploaded — '+name);
+    });
+  })();
+
+  // ---- click-to-sort on all admin tables ----
+  function parseCell(td){
+    var s=(td?td.textContent:'').trim();
+    if(/^\d{1,2}\s\w{3}\s\d{4}$/.test(s)){ var d=Date.parse(s); if(!isNaN(d)) return {t:'n',v:d}; }
+    if(s==='—'||s==='-'||s===''){ return {t:'n',v:-Infinity}; }
+    var c=s.replace(/RM/gi,'').replace(/sen/gi,'').replace(/,/g,'').replace(/%/g,'').replace(/\+/g,'').replace(/−/g,'-').trim();
+    if(/^-?\d*\.?\d+$/.test(c)){ return {t:'n',v:parseFloat(c)}; }
+    return {t:'s',v:s.toLowerCase()};
+  }
+  function sortTable(table, idx, dir){
+    if(!table) return; var tb=table.tBodies[0]; if(!tb) return;
+    var rows=Array.prototype.slice.call(tb.rows).filter(function(r){ return r.cells.length>1; });
+    var pinned=rows.filter(function(r){ return r.dataset.pin==='last'; });
+    var rest=rows.filter(function(r){ return r.dataset.pin!=='last'; });
+    rest.sort(function(a,b){
+      var av=parseCell(a.cells[idx]), bv=parseCell(b.cells[idx]), r;
+      if(av.t==='n'&&bv.t==='n') r=av.v-bv.v; else r=String(av.v).localeCompare(String(bv.v));
+      return dir==='asc'?r:-r;
+    });
+    rest.concat(pinned).forEach(function(r){ tb.appendChild(r); });
+    var ths=table.tHead?table.tHead.rows[0].cells:[];
+    for(var i=0;i<ths.length;i++){ ths[i].classList.remove('sorted-asc','sorted-desc'); }
+    if(ths[idx]) ths[idx].classList.add(dir==='asc'?'sorted-asc':'sorted-desc');
+    table.setAttribute('data-sort-col',idx); table.setAttribute('data-sort-dir',dir);
+  }
+  document.addEventListener('click',function(e){
+    var th=e.target.closest('.adm-main .tbl thead th'); if(!th) return;
+    var table=th.closest('table'); var cells=th.parentNode.cells; var idx=Array.prototype.indexOf.call(cells,th);
+    var dir = (table.getAttribute('data-sort-col')==String(idx) && table.getAttribute('data-sort-dir')==='asc') ? 'desc' : 'asc';
+    sortTable(table, idx, dir);
+  });
+})();
+</script>
+</body>
+</html>

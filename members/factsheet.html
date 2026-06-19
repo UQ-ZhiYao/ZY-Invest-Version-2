@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Factsheet — ZY-Invest</title>
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+<link rel="stylesheet" href="../assets/css/dashboard-portfolio.css">
+<script>if(location.search.indexOf("embed")!==-1)document.documentElement.classList.add("embed");</script>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- ===================== TOP NAV — FUND INFORMATION ===================== -->
+  <header class="topnav">
+    <a href="../index.html" class="brand">
+      <img src="../assets/img/logo.png" alt="ZY-Invest">
+      <span class="bt"><b>ZY-Invest</b><span>Member Portal</span></span>
+    </a>
+    <nav class="nav-links">
+      <div class="nav-group">
+        <button class="nav-top active">Fund <span class="caret">▾</span></button>
+        <div class="dropdown"><div class="dd-card">
+          <a class="dd-item" href="fund-overview.html"><b>Fund Overview</b><span>Mandate, objective &amp; key facts</span></a>
+          <a class="dd-item" href="factsheet.html"><b>Factsheet</b><span>Holdings allocation each financial year</span></a>
+          <a class="dd-item" href="shareholder-list.html"><b>Shareholder List</b><span>Unitholders, units held &amp; ownership</span></a>
+        </div></div>
+      </div>
+      <div class="nav-group">
+        <button class="nav-top">Performance <span class="caret">▾</span></button>
+        <div class="dropdown"><div class="dd-card">
+          <a class="dd-item" href="financial-result.html"><b>Financial Result</b><span>Income statement, balance sheet &amp; cash flow</span></a>
+          <a class="dd-item" href="performance-analysis.html"><b>Performance Analysis</b><span>Returns &amp; benchmark comparison (FBM KLCI)</span></a>
+          <a class="dd-item" href="nta-history.html"><b>NTA History</b><span>Chart &amp; daily NTA / NAV history</span></a>
+        </div></div>
+      </div>
+      <div class="nav-group">
+        <button class="nav-top">Documents <span class="caret">▾</span></button>
+        <div class="dropdown"><div class="dd-card">
+          <a class="dd-item" href="statement-download.html"><b>Statement Download</b><span>Factsheets &amp; annual reports</span></a>
+        </div></div>
+      </div>
+    </nav>
+    <div class="nav-right">
+      <button class="icon-btn" title="Search">⌕</button>
+      <button class="icon-btn" title="Notifications">🔔<span class="badge-dot"></span></button>
+      <div class="nav-user-wrap">
+        <div class="nav-user" id="userBtn">
+          <div class="nu-text" style="text-align:right;">
+            <div class="nu-name">Tan Hui Mei</div>
+            <div class="nu-role">ZYI-2024-0014</div>
+          </div>
+          <div class="avatar">THM</div>
+          <span class="nu-caret">▾</span>
+        </div>
+        <div class="user-menu" id="userMenu">
+          <div class="um-head">
+            <div class="avatar">THM</div>
+            <div>
+              <div class="um-name">Tan Hui Mei</div>
+              <div class="um-mail">huimei.tan@example.com</div>
+            </div>
+          </div>
+          <a class="um-item" href="profile.html">
+            <span class="um-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span>
+            <span><b>Profile</b><span>Personal &amp; account details</span></span>
+          </a>
+          <a class="um-item" href="profile.html#security">
+            <span class="um-ic"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+            <span><b>Password</b><span>Sign-in &amp; security</span></span>
+          </a>
+          <a class="um-item" href="profile.html#nominee">
+            <span class="um-ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20c0-3 2.5-4.6 5.5-4.6S14.5 17 14.5 20"/><circle cx="17" cy="9" r="2.6"/><path d="M16 15.6c2.6.2 4.5 1.7 4.5 4.4"/></svg></span>
+            <span><b>Nominee</b><span>Beneficiary nomination</span></span>
+          </a>
+          <div class="um-sep"></div>
+          <a class="um-item danger" href="../login.html">
+            <span class="um-ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>
+            <span><b>Sign out</b></span>
+          </a>
+        </div>
+      </div>
+      <a href="../login.html" class="btn-logout">Logout</a>
+    </div>
+  </header>
+
+  <!-- ===================== INDEX TICKER ===================== -->
+  <div class="ticker">
+    <div class="ticker-mask">
+      <div class="ticker-track" id="tickerTrack">
+        <span class="tk"><span class="flag">🇺🇸</span><span class="tname">S&amp;P 500</span><span class="tval">5,432.10</span><span class="tchg up">+0.42%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇺🇸</span><span class="tname">NASDAQ</span><span class="tval">17,210.5</span><span class="tchg up">+0.71%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇺🇸</span><span class="tname">DOW</span><span class="tval">39,150.2</span><span class="tchg up">+0.18%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇸🇬</span><span class="tname">STI</span><span class="tval">3,340.6</span><span class="tchg up">+0.30%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇭🇰</span><span class="tname">HANG SENG</span><span class="tval">18,902.4</span><span class="tchg down">−0.52%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇯🇵</span><span class="tname">NIKKEI 225</span><span class="tval">38,505.0</span><span class="tchg up">+0.88%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇲🇾</span><span class="tname">FBM KLCI</span><span class="tval">1,612.40</span><span class="tchg up">+0.60%</span></span>
+        <span class="tsep">•</span>
+        <!-- duplicate for seamless loop -->
+        <span class="tk"><span class="flag">🇺🇸</span><span class="tname">S&amp;P 500</span><span class="tval">5,432.10</span><span class="tchg up">+0.42%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇺🇸</span><span class="tname">NASDAQ</span><span class="tval">17,210.5</span><span class="tchg up">+0.71%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇺🇸</span><span class="tname">DOW</span><span class="tval">39,150.2</span><span class="tchg up">+0.18%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇸🇬</span><span class="tname">STI</span><span class="tval">3,340.6</span><span class="tchg up">+0.30%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇭🇰</span><span class="tname">HANG SENG</span><span class="tval">18,902.4</span><span class="tchg down">−0.52%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇯🇵</span><span class="tname">NIKKEI 225</span><span class="tval">38,505.0</span><span class="tchg up">+0.88%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇲🇾</span><span class="tname">FBM KLCI</span><span class="tval">1,612.40</span><span class="tchg up">+0.60%</span></span>
+        <span class="tsep">•</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== SHELL: SIDEBAR + MAIN ===================== -->
+  <div class="shell" id="shell">
+    <script>try{if(localStorage.getItem('zy-sb-collapsed')==='1'){document.getElementById('shell').classList.add('collapsed');}}catch(e){}</script>
+    <div class="sidebar-scrim" id="scrim"></div>
+
+    <!-- left sidebar: personal account -->
+    <aside class="sidebar" id="sidebar">
+      <button class="sb-toggle" id="sbToggle" title="Collapse menu"><span class="sb-bars"><span></span><span></span><span></span></span><span class="sb-tlbl">Menu</span></button>
+      <div class="sb-group">Account</div>
+      <a class="sb-item" href="dashboard.html">
+        <span class="sb-ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span>
+        <span class="sb-label">Account Summary</span>
+      </a>
+      <a class="sb-item" href="holdings.html">
+        <span class="sb-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 12V3"/><path d="M12 12l7.5 5"/></svg></span>
+        <span class="sb-label">Holdings</span>
+      </a>
+      <a class="sb-item" href="transactions.html">
+        <span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M4 8h14l-3-3"/><path d="M20 16H6l3 3"/></svg></span>
+        <span class="sb-label">Principal Transactions</span>
+      </a>
+      <a class="sb-item" href="distributions.html">
+        <span class="sb-ic"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg></span>
+        <span class="sb-label">Distributions</span>
+      </a>
+      <div class="sb-group">Records</div>
+      <a class="sb-item" href="documents.html">
+        <span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>
+        <span class="sb-label">Statements</span>
+      </a>
+      <div class="sb-spacer"></div>
+      <a class="sb-item logout" href="../login.html">
+        <span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>
+        <span class="sb-label">Sign out</span>
+      </a>
+    </aside>
+
+    <!-- main -->
+    <main class="main">
+      <div class="ph-xl">
+        <h1><span class="ph-accent">Factsheet</span></h1>
+        <p>Holdings allocation across each financial year, plus the latest downloadable factsheet.</p>
+      </div>
+      <div class="panel"><div class="panel-head"><h3>Holdings Allocation by Financial Year</h3></div>
+        <div style="padding:20px;">
+          <div style="display:flex;flex-wrap:wrap;gap:14px 20px;margin-bottom:18px;font-size:0.8rem;color:var(--fg-2);"><span style="display:flex;align-items:center;gap:7px;"><span style="width:11px;height:11px;border-radius:3px;background:var(--blue)"></span>Healthcare</span><span style="display:flex;align-items:center;gap:7px;"><span style="width:11px;height:11px;border-radius:3px;background:var(--green)"></span>Financials</span><span style="display:flex;align-items:center;gap:7px;"><span style="width:11px;height:11px;border-radius:3px;background:var(--orange)"></span>Technology</span><span style="display:flex;align-items:center;gap:7px;"><span style="width:11px;height:11px;border-radius:3px;background:#7E57C2"></span>Telcos</span><span style="display:flex;align-items:center;gap:7px;"><span style="width:11px;height:11px;border-radius:3px;background:var(--gray-400)"></span>Other &amp; Cash</span></div>
+        <div style="margin-bottom:18px;">
+          <div style="display:flex;justify-content:space-between;font-size:0.84rem;margin-bottom:7px;"><span style="font-weight:600;color:var(--fg-1);">FY2025</span><span style="color:var(--fg-3);">NTA RM 1.0210</span></div>
+          <div class="dist-stack" style="height:18px;"><span style="width:28%;background:var(--blue)"></span><span style="width:22%;background:var(--green)"></span><span style="width:15%;background:var(--orange)"></span><span style="width:11%;background:#7E57C2"></span><span style="width:24%;background:var(--gray-400)"></span></div>
+        </div>
+        <div style="margin-bottom:18px;">
+          <div style="display:flex;justify-content:space-between;font-size:0.84rem;margin-bottom:7px;"><span style="font-weight:600;color:var(--fg-1);">FY2024</span><span style="color:var(--fg-3);">NTA RM 0.9920</span></div>
+          <div class="dist-stack" style="height:18px;"><span style="width:25%;background:var(--blue)"></span><span style="width:24%;background:var(--green)"></span><span style="width:12%;background:var(--orange)"></span><span style="width:13%;background:#7E57C2"></span><span style="width:26%;background:var(--gray-400)"></span></div>
+        </div>
+        <div style="margin-bottom:18px;">
+          <div style="display:flex;justify-content:space-between;font-size:0.84rem;margin-bottom:7px;"><span style="font-weight:600;color:var(--fg-1);">FY2023</span><span style="color:var(--fg-3);">NTA RM 0.9710</span></div>
+          <div class="dist-stack" style="height:18px;"><span style="width:22%;background:var(--blue)"></span><span style="width:26%;background:var(--green)"></span><span style="width:9%;background:var(--orange)"></span><span style="width:15%;background:#7E57C2"></span><span style="width:28%;background:var(--gray-400)"></span></div>
+        </div>
+        <div style="margin-bottom:18px;">
+          <div style="display:flex;justify-content:space-between;font-size:0.84rem;margin-bottom:7px;"><span style="font-weight:600;color:var(--fg-1);">FY2022</span><span style="color:var(--fg-3);">NTA RM 0.9650</span></div>
+          <div class="dist-stack" style="height:18px;"><span style="width:18%;background:var(--blue)"></span><span style="width:28%;background:var(--green)"></span><span style="width:6%;background:var(--orange)"></span><span style="width:16%;background:#7E57C2"></span><span style="width:32%;background:var(--gray-400)"></span></div>
+        </div>
+        </div>
+      </div>
+      <div class="panel" style="margin-top:16px;"><div class="panel-head"><h3>Download Factsheet</h3></div><div class="res-list" style="padding:8px;"><a class="res-item"><span class="ri-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/></svg></span><span class="ri-t"><b>Fund Factsheet — March 2026</b><span>PDF · 248 KB · updated monthly</span></span><span class="ri-arr">↓</span></a><a class="res-item"><span class="ri-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/></svg></span><span class="ri-t"><b>Fund Factsheet — February 2026</b><span>PDF · 241 KB</span></span><span class="ri-arr">↓</span></a><a class="res-item"><span class="ri-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/></svg></span><span class="ri-t"><b>Fund Factsheet — January 2026</b><span>PDF · 256 KB</span></span><span class="ri-arr">↓</span></a></div></div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ===================== FLOATING CHAT ASSISTANT ===================== -->
+<button class="fab" id="chatFab" title="Ask ZY Assistant">
+  <svg viewBox="0 0 100 100" aria-hidden="true"><g transform="translate(50,50)" fill="#fff"><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4"/><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4" transform="rotate(45)"/><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4" transform="rotate(90)"/><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4" transform="rotate(135)"/></g></svg>
+  <span class="fab-ping">1</span>
+</button>
+
+<section class="chat-pop" id="chatPop" aria-label="ZY Assistant">
+  <div class="chat-head">
+    <div class="ch-logo">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><g transform="translate(50,50)" fill="#1565C0"><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4"/><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4" transform="rotate(45)"/><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4" transform="rotate(90)"/><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4" transform="rotate(135)"/></g></svg>
+    </div>
+    <div class="ch-id"><b>ZY Assistant</b><span>Online · replies instantly</span></div>
+    <button class="ch-btn" id="chatMin" title="Minimize">⌄</button>
+  </div>
+  <div class="chat-body" id="chatBody">
+    <div class="chat-time">3:52 PM</div>
+    <div class="msg-label">ZY Assistant</div>
+    <div class="msg bot">
+      Welcome back, Hui Mei 👋 I can help with your account, distributions, and documents.
+      <br><br>
+      <span style="font-size:0.78rem;color:var(--fg-3);">Note: responses are a general guide. For formal confirmations, refer to your statements or contact the fund.</span>
+    </div>
+    <div class="chat-action"><button>View account summary</button></div>
+    <div class="msg user">When is my next distribution?</div>
+    <div class="msg bot">
+      Your next income distribution is the <b>FY26 interim</b>:
+      <ul>
+        <li>Expected ex-date <b>30 Nov 2026</b></li>
+        <li>Estimated on <b>12,345.68 units</b> held</li>
+        <li>Paid to Maybank ····2048 within 15 business days</li>
+      </ul>
+    </div>
+  </div>
+  <div class="chat-chips">
+    <button class="chat-chip">Explain my P&amp;L</button>
+    <button class="chat-chip">How is NTA computed?</button>
+    <button class="chat-chip">My documents</button>
+  </div>
+  <div class="chat-foot">
+    <button class="clip" title="Attach">📎</button>
+    <div class="field-box"><input type="text" id="chatInput" placeholder="Type a message…"></div>
+    <button class="send" id="chatSend" title="Send">➤</button>
+  </div>
+</section>
+
+<script>
+(function(){
+  var shell=document.getElementById('shell');
+  var toggle=document.getElementById('sbToggle');
+  var scrim=document.getElementById('scrim');
+
+  function isMobile(){ return window.matchMedia('(max-width:860px)').matches; }
+  // restore persisted collapsed state so the sidebar keeps its mode across pages
+  try{ if(localStorage.getItem('zy-sb-collapsed')==='1'){ shell.classList.add('collapsed'); } }catch(e){}
+  toggle.addEventListener('click',function(){
+    if(isMobile()){ shell.classList.toggle('nav-open'); }
+    else { var c=shell.classList.toggle('collapsed'); try{ localStorage.setItem('zy-sb-collapsed', c?'1':'0'); }catch(e){} }
+  });
+  scrim.addEventListener('click',function(){ shell.classList.remove('nav-open'); });
+
+  // user dropdown menu
+  (function(){
+    var wrap=document.querySelector('.nav-user-wrap'), btn=document.getElementById('userBtn');
+    if(!wrap||!btn) return;
+    btn.addEventListener('click',function(e){ e.stopPropagation(); wrap.classList.toggle('open'); });
+    document.addEventListener('click',function(e){ if(!wrap.contains(e.target)) wrap.classList.remove('open'); });
+  })();
+
+  // NTA chart hover tooltip — only show on hover, follow the line
+  (function(){
+    var main=document.querySelector('.chart-main');
+    var svg=main && main.querySelector('.chart-svg');
+    var tip=document.getElementById('ntaTip');
+    if(!main||!svg||!tip) return;
+    var path=svg.querySelector('.line');
+    var dEl=tip.querySelector('.ft-d'), vEl=tip.querySelector('.ft-v');
+    var len=path.getTotalLength();
+    // map x (0..1) to a date + NTA value
+    var start=new Date(2023,0,1), end=new Date(2026,2,19);
+    function fmtDate(t){ var d=new Date(start.getTime()+(end-start)*t);
+      return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+    function ntaAt(t){ var v=1.0003+(0.0242)*Math.pow(t,0.92); return 'RM '+v.toFixed(4); }
+    function move(e){
+      var r=svg.getBoundingClientRect();
+      var x=Math.min(Math.max((e.clientX-r.left)/r.width,0),1);
+      // find point on path at this x fraction (path x is monotonic with length here)
+      var pt=path.getPointAtLength(len*x);
+      var vb=svg.viewBox.baseVal;
+      var px=(pt.x/vb.width)*100, py=(pt.y/vb.height)*100;
+      tip.style.left=px+'%'; tip.style.top=(py-14)+'%';
+      dEl.textContent=fmtDate(x); vEl.textContent=ntaAt(x);
+    }
+    main.addEventListener('mouseenter',function(){ tip.style.display='block'; });
+    main.addEventListener('mousemove',move);
+    main.addEventListener('mouseleave',function(){ tip.style.display='none'; });
+  })();
+
+  // period toggle
+  document.querySelectorAll('.seg-ctrl').forEach(function(g){
+    g.querySelectorAll('button').forEach(function(b){
+      b.addEventListener('click',function(){ g.querySelectorAll('button').forEach(function(x){x.classList.remove('on');}); b.classList.add('on'); });
+    });
+  });
+
+  // floating chat
+  var fab=document.getElementById('chatFab'), min=document.getElementById('chatMin');
+  var body=document.getElementById('chatBody'), input=document.getElementById('chatInput'), send=document.getElementById('chatSend');
+  function openChat(){ document.body.classList.add('chat-open'); setTimeout(function(){ if(input) input.focus(); },240); var p=fab.querySelector('.fab-ping'); if(p) p.style.display='none'; }
+  function closeChat(){ document.body.classList.remove('chat-open'); }
+  fab.addEventListener('click',openChat);
+  min.addEventListener('click',closeChat);
+  function addMsg(text, who){ var m=document.createElement('div'); m.className='msg '+who; m.textContent=text; body.appendChild(m); body.scrollTop=body.scrollHeight; }
+  function sendMsg(){ var v=(input.value||'').trim(); if(!v) return; addMsg(v,'user'); input.value='';
+    setTimeout(function(){ addMsg('Thanks — a member-services teammate will follow up here. You can also open your statements under Documents.','bot'); },650); }
+  send.addEventListener('click',sendMsg);
+  input.addEventListener('keydown',function(e){ if(e.key==='Enter') sendMsg(); });
+  document.querySelectorAll('.chat-chip').forEach(function(c){ c.addEventListener('click',function(){ input.value=c.textContent; input.focus(); }); });
+})();
+</script>
+<script src="../assets/js/member-search.js"></script>
+<script src="../assets/js/member-notifications.js"></script>
+</body>
+</html>
