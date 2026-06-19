@@ -29,7 +29,7 @@
         <button class="nav-top">Performance <span class="caret">▾</span></button>
         <div class="dropdown"><div class="dd-card">
           <a class="dd-item" href="financial-result.html"><b>Financial Result</b><span>Income statement, balance sheet &amp; cash flow</span></a>
-          <a class="dd-item" href="performance-analysis.html"><b>Performance Analysis</b><span>Returns &amp; benchmark comparison (FBM KLCI)</span></a>
+          <a class="dd-item" href="performance-analysis.html"><b>Performance Analysis</b><span>Returns &amp; benchmark comparison</span></a>
           <a class="dd-item" href="nta-history.html"><b>NTA History</b><span>Chart &amp; daily NTA / NAV history</span></a>
         </div></div>
       </div>
@@ -60,36 +60,21 @@
               <div class="um-mail" id="menuEmail">—</div>
             </div>
           </div>
-          <a class="um-item" href="profile.html">
-            <span class="um-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span>
-            <span><b>Profile</b><span>Personal &amp; account details</span></span>
-          </a>
-          <a class="um-item" href="profile.html#security">
-            <span class="um-ic"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
-            <span><b>Password</b><span>Sign-in &amp; security</span></span>
-          </a>
-          <a class="um-item" href="profile.html#nominee">
-            <span class="um-ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20c0-3 2.5-4.6 5.5-4.6S14.5 17 14.5 20"/><circle cx="17" cy="9" r="2.6"/><path d="M16 15.6c2.6.2 4.5 1.7 4.5 4.4"/></svg></span>
-            <span><b>Nominee</b><span>Beneficiary nomination</span></span>
-          </a>
+          <a class="um-item" href="profile.html"><span class="um-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span><span><b>Profile</b><span>Personal &amp; account details</span></span></a>
+          <a class="um-item" href="profile.html#security"><span class="um-ic"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span><span><b>Password</b><span>Sign-in &amp; security</span></span></a>
           <div class="um-sep"></div>
-          <a class="um-item danger" href="../login.html">
-            <span class="um-ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>
-            <span><b>Sign out</b></span>
-          </a>
+          <a class="um-item danger" href="../login.html"><span class="um-ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span><span><b>Sign out</b></span></a>
         </div>
       </div>
       <a href="../login.html" class="btn-logout">Logout</a>
     </div>
   </header>
 
-  <!-- ===================== INDEX TICKER ===================== -->
+  <!-- ===================== TICKER ===================== -->
   <div class="ticker">
     <div class="ticker-mask">
       <div class="ticker-track" id="tickerTrack">
         <span class="tk"><span class="flag">🇺🇸</span><span class="tname">S&amp;P 500</span><span class="tval">5,432.10</span><span class="tchg up">+0.42%</span></span>
-        <span class="tsep">•</span>
-        <span class="tk"><span class="flag">🇺🇸</span><span class="tname">NASDAQ</span><span class="tval">17,210.5</span><span class="tchg up">+0.71%</span></span>
         <span class="tsep">•</span>
         <span class="tk"><span class="flag">🇲🇾</span><span class="tname">FBM KLCI</span><span class="tval">1,584.3</span><span class="tchg dn">-0.18%</span></span>
         <span class="tsep">•</span>
@@ -98,44 +83,24 @@
     </div>
   </div>
 
-  <!-- ===================== SHELL: SIDEBAR + MAIN ===================== -->
+  <!-- ===================== SHELL ===================== -->
   <div class="shell" id="shell">
     <script>try{if(localStorage.getItem('zy-sb-collapsed')==='1'){document.getElementById('shell').classList.add('collapsed');}}catch(e){}</script>
     <div class="sidebar-scrim" id="scrim"></div>
 
-    <!-- left sidebar -->
     <aside class="sidebar" id="sidebar">
       <button class="sb-toggle" id="sbToggle" title="Collapse menu"><span class="sb-bars"><span></span><span></span><span></span></span><span class="sb-tlbl">Menu</span></button>
       <div class="sb-group">Account</div>
-      <a class="sb-item" href="dashboard.html">
-        <span class="sb-ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span>
-        <span class="sb-label">Account Summary</span>
-      </a>
-      <a class="sb-item" href="holdings.html">
-        <span class="sb-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 12V3"/><path d="M12 12l7.5 5"/></svg></span>
-        <span class="sb-label">Holdings</span>
-      </a>
-      <a class="sb-item" href="transactions.html">
-        <span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M4 8h14l-3-3"/><path d="M20 16H6l3 3"/></svg></span>
-        <span class="sb-label">Principal Transactions</span>
-      </a>
-      <a class="sb-item" href="distributions.html">
-        <span class="sb-ic"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg></span>
-        <span class="sb-label">Distributions</span>
-      </a>
+      <a class="sb-item" href="dashboard.html"><span class="sb-ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><span class="sb-label">Account Summary</span></a>
+      <a class="sb-item" href="holdings.html"><span class="sb-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 12V3"/><path d="M12 12l7.5 5"/></svg></span><span class="sb-label">Holdings</span></a>
+      <a class="sb-item" href="transactions.html"><span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M4 8h14l-3-3"/><path d="M20 16H6l3 3"/></svg></span><span class="sb-label">Principal Transactions</span></a>
+      <a class="sb-item" href="distributions.html"><span class="sb-ic"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg></span><span class="sb-label">Distributions</span></a>
       <div class="sb-group">Records</div>
-      <a class="sb-item" href="documents.html">
-        <span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/></svg></span>
-        <span class="sb-label">Statements</span>
-      </a>
+      <a class="sb-item" href="documents.html"><span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/></svg></span><span class="sb-label">Statements</span></a>
       <div class="sb-spacer"></div>
-      <a class="sb-item logout" href="../login.html">
-        <span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>
-        <span class="sb-label">Sign out</span>
-      </a>
+      <a class="sb-item logout" href="../login.html"><span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span><span class="sb-label">Sign out</span></a>
     </aside>
 
-    <!-- main -->
     <main class="main main-center">
       <div class="ph-xl">
         <h1>My <span class="ph-accent">Profile</span></h1>
@@ -144,13 +109,13 @@
 
       <div class="profile-wrap">
 
-        <!-- profile hero -->
+        <!-- hero -->
         <div class="prof-hero">
           <div class="prof-av" id="profAvatar">—</div>
           <div class="prof-id">
             <h2 id="profName">Loading…</h2>
             <div class="pm">
-              <span>Member ID <b id="profMemberId">—</b></span>
+              <span>Email <b id="profEmail">—</b></span>
               <span>Base currency <b>MYR</b></span>
             </div>
           </div>
@@ -167,23 +132,19 @@
         <!-- ============ PERSONAL PANE ============ -->
         <div class="prof-pane on" data-pane="personal">
 
-          <!-- Personal Details -->
           <div class="form-card">
             <div class="fc-head"><div><h3>Personal Details</h3><p>Your contact and identity information on record.</p></div></div>
             <div class="fc-body">
               <div class="form-grid">
                 <div class="field"><label>Full Name</label><input id="prof-fullname" placeholder="As per NRIC / passport"></div>
                 <div class="field"><label>Preferred Name</label><input id="prof-preferred" placeholder="Display name"></div>
-                <div class="field"><label>Email Address</label><input id="prof-email" type="email" disabled></div>
+                <div class="field"><label>Email Address</label><input id="prof-email" type="email" disabled style="opacity:0.6;cursor:not-allowed;"></div>
                 <div class="field"><label>Mobile</label><input id="prof-phone" placeholder="+60 12-345 6789"></div>
                 <div class="field fg-full"><label>Residential Address</label><input id="prof-address" placeholder="Full residential address"></div>
                 <div class="field">
                   <label>NRIC / Passport</label>
                   <input id="prof-nric" placeholder="Enter NRIC or passport no.">
-                  <span class="locked" id="prof-nric-lock" style="display:none;">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-                    Locked — contact the fund to update
-                  </span>
+                  <span id="prof-nric-lock" style="display:none;font-size:0.75rem;color:var(--fg-3);margin-top:4px;display:none;">🔒 Locked — contact the fund to update</span>
                 </div>
                 <div class="field">
                   <label>Nationality</label>
@@ -193,10 +154,7 @@
                     <option value="Other">Other</option>
                   </select>
                 </div>
-                <div class="field">
-                  <label>Date of Birth</label>
-                  <input id="prof-dob" type="date">
-                </div>
+                <div class="field"><label>Date of Birth</label><input id="prof-dob" type="date"></div>
               </div>
             </div>
             <div class="fc-foot">
@@ -205,12 +163,11 @@
             </div>
           </div>
 
-          <!-- Bank Details -->
           <div class="form-card">
             <div class="fc-head"><div><h3>Distribution Bank Account</h3><p>Where your income distributions are paid in MYR.</p></div></div>
             <div class="fc-body">
               <div class="form-grid">
-                <div class="field"><label>Bank</label><input id="prof-bank" placeholder="e.g. Maybank"></div>
+                <div class="field"><label>Bank Name</label><input id="prof-bank" placeholder="e.g. Maybank"></div>
                 <div class="field"><label>Account Number</label><input id="prof-bankacct" placeholder="Account number"></div>
                 <div class="field fg-full"><label>Account Holder Name</label><input id="prof-bankHolder" placeholder="Name as per bank account"></div>
               </div>
@@ -221,30 +178,12 @@
             </div>
           </div>
 
-          <!-- Account Verification (read-only display) -->
           <div class="form-card">
             <div class="fc-head"><div><h3>Account Verification</h3><p>Your KYC status and investor classification.</p></div></div>
             <div class="fc-body" style="padding-top:8px;padding-bottom:8px;">
-              <div class="kyc-row">
-                <span class="kyc-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span>
-                <span class="kyc-meta"><span class="kt">Identity Verification</span><span class="kd">NRIC verified · 18 Mar 2024</span></span>
-                <span class="pill-ok">Verified</span>
-              </div>
-              <div class="kyc-row">
-                <span class="kyc-ic"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg></span>
-                <span class="kyc-meta"><span class="kt">Proof of Address</span><span class="kd">Utility statement · 18 Mar 2024</span></span>
-                <span class="pill-ok">Verified</span>
-              </div>
-              <div class="kyc-row">
-                <span class="kyc-ic"><svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/></svg></span>
-                <span class="kyc-meta"><span class="kt">Investor Classification</span><span class="kd">Eligible to subscribe under the fund mandate</span></span>
-                <span class="pill-ok">Sophisticated Investor</span>
-              </div>
-              <div class="kyc-row">
-                <span class="kyc-ic"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0z"/><path d="M12 8v4l3 2"/></svg></span>
-                <span class="kyc-meta"><span class="kt">Risk Profile Assessment</span><span class="kd">Annual review due 30 Jun 2026</span></span>
-                <span class="pill-warn">Review due</span>
-              </div>
+              <div class="kyc-row"><span class="kyc-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span><span class="kyc-meta"><span class="kt">Identity Verification</span><span class="kd">NRIC verified</span></span><span class="pill-ok">Verified</span></div>
+              <div class="kyc-row"><span class="kyc-ic"><svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/></svg></span><span class="kyc-meta"><span class="kt">Investor Classification</span><span class="kd">Eligible to subscribe under the fund mandate</span></span><span class="pill-ok">Sophisticated Investor</span></div>
+              <div class="kyc-row"><span class="kyc-ic"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0z"/><path d="M12 8v4l3 2"/></svg></span><span class="kyc-meta"><span class="kt">Risk Profile Assessment</span><span class="kd">Annual review due 30 Jun 2026</span></span><span class="pill-warn">Review due</span></div>
             </div>
           </div>
         </div>
@@ -252,45 +191,15 @@
         <!-- ============ SECURITY PANE ============ -->
         <div class="prof-pane" data-pane="security" id="security">
           <div class="form-card">
-            <div class="fc-head"><div><h3>Change Password</h3><p>Use at least 10 characters with a mix of letters, numbers, and symbols.</p></div></div>
+            <div class="fc-head"><div><h3>Change Password</h3><p>Use at least 8 characters with a mix of letters, numbers, and symbols.</p></div></div>
             <div class="fc-body">
               <div class="form-grid">
                 <div class="field"><label>New Password</label><input type="password" id="sec-pw1" placeholder="Enter new password"></div>
                 <div class="field"><label>Confirm New Password</label><input type="password" id="sec-pw2" placeholder="Re-enter new password"></div>
               </div>
+              <div id="sec-msg" style="display:none;margin-top:10px;font-size:0.84rem;padding:10px 14px;border-radius:8px;"></div>
             </div>
             <div class="fc-foot"><button class="btn-line">Cancel</button><button class="btn-fill" id="savePassword">Update Password</button></div>
-          </div>
-
-          <div class="form-card">
-            <div class="fc-head"><div><h3>Two-Factor Authentication</h3><p>Add an extra layer of security to your sign-in.</p></div></div>
-            <div class="fc-body" style="padding-top:6px;padding-bottom:6px;">
-              <div class="kyc-row">
-                <span class="kyc-ic"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></span>
-                <span class="kyc-meta"><span class="kt">Authenticator App</span><span class="kd">Time-based one-time passcode (TOTP)</span></span>
-                <button class="toggle-sw on" data-sw></button>
-              </div>
-              <div class="kyc-row">
-                <span class="kyc-ic"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M4 9h16"/></svg></span>
-                <span class="kyc-meta"><span class="kt">Email One-Time Passcode</span><span class="kd" id="sec-email-hint">Send a code to your email</span></span>
-                <button class="toggle-sw" data-sw></button>
-              </div>
-              <div class="kyc-row">
-                <span class="kyc-ic"><svg viewBox="0 0 24 24"><path d="M3 5a2 2 0 0 1 2-2h3l2 5-2 1a12 12 0 0 0 5 5l1-2 5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 3 5z"/></svg></span>
-                <span class="kyc-meta"><span class="kt">SMS Backup</span><span class="kd" id="sec-sms-hint">+60 ··· ····</span></span>
-                <button class="toggle-sw on" data-sw></button>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-card">
-            <div class="fc-head"><div><h3>Active Sessions</h3><p>Devices currently signed in to your account.</p></div></div>
-            <div class="fc-body" style="padding-top:6px;padding-bottom:6px;">
-              <div class="sess-row">
-                <span class="kyc-ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></span>
-                <span class="sess-meta"><span class="st">Current Browser <span class="sess-now">● This device</span></span><span class="sd">Active session</span></span>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -298,18 +207,14 @@
         <div class="prof-pane" data-pane="nominee">
           <div class="form-card">
             <div class="fc-head">
-              <div><h3>Nomination Summary</h3><p>Select a nominee to edit their details, or add a new one. Allocations always total 100%.</p></div>
-              <button class="btn-fill" id="nomAdd" style="padding:9px 16px;flex:none;width:auto;white-space:nowrap;">+ Add Nominee</button>
+              <div><h3>Nomination Summary</h3><p>Select a nominee to edit their details, or add a new one.</p></div>
+              <button class="btn-fill" id="nomAdd" style="padding:9px 16px;flex:none;width:auto;">+ Add Nominee</button>
             </div>
             <div class="fc-body">
-              <div class="nom-total">
-                <div class="nom-total-bar" id="nomBar"></div>
-                <div class="nom-total-meta"><span>Total allocation across nominees</span><span class="nom-total-val ok" id="nomTotal">100%</span></div>
-              </div>
+              <div class="nom-total"><div class="nom-total-bar" id="nomBar"></div><div class="nom-total-meta"><span>Total allocation</span><span class="nom-total-val ok" id="nomTotal">100%</span></div></div>
               <div class="nom-list" id="nomList"></div>
             </div>
           </div>
-
           <div class="form-card">
             <div class="fc-head"><div><h3 id="nomFormTitle">Nominee Details</h3><p id="nomFormSub">Editing the selected nominee.</p></div><span class="pill-ok" id="nomFormBadge">Primary</span></div>
             <div class="fc-body">
@@ -319,10 +224,7 @@
                 <div class="field"><label>NRIC / Passport</label><input id="nf-nric" placeholder="NRIC or passport no."></div>
                 <div class="field"><label>Date of Birth</label><input id="nf-dob" placeholder="DD Mmm YYYY"></div>
                 <div class="field"><label>Mobile</label><input id="nf-mobile" placeholder="+60 ..."></div>
-                <div class="field"><label>Allocation <span class="nf-alloc-val" id="nf-allocVal">0%</span></label>
-                  <input type="range" min="0" max="100" step="5" value="0" id="nf-alloc" class="nom-range">
-                  <span class="hint">Other nominees adjust automatically so the total always stays 100%.</span>
-                </div>
+                <div class="field"><label>Allocation <span id="nf-allocVal">0%</span></label><input type="range" min="0" max="100" step="5" value="0" id="nf-alloc" class="nom-range"><span class="hint">Other nominees adjust automatically.</span></div>
               </div>
             </div>
             <div class="fc-foot"><button class="btn-line" id="nomDelete">Remove Nominee</button><button class="btn-fill" id="nomSave">Save Changes</button></div>
@@ -334,139 +236,278 @@
   </div>
 </div>
 
-<!-- ===================== FLOATING CHAT ASSISTANT ===================== -->
-<button class="fab" id="chatFab" title="Ask ZY Assistant">
-  <svg viewBox="0 0 100 100" aria-hidden="true"><g transform="translate(50,50)" fill="#fff"><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4"/><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4" transform="rotate(45)"/><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4" transform="rotate(90)"/><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4" transform="rotate(135)"/></g></svg>
-  <span class="fab-ping">1</span>
-</button>
-
-<section class="chat-pop" id="chatPop" aria-label="ZY Assistant">
-  <div class="chat-head">
-    <div class="ch-logo">
-      <svg viewBox="0 0 100 100" aria-hidden="true"><g transform="translate(50,50)" fill="#1565C0"><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4"/><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4" transform="rotate(45)"/><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4" transform="rotate(90)"/><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4" transform="rotate(135)"/></g></svg>
-    </div>
-    <div class="ch-id"><b>ZY Assistant</b><span>Online · replies instantly</span></div>
-    <button class="ch-btn" id="chatMin" title="Minimize">⌄</button>
-  </div>
-  <div class="chat-body" id="chatBody">
-    <div class="chat-time">Now</div>
-    <div class="msg-label">ZY Assistant</div>
-    <div class="msg bot">Welcome 👋 I can help with your account, distributions, and documents.<br><br><span style="font-size:0.78rem;color:var(--fg-3);">Note: responses are a general guide. Contact the fund manager for official matters.</span></div>
-  </div>
-  <div class="chat-chips">
-    <button class="chat-chip">My distributions</button>
-    <button class="chat-chip">NTA today</button>
-    <button class="chat-chip">Download statement</button>
-  </div>
-  <div class="chat-foot">
-    <button class="clip">📎</button>
-    <div class="field-box"><input id="chatInput" placeholder="Ask anything…"></div>
-    <button class="send" id="chatSend">➤</button>
-  </div>
-</section>
-
-<!-- ===================== TOAST ===================== -->
-<div id="profileToast" class="profile-toast"></div>
-<style>
-.profile-toast{position:fixed;bottom:28px;right:28px;padding:12px 20px;border-radius:10px;font-size:0.88rem;font-weight:600;color:#fff;opacity:0;transform:translateY(8px);transition:.3s;pointer-events:none;z-index:999;}
-.profile-toast.show{opacity:1;transform:none;}
-.profile-toast.ok{background:#2E7D32;}
-.profile-toast.error{background:#DC2626;}
-</style>
+<!-- toast -->
+<div id="profileToast" style="position:fixed;bottom:28px;right:28px;padding:12px 20px;border-radius:10px;font-size:0.88rem;font-weight:600;color:#fff;opacity:0;transform:translateY(8px);transition:.3s;pointer-events:none;z-index:9999;"></div>
 
 <!-- ===================== SCRIPTS ===================== -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../assets/js/supabase-auth.js"></script>
 <script src="../assets/js/auth-logout.js"></script>
-<script src="../assets/js/profile-supabase.js"></script>
-<script src="../assets/js/member-search.js"></script>
-<script src="../assets/js/member-notifications.js"></script>
 <script>
 (function(){
-  // ---- sidebar collapse ----
-  var shell=document.getElementById('shell'), sbToggle=document.getElementById('sbToggle'), scrim=document.getElementById('scrim');
-  sbToggle.addEventListener('click',function(){ var c=shell.classList.toggle('collapsed'); try{localStorage.setItem('zy-sb-collapsed',c?'1':'0');}catch(e){} });
-  scrim.addEventListener('click',function(){ shell.classList.remove('collapsed'); });
 
-  // ---- nav user dropdown ----
-  var userBtn=document.getElementById('userBtn'), userMenu=document.getElementById('userMenu');
-  userBtn.addEventListener('click',function(e){ e.stopPropagation(); userMenu.classList.toggle('open'); });
-  document.addEventListener('click',function(){ userMenu.classList.remove('open'); });
+  /* ── toast ───────────────────────────────────────────────── */
+  function toast(msg, isErr){
+    var t = document.getElementById('profileToast');
+    t.textContent = msg;
+    t.style.background = isErr ? '#DC2626' : '#2E7D32';
+    t.style.opacity = '1';
+    t.style.transform = 'translateY(0)';
+    clearTimeout(t._tmr);
+    t._tmr = setTimeout(function(){
+      t.style.opacity = '0';
+      t.style.transform = 'translateY(8px)';
+    }, 3200);
+  }
 
-  // ---- floating chat ----
-  var fab=document.getElementById('chatFab'), chatMin=document.getElementById('chatMin');
-  var chatBody=document.getElementById('chatBody'), chatInput=document.getElementById('chatInput'), chatSend=document.getElementById('chatSend');
-  function openChat(){ document.body.classList.add('chat-open'); setTimeout(function(){ if(chatInput) chatInput.focus(); },240); var p=fab.querySelector('.fab-ping'); if(p) p.style.display='none'; }
-  function closeChat(){ document.body.classList.remove('chat-open'); }
-  fab.addEventListener('click',openChat);
-  chatMin.addEventListener('click',closeChat);
-  function addMsg(text,who){ var m=document.createElement('div'); m.className='msg '+who; m.textContent=text; chatBody.appendChild(m); chatBody.scrollTop=chatBody.scrollHeight; }
-  function sendMsg(){ var v=(chatInput.value||'').trim(); if(!v) return; addMsg(v,'user'); chatInput.value=''; setTimeout(function(){ addMsg('Thanks — a member-services teammate will follow up here. You can also open your statements under Documents.','bot'); },650); }
-  chatSend.addEventListener('click',sendMsg);
-  chatInput.addEventListener('keydown',function(e){ if(e.key==='Enter') sendMsg(); });
-  document.querySelectorAll('.chat-chip').forEach(function(c){ c.addEventListener('click',function(){ chatInput.value=c.textContent; chatInput.focus(); }); });
+  /* ── set value helpers ───────────────────────────────────── */
+  function setVal(id, v){
+    var el = document.getElementById(id);
+    if(el) el.value = v || '';
+  }
+  function setText(id, v){
+    var el = document.getElementById(id);
+    if(el) el.textContent = v || '';
+  }
+  function getVal(id){
+    var el = document.getElementById(id);
+    return el ? el.value.trim() : '';
+  }
+  function initials(name){
+    return (name||'U').split(' ').map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,3);
+  }
 
-  // ---- profile tabs ----
-  var tabs=document.querySelectorAll('.prof-tab'), panes=document.querySelectorAll('.prof-pane');
+  /* ── sidebar collapse ────────────────────────────────────── */
+  var shell = document.getElementById('shell');
+  document.getElementById('sbToggle').addEventListener('click', function(){
+    var c = shell.classList.toggle('collapsed');
+    try{ localStorage.setItem('zy-sb-collapsed', c ? '1' : '0'); }catch(e){}
+  });
+  document.getElementById('scrim').addEventListener('click', function(){
+    shell.classList.remove('collapsed');
+  });
+
+  /* ── nav dropdown ────────────────────────────────────────── */
+  var userBtn = document.getElementById('userBtn');
+  var userMenu = document.getElementById('userMenu');
+  userBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    userMenu.classList.toggle('open');
+  });
+  document.addEventListener('click', function(){ userMenu.classList.remove('open'); });
+
+  /* ── profile tabs ────────────────────────────────────────── */
+  var tabs = document.querySelectorAll('.prof-tab');
+  var panes = document.querySelectorAll('.prof-pane');
   function showTab(name){
-    tabs.forEach(function(t){ t.classList.toggle('on',t.dataset.pane===name); });
-    panes.forEach(function(p){ p.classList.toggle('on',p.dataset.pane===name); });
+    tabs.forEach(function(t){ t.classList.toggle('on', t.dataset.pane === name); });
+    panes.forEach(function(p){ p.classList.toggle('on', p.dataset.pane === name); });
   }
-  tabs.forEach(function(t){ t.addEventListener('click',function(){ showTab(t.dataset.pane); var h=(t.dataset.pane==='personal')?'':('#'+t.dataset.pane); history.replaceState(null,'',h||location.pathname); }); });
-  var hp=location.hash.replace('#',''); if(hp==='security'||hp==='nominee'){ showTab(hp); }
-
-  // ---- 2FA toggles ----
-  document.querySelectorAll('[data-sw]').forEach(function(sw){ sw.addEventListener('click',function(){ sw.classList.toggle('on'); }); });
-
-  // ---- password change via Supabase ----
-  var savePw=document.getElementById('savePassword');
-  if(savePw){
-    savePw.addEventListener('click', async function(){
-      var p1=document.getElementById('sec-pw1').value;
-      var p2=document.getElementById('sec-pw2').value;
-      var toast=document.getElementById('profileToast');
-      function showToast(msg,ok){ toast.textContent=msg; toast.className='profile-toast show '+(ok===false?'error':'ok'); clearTimeout(toast._t); toast._t=setTimeout(function(){ toast.className='profile-toast'; },3200); }
-      if(p1.length < 8){ showToast('Password must be at least 8 characters.',false); return; }
-      if(p1 !== p2){ showToast('Passwords do not match.',false); return; }
-      savePw.disabled=true; savePw.textContent='Updating…';
-      try{
-        var res = await sb.auth.updateUser({ password: p1 });
-        if(res.error) throw res.error;
-        showToast('Password updated successfully ✓');
-        document.getElementById('sec-pw1').value='';
-        document.getElementById('sec-pw2').value='';
-      }catch(err){
-        showToast((err&&err.message)||'Failed to update password.',false);
-      }
-      savePw.disabled=false; savePw.textContent='Update Password';
+  tabs.forEach(function(t){
+    t.addEventListener('click', function(){
+      showTab(t.dataset.pane);
+      history.replaceState(null, '', t.dataset.pane === 'personal' ? location.pathname : '#' + t.dataset.pane);
     });
-  }
+  });
+  var hp = location.hash.replace('#','');
+  if(hp === 'security' || hp === 'nominee') showTab(hp);
 
-  // ---- nominee logic ----
+  /* ── nominee logic ───────────────────────────────────────── */
   (function(){
-    var list=document.getElementById('nomList');
-    if(!list) return;
-    var bar=document.getElementById('nomBar'), totalEl=document.getElementById('nomTotal');
-    var f={ name:document.getElementById('nf-name'), rel:document.getElementById('nf-rel'),
-      nric:document.getElementById('nf-nric'), dob:document.getElementById('nf-dob'),
-      mobile:document.getElementById('nf-mobile'), alloc:document.getElementById('nf-alloc'), allocVal:document.getElementById('nf-allocVal') };
+    var list = document.getElementById('nomList'); if(!list) return;
+    var bar = document.getElementById('nomBar'), totalEl = document.getElementById('nomTotal');
+    var f = { name:document.getElementById('nf-name'), rel:document.getElementById('nf-rel'), nric:document.getElementById('nf-nric'), dob:document.getElementById('nf-dob'), mobile:document.getElementById('nf-mobile'), alloc:document.getElementById('nf-alloc'), allocVal:document.getElementById('nf-allocVal') };
     var title=document.getElementById('nomFormTitle'), sub=document.getElementById('nomFormSub'), badge=document.getElementById('nomFormBadge');
     var addBtn=document.getElementById('nomAdd'), saveBtn=document.getElementById('nomSave'), delBtn=document.getElementById('nomDelete');
     var colors=['var(--blue)','var(--green)','var(--orange)','#7E57C2'];
-    var data=[ { name:'', rel:'Child', nric:'', dob:'', mobile:'', alloc:100 } ];
-    var sel=0;
+    var data=[{name:'',rel:'Child',nric:'',dob:'',mobile:'',alloc:100}], sel=0;
     function clamp(v){ return Math.max(0,Math.min(100,v)); }
-    function fixRounding(){ var total=data.reduce(function(a,n){return a+n.alloc;},0),diff=100-total; if(diff===0||data.length===0) return; var idx=-1,max=-1; data.forEach(function(n,i){if(i!==sel&&n.alloc>max){max=n.alloc;idx=i;}}); if(idx===-1) idx=sel; data[idx].alloc=clamp(data[idx].alloc+diff); }
-    function rebalance(newVal){ newVal=clamp(Math.round(newVal/5)*5); var others=data.map(function(n,i){return i;}).filter(function(i){return i!==sel;}); if(others.length===0){data[sel].alloc=100;return;} var remaining=100-newVal,othersTotal=others.reduce(function(a,i){return a+data[i].alloc;},0); if(othersTotal===0){var each=remaining/others.length;others.forEach(function(i){data[i].alloc=Math.round(each);});}else{others.forEach(function(i){data[i].alloc=Math.round(data[i].alloc/othersTotal*remaining);});} data[sel].alloc=newVal; fixRounding(); }
-    function renderSummary(){ bar.innerHTML=''; data.forEach(function(n,i){var s=document.createElement('span');s.style.width=n.alloc+'%';s.style.background=colors[i%colors.length];bar.appendChild(s);}); var total=data.reduce(function(a,n){return a+n.alloc;},0); totalEl.textContent=total+'%'; totalEl.className='nom-total-val '+(total===100?'ok':'warn'); list.innerHTML=''; data.forEach(function(n,i){ var row=document.createElement('button');row.type='button';row.className='nom-item'+(i===sel?' active':''); row.innerHTML='<span class="nom-dot" style="background:'+colors[i%colors.length]+'"></span><span class="nom-meta"><span class="kt">'+(n.name||'New nominee')+'</span><span class="kd">'+n.rel+' · '+(i===0?'Primary':'Secondary')+' nominee</span></span><span class="nom-alloc-pill">'+n.alloc+'%</span>'; row.addEventListener('click',function(){sel=i;loadForm();renderSummary();}); list.appendChild(row); }); }
-    function loadForm(){ var n=data[sel]; f.name.value=n.name;f.rel.value=n.rel;f.nric.value=n.nric;f.dob.value=n.dob;f.mobile.value=n.mobile;f.alloc.value=n.alloc;f.allocVal.textContent=n.alloc+'%'; title.textContent=n.name?'Edit · '+n.name:'New Nominee'; sub.textContent=n.name?'Update this nominee\u2019s details and allocation.':'Enter the new nominee\u2019s details, then save.'; badge.textContent=sel===0?'Primary':'Secondary'; }
-    f.alloc.addEventListener('input',function(){ f.allocVal.textContent=f.alloc.value+'%'; rebalance(parseInt(f.alloc.value,10)); renderSummary(); });
-    saveBtn.addEventListener('click',function(){ var n=data[sel]; n.name=f.name.value.trim();n.rel=f.rel.value;n.nric=f.nric.value.trim();n.dob=f.dob.value.trim();n.mobile=f.mobile.value.trim();n.alloc=parseInt(f.alloc.value,10); renderSummary(); saveBtn.textContent='Saved ✓'; setTimeout(function(){saveBtn.textContent='Save Changes';},1400); });
-    addBtn.addEventListener('click',function(){ if(data.length>=4){addBtn.textContent='Max 4 nominees';setTimeout(function(){addBtn.textContent='+ Add Nominee';},1400);return;} data.push({name:'',rel:'Child',nric:'',dob:'',mobile:'',alloc:0});sel=data.length-1;loadForm();renderSummary();f.name.focus(); });
-    delBtn.addEventListener('click',function(){ if(data.length<=1){delBtn.textContent='At least one required';setTimeout(function(){delBtn.textContent='Remove Nominee';},1400);return;} data.splice(sel,1);sel=0; var t=data.reduce(function(a,n){return a+n.alloc;},0); if(t!==100&&t>0){data.forEach(function(n){n.alloc=Math.round(n.alloc/t*100);});fixRounding();}else if(t===0){data[0].alloc=100;} loadForm();renderSummary(); });
-    renderSummary(); loadForm();
+    function fixRounding(){ var tot=data.reduce(function(a,n){return a+n.alloc;},0),diff=100-tot; if(!diff||!data.length) return; var idx=-1,mx=-1; data.forEach(function(n,i){if(i!==sel&&n.alloc>mx){mx=n.alloc;idx=i;}}); if(idx===-1)idx=sel; data[idx].alloc=clamp(data[idx].alloc+diff); }
+    function rebalance(v){ v=clamp(Math.round(v/5)*5); var oth=data.map(function(n,i){return i;}).filter(function(i){return i!==sel;}); if(!oth.length){data[sel].alloc=100;return;} var rem=100-v,tot=oth.reduce(function(a,i){return a+data[i].alloc;},0); if(!tot){var e=rem/oth.length;oth.forEach(function(i){data[i].alloc=Math.round(e);});}else{oth.forEach(function(i){data[i].alloc=Math.round(data[i].alloc/tot*rem);});} data[sel].alloc=v;fixRounding(); }
+    function renderSummary(){ bar.innerHTML=''; data.forEach(function(n,i){var s=document.createElement('span');s.style.width=n.alloc+'%';s.style.background=colors[i%colors.length];bar.appendChild(s);}); var tot=data.reduce(function(a,n){return a+n.alloc;},0); totalEl.textContent=tot+'%'; totalEl.className='nom-total-val '+(tot===100?'ok':'warn'); list.innerHTML=''; data.forEach(function(n,i){var row=document.createElement('button');row.type='button';row.className='nom-item'+(i===sel?' active':'');row.innerHTML='<span class="nom-dot" style="background:'+colors[i%colors.length]+'"></span><span class="nom-meta"><span class="kt">'+(n.name||'New nominee')+'</span><span class="kd">'+n.rel+' · '+(i===0?'Primary':'Secondary')+' nominee</span></span><span class="nom-alloc-pill">'+n.alloc+'%</span>';row.addEventListener('click',function(){sel=i;loadForm();renderSummary();});list.appendChild(row);}); }
+    function loadForm(){ var n=data[sel];f.name.value=n.name;f.rel.value=n.rel;f.nric.value=n.nric;f.dob.value=n.dob;f.mobile.value=n.mobile;f.alloc.value=n.alloc;f.allocVal.textContent=n.alloc+'%';title.textContent=n.name?'Edit · '+n.name:'New Nominee';sub.textContent=n.name?'Update this nominee\u2019s details.':'Enter the new nominee\u2019s details, then save.';badge.textContent=sel===0?'Primary':'Secondary'; }
+    f.alloc.addEventListener('input',function(){f.allocVal.textContent=f.alloc.value+'%';rebalance(parseInt(f.alloc.value,10));renderSummary();});
+    saveBtn.addEventListener('click',function(){var n=data[sel];n.name=f.name.value.trim();n.rel=f.rel.value;n.nric=f.nric.value.trim();n.dob=f.dob.value.trim();n.mobile=f.mobile.value.trim();n.alloc=parseInt(f.alloc.value,10);renderSummary();saveBtn.textContent='Saved ✓';setTimeout(function(){saveBtn.textContent='Save Changes';},1400);});
+    addBtn.addEventListener('click',function(){if(data.length>=4){addBtn.textContent='Max 4';setTimeout(function(){addBtn.textContent='+ Add Nominee';},1400);return;}data.push({name:'',rel:'Child',nric:'',dob:'',mobile:'',alloc:0});sel=data.length-1;loadForm();renderSummary();f.name.focus();});
+    delBtn.addEventListener('click',function(){if(data.length<=1){delBtn.textContent='At least one required';setTimeout(function(){delBtn.textContent='Remove Nominee';},1400);return;}data.splice(sel,1);sel=0;var t=data.reduce(function(a,n){return a+n.alloc;},0);if(t!==100&&t>0){data.forEach(function(n){n.alloc=Math.round(n.alloc/t*100);});fixRounding();}else if(!t){data[0].alloc=100;}loadForm();renderSummary();});
+    renderSummary();loadForm();
   })();
+
+  /* ── SUPABASE: load profile + wire save buttons ──────────── */
+  (async function(){
+
+    // Wait until sb is available
+    if(typeof sb === 'undefined' || !sb){
+      toast('Auth service not ready. Please refresh.', true);
+      return;
+    }
+
+    // Check session
+    var sessionRes = await sb.auth.getSession();
+    if(!sessionRes.data || !sessionRes.data.session){
+      window.location.href = '../login.html';
+      return;
+    }
+
+    var session   = sessionRes.data.session;
+    var userId    = session.user.id;
+    var userEmail = session.user.email;
+
+    // Load profile row
+    var profileRes = await sb.from('profiles').select('*').eq('id', userId).single();
+
+    if(profileRes.error || !profileRes.data){
+      toast('Could not load profile: ' + (profileRes.error ? profileRes.error.message : 'no data'), true);
+      return;
+    }
+
+    var p = profileRes.data;
+
+    // Populate hero
+    var av = initials(p.preferred_name || p.full_name || userEmail);
+    setText('profAvatar', av);
+    setText('profName',   p.full_name || userEmail);
+    setText('profEmail',  userEmail);
+    setText('navName',    p.full_name || userEmail);
+    setText('navRole',    userEmail);
+    setText('navAvatar',  av);
+    setText('menuAvatar', av);
+    setText('menuName',   p.full_name || '—');
+    setText('menuEmail',  userEmail);
+
+    // Populate personal fields
+    setVal('prof-fullname',  p.full_name);
+    setVal('prof-preferred', p.preferred_name);
+    setVal('prof-email',     userEmail);
+    setVal('prof-phone',     p.phone);
+    setVal('prof-address',   p.address);
+    setVal('prof-dob',       p.date_of_birth || '');
+
+    // Nationality select
+    var natEl = document.getElementById('prof-nationality');
+    if(natEl && p.nationality){
+      for(var i=0;i<natEl.options.length;i++){
+        if(natEl.options[i].value === p.nationality){ natEl.selectedIndex=i; break; }
+      }
+    }
+
+    // NRIC — lock if already saved
+    var nricEl   = document.getElementById('prof-nric');
+    var nricLock = document.getElementById('prof-nric-lock');
+    if(nricEl){
+      if(p.nric_passport){
+        nricEl.value    = '······-··-····';
+        nricEl.disabled = true;
+        if(nricLock) nricLock.style.display = 'block';
+      } else {
+        nricEl.disabled = false;
+        if(nricLock) nricLock.style.display = 'none';
+      }
+    }
+
+    // Populate bank fields
+    setVal('prof-bank',       p.bank_name);
+    setVal('prof-bankacct',   p.bank_account_no);
+    setVal('prof-bankHolder', p.bank_account_holder);
+
+    /* ── Save Personal ───────────────────────────────────────── */
+    document.getElementById('savePersonal').addEventListener('click', async function(){
+      var btn = this;
+      btn.disabled = true; btn.textContent = 'Saving…';
+
+      var updates = {
+        full_name:      getVal('prof-fullname'),
+        preferred_name: getVal('prof-preferred'),
+        phone:          getVal('prof-phone'),
+        address:        getVal('prof-address'),
+        nationality:    getVal('prof-nationality'),
+        date_of_birth:  getVal('prof-dob') || null
+      };
+
+      if(nricEl && !nricEl.disabled && nricEl.value.trim()){
+        updates.nric_passport = nricEl.value.trim();
+      }
+
+      var res = await sb.from('profiles').update(updates).eq('id', userId);
+      if(res.error){
+        toast('Save failed: ' + res.error.message, true);
+      } else {
+        toast('Personal details saved ✓');
+        setText('profName',   updates.full_name);
+        setText('navName',    updates.full_name);
+        var newAv = initials(updates.preferred_name || updates.full_name);
+        setText('profAvatar', newAv);
+        setText('navAvatar',  newAv);
+        setText('menuAvatar', newAv);
+        setText('menuName',   updates.full_name);
+        if(updates.nric_passport && nricEl){
+          nricEl.value    = '······-··-····';
+          nricEl.disabled = true;
+          if(nricLock) nricLock.style.display = 'block';
+        }
+      }
+      btn.disabled = false; btn.textContent = 'Save Changes';
+    });
+
+    /* ── Save Bank ───────────────────────────────────────────── */
+    document.getElementById('saveBank').addEventListener('click', async function(){
+      var btn = this;
+      btn.disabled = true; btn.textContent = 'Saving…';
+
+      var res = await sb.from('profiles').update({
+        bank_name:           getVal('prof-bank'),
+        bank_account_no:     getVal('prof-bankacct'),
+        bank_account_holder: getVal('prof-bankHolder')
+      }).eq('id', userId);
+
+      if(res.error){
+        toast('Save failed: ' + res.error.message, true);
+      } else {
+        toast('Bank details saved ✓');
+      }
+      btn.disabled = false; btn.textContent = 'Save Changes';
+    });
+
+    /* ── Save Password ───────────────────────────────────────── */
+    document.getElementById('savePassword').addEventListener('click', async function(){
+      var btn = this;
+      var p1  = document.getElementById('sec-pw1').value;
+      var p2  = document.getElementById('sec-pw2').value;
+      var msg = document.getElementById('sec-msg');
+
+      function secMsg(txt, err){
+        msg.textContent = txt;
+        msg.style.display = 'block';
+        msg.style.background = err ? '#FEF2F2' : '#EFF6F0';
+        msg.style.color = err ? '#DC2626' : '#2E7D32';
+        msg.style.border = '1px solid ' + (err ? '#FECACA' : '#bfe3c4');
+      }
+
+      if(p1.length < 8){ secMsg('Password must be at least 8 characters.', true); return; }
+      if(p1 !== p2){ secMsg('Passwords do not match.', true); return; }
+
+      btn.disabled = true; btn.textContent = 'Updating…';
+      var res = await sb.auth.updateUser({ password: p1 });
+      if(res.error){
+        secMsg(res.error.message, true);
+      } else {
+        secMsg('Password updated successfully ✓', false);
+        document.getElementById('sec-pw1').value = '';
+        document.getElementById('sec-pw2').value = '';
+      }
+      btn.disabled = false; btn.textContent = 'Update Password';
+    });
+
+    /* ── Cancel buttons ──────────────────────────────────────── */
+    document.querySelectorAll('.prof-cancel').forEach(function(btn){
+      btn.addEventListener('click', function(){ location.reload(); });
+    });
+
+  })();
+
 })();
 </script>
+<script src="../assets/js/member-search.js"></script>
+<script src="../assets/js/member-notifications.js"></script>
 </body>
 </html>
