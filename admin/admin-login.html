@@ -21,64 +21,54 @@
   --blue:#1565C0; --blue-dark:#0D47A1; --green:#2E7D32; --red:#DC2626;
   --ink:#0F172A; --fg-2:#374151; --fg-3:#64748B; --border:#E2E8F0;
   --font-body:'DM Sans',system-ui,sans-serif; --font-mono:'DM Mono',monospace;
-  --radius-md:10px; --radius-lg:16px; --radius-xl:24px;
+  --radius-md:10px; --radius-lg:16px;
 }
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;height:100%;}
 body{font-family:var(--font-body);color:var(--ink);background:#0B1220;-webkit-font-smoothing:antialiased;
   min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;}
-
-/* living dark backdrop */
 .bg{position:fixed;inset:0;z-index:0;background:linear-gradient(160deg,#0B1220 0%,#0D2A52 55%,#0B1220 100%);}
 .orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.5;}
-.orb.a{width:480px;height:480px;background:radial-gradient(circle,rgba(21,101,192,.55),transparent 70%);top:-140px;right:-80px;animation:drift1 14s ease-in-out infinite;}
-.orb.b{width:420px;height:420px;background:radial-gradient(circle,rgba(46,125,50,.35),transparent 70%);bottom:-160px;left:-100px;animation:drift2 17s ease-in-out infinite;}
-.grid-lines{position:absolute;inset:0;opacity:.06;background-image:linear-gradient(rgba(255,255,255,.6) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.6) 1px,transparent 1px);background-size:54px 54px;}
-@keyframes drift1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-46px,40px) scale(1.1);}}
-@keyframes drift2{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(40px,-36px) scale(1.08);}}
-
-.card{position:relative;z-index:2;width:100%;max-width:440px;background:#fff;border-radius:var(--radius-xl);
-  box-shadow:0 30px 80px rgba(0,0,0,.45);overflow:hidden;animation:rise .5s ease;}
-@keyframes rise{from{transform:translateY(16px);}to{transform:none;}}
-.card-top{background:linear-gradient(160deg,#0D47A1,#1565C0);padding:30px 34px 26px;color:#fff;position:relative;overflow:hidden;}
-.card-top::after{content:'';position:absolute;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.16),transparent 70%);top:-90px;right:-60px;}
-.brand{display:flex;align-items:center;gap:11px;position:relative;}
-.brand img{height:44px;}
-.brand b{font-size:1.05rem;font-weight:600;letter-spacing:-0.01em;}
-.brand .sub{font-size:0.7rem;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,.7);}
-.card-top h1{margin:18px 0 5px;font-size:1.5rem;font-weight:600;letter-spacing:-0.02em;position:relative;}
-.card-top p{margin:0;font-size:0.86rem;color:rgba(255,255,255,.8);position:relative;line-height:1.5;}
-.lock-pill{position:absolute;top:30px;right:34px;z-index:3;display:inline-flex;align-items:center;gap:6px;font-size:0.68rem;font-weight:600;
-  letter-spacing:0.08em;text-transform:uppercase;color:#fff;background:rgba(255,255,255,.16);padding:6px 11px;border-radius:999px;}
-
+.orb.a{width:480px;height:480px;background:radial-gradient(circle,rgba(21,101,192,.55),transparent 70%);top:-140px;right:-80px;animation:drift1 14s ease-in-out infinite alternate;}
+.orb.b{width:360px;height:360px;background:radial-gradient(circle,rgba(46,125,50,.4),transparent 70%);bottom:-100px;left:-60px;animation:drift2 18s ease-in-out infinite alternate;}
+@keyframes drift1{to{transform:translate(-40px,60px);}}
+@keyframes drift2{to{transform:translate(50px,-40px);}}
+.grid-lines{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:60px 60px;}
+.card{position:relative;z-index:1;width:100%;max-width:440px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:20px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);overflow:hidden;}
+.card-top{padding:32px 34px 24px;border-bottom:1px solid rgba(255,255,255,.08);}
+.lock-pill{display:inline-flex;align-items:center;gap:6px;font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,.55);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:5px 12px;margin-bottom:18px;}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.brand img{height:38px;filter:brightness(0) invert(1);}
+.brand b{display:block;font-size:1rem;font-weight:700;color:#fff;line-height:1.1;}
+.brand .sub{font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,.45);}
+.card-top h1{margin:0 0 6px;font-size:1.45rem;font-weight:600;color:#fff;letter-spacing:-0.01em;}
+.card-top p{margin:0;font-size:0.86rem;color:rgba(255,255,255,.5);line-height:1.5;}
 .card-body{padding:28px 34px 32px;}
 .note{display:none;font-size:0.83rem;padding:10px 13px;border-radius:var(--radius-md);margin-bottom:16px;}
-.note.error{display:block;background:#FEF2F2;color:var(--red);border:1px solid #FECACA;}
+.note.error{display:block;background:rgba(220,38,38,.15);color:#FCA5A5;border:1px solid rgba(220,38,38,.3);}
 .field{margin-bottom:16px;}
-.field label{display:block;font-size:0.7rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--fg-3);margin-bottom:7px;}
-.field input{width:100%;font:inherit;font-size:0.94rem;color:var(--ink);background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-md);padding:12px 14px;transition:border .2s, box-shadow .2s;}
-.field input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(21,101,192,.10);}
+.field label{display:block;font-size:0.7rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:7px;}
+.field input{width:100%;font:inherit;font-size:0.94rem;color:#fff;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.12);border-radius:var(--radius-md);padding:12px 14px;transition:border .2s,box-shadow .2s;outline:none;}
+.field input:focus{border-color:rgba(21,101,192,.8);box-shadow:0 0 0 3px rgba(21,101,192,.2);}
+.field input::placeholder{color:rgba(255,255,255,.25);}
 .pw-wrap{position:relative;}
-.pw-toggle{position:absolute;right:13px;top:50%;transform:translateY(-50%);font-size:0.8rem;font-weight:600;color:var(--blue);cursor:pointer;user-select:none;}
+.pw-toggle{position:absolute;right:13px;top:50%;transform:translateY(-50%);font-size:0.8rem;font-weight:600;color:rgba(255,255,255,.45);cursor:pointer;user-select:none;}
+.pw-toggle:hover{color:#fff;}
 .submit{width:100%;font:inherit;font-size:0.95rem;font-weight:600;color:#fff;background:var(--blue);border:none;border-radius:var(--radius-md);
-  padding:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 2px 8px rgba(21,101,192,.3);
-  transition:background .2s, transform .1s, box-shadow .2s;margin-top:4px;}
-.submit:hover{background:var(--blue-dark);transform:translateY(-1px);box-shadow:0 4px 14px rgba(21,101,192,.4);}
-.submit:disabled{opacity:.7;cursor:default;transform:none;}
-.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;display:none;animation:rot .7s linear infinite;}
+  padding:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;
+  box-shadow:0 2px 16px rgba(21,101,192,.5);transition:background .2s,transform .1s;margin-top:4px;}
+.submit:hover{background:var(--blue-dark);transform:translateY(-1px);}
+.submit:disabled{opacity:.65;cursor:default;transform:none;}
+.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;display:none;animation:rot .7s linear infinite;}
 @keyframes rot{to{transform:rotate(360deg);}}
-.demo-hint{margin-top:18px;font-size:0.78rem;color:var(--fg-3);text-align:center;line-height:1.6;}
-.demo-hint code{font-family:var(--font-mono);background:#F1F5F9;padding:2px 6px;border-radius:5px;color:var(--fg-2);}
-.back{margin-top:16px;text-align:center;font-size:0.82rem;}
-.back a{color:var(--fg-3);text-decoration:none;}
+.back{margin-top:20px;text-align:center;font-size:0.82rem;}
+.back a{color:rgba(255,255,255,.4);text-decoration:none;}
+.back a:hover{color:rgba(255,255,255,.7);}
 .install-row{margin-top:18px;display:none;}
-.install-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:9px;font-family:var(--font-body);font-size:0.9rem;font-weight:600;color:var(--blue);background:var(--blue-bg,#E8F0FB);border:1.5px solid var(--blue);border-radius:var(--radius-md,10px);padding:11px;cursor:pointer;transition:background .2s;}
-.install-btn:hover{background:#dbe8fa;}
+.install-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:9px;font-family:var(--font-body);font-size:0.9rem;font-weight:600;color:#fff;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.15);border-radius:var(--radius-md);padding:11px;cursor:pointer;transition:background .2s;}
+.install-btn:hover{background:rgba(255,255,255,.13);}
 .install-btn img{width:20px;height:20px;border-radius:4px;}
-.install-hint{margin-top:9px;font-size:0.72rem;color:var(--fg-3);text-align:center;line-height:1.5;}
-.back a:hover{color:var(--blue);}
-
-/* progress transition overlay (login → admin) */
+.install-hint{margin-top:9px;font-size:0.72rem;color:rgba(255,255,255,.35);text-align:center;line-height:1.5;}
 #prog{position:fixed;inset:0;z-index:50;background:linear-gradient(160deg,#0B1220,#0D2A52);display:none;align-items:center;justify-content:center;flex-direction:column;gap:22px;}
 #prog.show{display:flex;animation:fadeIn .3s ease;}
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
@@ -100,7 +90,7 @@ body{font-family:var(--font-body);color:var(--ink);background:#0B1220;-webkit-fo
     <span class="lock-pill">🔒 Restricted</span>
     <div class="brand">
       <img src="../assets/img/logo.png" alt="ZY-Invest">
-      <span><b style="display:block;">ZY-Invest</b><span class="sub">Admin Console</span></span>
+      <span><b>ZY-Invest</b><span class="sub">Admin Console</span></span>
     </div>
     <h1>Fund Management</h1>
     <p>Authorised personnel only. Manage investor principal, distributions, and daily NTA.</p>
@@ -119,9 +109,11 @@ body{font-family:var(--font-body);color:var(--ink);background:#0B1220;-webkit-fo
           <span class="pw-toggle" id="pwToggle">Show</span>
         </div>
       </div>
-      <button type="submit" class="submit" id="submitBtn"><span id="btnText">Sign In to Console</span><span class="spin" id="spin"></span></button>
+      <button type="submit" class="submit" id="submitBtn">
+        <span id="btnText">Sign In to Console</span>
+        <span class="spin" id="spin"></span>
+      </button>
     </form>
-    <div class="demo-hint">Demo access — <code>admin@zy-invest.com</code> · <code>admin123</code></div>
     <div class="back"><a href="../login.html">← Member login</a></div>
     <div class="install-row" id="installRow">
       <button class="install-btn" id="installBtn"><img src="../assets/img/icon-192.png" alt=""> Install Admin App</button>
@@ -130,7 +122,6 @@ body{font-family:var(--font-body);color:var(--ink);background:#0B1220;-webkit-fo
   </div>
 </div>
 
-<!-- progress transition -->
 <div id="prog">
   <div class="prog-mark">
     <svg class="prog-ring" viewBox="0 0 120 120"><circle class="trk" cx="60" cy="60" r="54"/><circle class="prg" id="progRing" cx="60" cy="60" r="54"/></svg>
@@ -140,74 +131,126 @@ body{font-family:var(--font-body);color:var(--ink);background:#0B1220;-webkit-fo
   <div class="prog-pct" id="progPct">0%</div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/js/supabase-auth.js"></script>
 <script>
 (function(){
-  var DEMO_EMAIL='admin@zy-invest.com', DEMO_PW='admin123';
-  var pw=document.getElementById('password'), tog=document.getElementById('pwToggle');
-  tog.addEventListener('click',function(){ if(pw.type==='password'){pw.type='text';tog.textContent='Hide';}else{pw.type='password';tog.textContent='Show';} });
+  var pw  = document.getElementById('password');
+  var tog = document.getElementById('pwToggle');
+  tog.addEventListener('click', function(){
+    if(pw.type === 'password'){ pw.type = 'text'; tog.textContent = 'Hide'; }
+    else { pw.type = 'password'; tog.textContent = 'Show'; }
+  });
 
-  var form=document.getElementById('adminForm'), btn=document.getElementById('submitBtn'),
-      btnText=document.getElementById('btnText'), spin=document.getElementById('spin'), note=document.getElementById('note');
-  function err(m){ note.textContent=m; note.className='note error'; }
+  var form    = document.getElementById('adminForm');
+  var btn     = document.getElementById('submitBtn');
+  var btnText = document.getElementById('btnText');
+  var spin    = document.getElementById('spin');
+  var note    = document.getElementById('note');
+
+  function err(m){ note.textContent = m; note.className = 'note error'; }
+  function clearErr(){ note.className = 'note'; }
 
   function runProgress(done){
-    var prog=document.getElementById('prog'), ring=document.getElementById('progRing'), pct=document.getElementById('progPct');
-    prog.classList.add('show'); var C=339.3, p=0;
-    var t=setInterval(function(){
-      p+=Math.random()*16+8; if(p>=100){p=100;clearInterval(t);setTimeout(done,260);}
-      ring.style.strokeDashoffset=C*(1-p/100); pct.textContent=Math.round(p)+'%';
-    },90);
+    var prog = document.getElementById('prog');
+    var ring = document.getElementById('progRing');
+    var pct  = document.getElementById('progPct');
+    prog.classList.add('show');
+    var C = 339.3, p = 0;
+    var t = setInterval(function(){
+      p += Math.random() * 16 + 8;
+      if(p >= 100){ p = 100; clearInterval(t); setTimeout(done, 260); }
+      ring.style.strokeDashoffset = C * (1 - p / 100);
+      pct.textContent = Math.round(p) + '%';
+    }, 90);
   }
 
-  form.addEventListener('submit',function(e){
+  form.addEventListener('submit', async function(e){
     e.preventDefault();
-    var email=document.getElementById('email').value.trim().toLowerCase(), p=pw.value;
-    btn.disabled=true; btnText.textContent='Signing in…'; spin.style.display='block';
-    setTimeout(function(){
-      if(email===DEMO_EMAIL && p===DEMO_PW){
-        try{ localStorage.setItem('zy_admin_session', JSON.stringify({name:'Ng Zhi Yao', role:'admin', ts:Date.now()})); }catch(e){}
-        runProgress(function(){ window.location.href='admin.html'; });
-      } else {
-        err('Incorrect email or password. (Demo: admin@zy-invest.com / admin123)');
-        btn.disabled=false; btnText.textContent='Sign In to Console'; spin.style.display='none';
+    clearErr();
+    var email    = document.getElementById('email').value.trim();
+    var password = pw.value;
+    btn.disabled = true; btnText.textContent = 'Signing in…'; spin.style.display = 'block';
+
+    try {
+      // Step 1 — Supabase login
+      if(!sb) throw new Error('Auth service not configured.');
+      var res = await sb.auth.signInWithPassword({ email: email, password: password });
+      if(res.error) throw res.error;
+
+      // Step 2 — verify the user has role = 'admin' in profiles table
+      var profileRes = await sb.from('profiles').select('role, full_name, status').eq('id', res.data.user.id).single();
+      if(profileRes.error) throw new Error('Could not verify admin role.');
+      if(profileRes.data.role !== 'admin'){
+        await sb.auth.signOut();
+        throw new Error('Access denied. This account does not have admin privileges.');
       }
-    },480);
+      if(profileRes.data.status === 'suspended'){
+        await sb.auth.signOut();
+        throw new Error('This admin account has been suspended.');
+      }
+
+      // Step 3 — store admin session info for admin.html to read
+      try{
+        localStorage.setItem('zy_admin_session', JSON.stringify({
+          name:  profileRes.data.full_name || email,
+          role:  'admin',
+          email: email,
+          ts:    Date.now()
+        }));
+      }catch(ex){}
+
+      // Step 4 — progress animation then redirect
+      runProgress(function(){ window.location.href = 'admin.html'; });
+
+    } catch(ex){
+      var m = (ex && ex.message) || 'Login failed.';
+      if(/invalid login/i.test(m) || /invalid credentials/i.test(m)) m = 'Incorrect email or password.';
+      err(m);
+      btn.disabled = false; btnText.textContent = 'Sign In to Console'; spin.style.display = 'none';
+    }
   });
+
+  // Already logged in as admin? Skip the form
+  (async function(){
+    try{
+      if(!sb) return;
+      var s = await sb.auth.getSession();
+      if(!s.data.session) return;
+      var pr = await sb.from('profiles').select('role').eq('id', s.data.session.user.id).single();
+      if(pr.data && pr.data.role === 'admin') window.location.href = 'admin.html';
+    }catch(ex){}
+  })();
 })();
 
-/* ---- PWA: service worker + install prompt ---- */
+/* ---- PWA install ---- */
 (function(){
   if('serviceWorker' in navigator){
     window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
   }
-  var row=document.getElementById('installRow'), btn=document.getElementById('installBtn'), hint=document.getElementById('installHint');
-  var deferred=null;
-  var standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
-  if(standalone) return; // already installed — keep it hidden
-
+  var row = document.getElementById('installRow');
+  var btn = document.getElementById('installBtn');
+  var hint = document.getElementById('installHint');
+  var deferred = null;
+  var standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  if(standalone) return;
   window.addEventListener('beforeinstallprompt', function(e){
-    e.preventDefault(); deferred=e; row.style.display='block'; hint.textContent='';
+    e.preventDefault(); deferred = e; row.style.display = 'block';
   });
   btn.addEventListener('click', async function(){
     if(deferred){
       deferred.prompt();
-      var choice=await deferred.userChoice;
-      deferred=null;
-      if(choice && choice.outcome==='accepted'){ row.style.display='none'; }
-      else { hint.textContent='Installation dismissed.'; }
+      var choice = await deferred.userChoice;
+      deferred = null;
+      if(choice && choice.outcome === 'accepted') row.style.display = 'none';
+      else hint.textContent = 'Installation dismissed.';
       return;
     }
-    // Fallback for browsers without beforeinstallprompt (Safari/iOS)
-    var ua=navigator.userAgent;
-    if(/iPhone|iPad|iPod/i.test(ua)) hint.textContent='On iPhone/iPad: tap the Share button, then “Add to Home Screen”.';
-    else if(/Macintosh/i.test(ua) && 'ontouchend' in document) hint.textContent='Tap Share, then “Add to Home Screen”.';
-    else hint.textContent='Open your browser menu and choose “Install ZY Admin” / “Install app”.';
+    var ua = navigator.userAgent;
+    if(/iPhone|iPad|iPod/i.test(ua)) hint.textContent = 'Tap the Share button, then "Add to Home Screen".';
+    else hint.textContent = 'Open your browser menu and choose "Install app".';
   });
-  window.addEventListener('appinstalled', function(){ row.style.display='none'; });
-
-  // Show a manual install entry point even if the event hasn't fired yet
-  // (e.g. desktop Chrome before engagement heuristics, or Safari).
-  setTimeout(function(){ if(!standalone && row.style.display!=='block'){ row.style.display='block'; if(!deferred && !hint.textContent){ hint.textContent='Install from your browser menu, or tap to see how.'; } } }, 1200);
+  window.addEventListener('appinstalled', function(){ row.style.display = 'none'; });
 })();
 </script>
 </body>
