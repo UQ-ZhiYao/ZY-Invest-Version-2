@@ -208,11 +208,15 @@
     var password=document.getElementById('password').value;
     btn.disabled=true; btnText.textContent='Signing in...'; spin.style.display='block';
     try{
-      // Real authentication against the ZY-Invest API.
-      var data=await api.post('/api/auth/login',{ email:email, password:password });
-      if(!data || !data.access_token) throw new Error('Login failed');
-      authSave(data);
-      // After a successful login, play the progress transition into the redesigned member dashboard.
+      if (!sb) throw new Error('Auth service not configured.');
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      authSave({
+        access_token: data.session.access_token,
+        role:         data.user.user_metadata?.role || 'member',
+        name:         data.user.user_metadata?.full_name || email,
+        investor_id:  data.user.user_metadata?.investor_id || ''
+      });
       window.zyEnterDashboard('members/dashboard.html');
     }catch(err){
       var m=(err && err.message) || 'Login failed. Please try again.';
