@@ -14,8 +14,9 @@
          localStorage.removeItem(k);
        });
      }catch(err){}
-     var root = location.pathname.replace(/\/(members|admin)\/.*$/, '/');
-     window.location.href = root + 'login.html';
+      var root = location.pathname.replace(/\/(members|admin)\/.*$/, '/');
+      var isAdmin = location.pathname.indexOf('/admin/') !== -1;
+      window.location.href = root + (isAdmin ? 'admin/admin-login.html' : 'login.html');
    }
 
   document.addEventListener('DOMContentLoaded', function(){
