@@ -26,7 +26,7 @@
     var sessionRes = await sb.auth.getSession();
     if(!sessionRes.data || !sessionRes.data.session){
       localStorage.removeItem('zy_admin_session');
-      location.replace('admin-login.html');
+      location.replace('admin-login.html?loggedout=1');
       return;
     }
     var session = sessionRes.data.session;
@@ -37,7 +37,7 @@
     if(!profileRes.data || profileRes.data.role !== 'admin'){
       await sb.auth.signOut();
       localStorage.removeItem('zy_admin_session');
-      location.replace('admin-login.html');
+      location.replace('admin-login.html?loggedout=1');
       return;
     }
 
@@ -53,7 +53,7 @@
     async function doAdminLogout(){
       try{ await sb.auth.signOut(); }catch(e){}
       try{ localStorage.removeItem('zy_admin_session'); }catch(e){}
-      location.replace('admin-login.html');
+      location.replace('admin-login.html?loggedout=1');
     }
     var logoutBtn   = document.getElementById('logout');
     var signoutBtn  = document.getElementById('admSignout');
