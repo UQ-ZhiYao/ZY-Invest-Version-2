@@ -6,8 +6,8 @@
    run in DEMO mode and simulate the email-verification flow.
    ============================================================ */
 
-const SUPABASE_URL  = 'https://YOUR-PROJECT.supabase.co';   // ← replace
-const SUPABASE_ANON = 'YOUR-PUBLIC-ANON-KEY';               // ← replace
+const SUPABASE_URL  = 'https://wvaibdjkjnnesefantjc.supabase.co';   // ← replace
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind2YWliZGpram5uZXNlZmFudGpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4NDM3NDEsImV4cCI6MjA5NzQxOTc0MX0.tWiXzeFVDQ_iFGAcKfJ141aN1ghRHToWwrzRjwEGLgM';               // ← replace
 
 // DEMO mode is on until real credentials are provided.
 const ZY_DEMO = SUPABASE_URL.indexOf('YOUR-PROJECT') !== -1;
