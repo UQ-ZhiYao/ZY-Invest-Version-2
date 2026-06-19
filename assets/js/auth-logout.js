@@ -22,7 +22,7 @@
   document.addEventListener('DOMContentLoaded', function(){
     // Target all logout/sign-out links by href or class
     document.querySelectorAll(
-      'a.logout, a.btn-logout, a.um-item.danger, a.adm-signout, #admSignout'
+      'a.logout, a.btn-logout, a.um-item.danger, a.adm-signout'
     ).forEach(function(el){
       el.addEventListener('click', doLogout);
     });
