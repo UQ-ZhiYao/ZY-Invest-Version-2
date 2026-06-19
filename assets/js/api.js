@@ -33,15 +33,12 @@ function authSave(data) {
   localStorage.setItem('zy_investor_id', data.investor_id || '');
 }
 
-function authLogout() {
-// AFTER — new body
 async function authLogout() {
   try {
     if (typeof sb !== 'undefined' && sb) await sb.auth.signOut();
   } catch(e) {}
   ['zy_token','zy_role','zy_name','zy_investor_id'].forEach(k => localStorage.removeItem(k));
   window.location.href = '/login.html';
-}
 }
 
 function authUser() {
