@@ -212,15 +212,16 @@
   form.addEventListener('submit', async function(e){
     e.preventDefault();
     note.className='login-note';
-    var name=document.getElementById('name').value.trim();
-    var email=document.getElementById('email').value.trim();
-    var p1=pw.value, p2=document.getElementById('password2').value;
-    if(p1.length<8){ err('Password must be at least 8 characters.'); return; }
-    if(p1!==p2){ err('Passwords do not match.'); return; }
+    var name  = document.getElementById('name').value.trim();
+    var email = document.getElementById('email').value.trim();
+    var p1    = pw.value;
+    var p2    = document.getElementById('password2').value;
+    if(p1.length < 8){ err('Password must be at least 8 characters.'); return; }
+    if(p1 !== p2){ err('Passwords do not match.'); return; }
     if(!document.getElementById('agree').checked){ err('Please accept the terms to continue.'); return; }
     btn.disabled=true; btnText.textContent='Creating account…'; spin.style.display='block';
     try{
-      var res=await zySignUp({ name:name, email:email, password:p1 });
+      var res = await zySignUp({ name: name, email: email, password: p1 });
       if(res.needsVerification){
         ok('Account created! We\u2019ve sent a verification link to <b>'+email+'</b>. Open it to activate your account.'+(res.demo?'<br><span style="font-size:0.76rem;">Demo mode — <a href="verify.html?demo=ok" style="color:#2E7D32;font-weight:600;">simulate the verification link</a>.</span>':''));
         form.reset(); meter.className='pw-meter';
