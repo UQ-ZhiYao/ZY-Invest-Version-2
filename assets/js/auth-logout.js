@@ -4,18 +4,19 @@
    clears the Supabase session before redirecting.
    ============================================================ */
 (function(){
-  async function doLogout(e){
-    if(e) e.preventDefault();
-    try{
-      if(typeof sb !== 'undefined' && sb) await sb.auth.signOut();
-    }catch(err){}
-    try{
-      ['zy_token','zy_role','zy_name','zy_investor_id'].forEach(function(k){
-        localStorage.removeItem(k);
-      });
-    }catch(err){}
-    window.location.href = '/login.html';
-  }
+   async function doLogout(e){
+     if(e) e.preventDefault();
+     try{
+       if(typeof sb !== 'undefined' && sb) await sb.auth.signOut();
+     }catch(err){}
+     try{
+       ['zy_token','zy_role','zy_name','zy_investor_id'].forEach(function(k){
+         localStorage.removeItem(k);
+       });
+     }catch(err){}
+     var root = location.pathname.replace(/\/(members|admin)\/.*$/, '/');
+     window.location.href = root + 'login.html';
+   }
 
   document.addEventListener('DOMContentLoaded', function(){
     // Target all logout/sign-out links by href or class
