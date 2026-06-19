@@ -1692,7 +1692,11 @@ If Annualised &gt; Hurdle Rate:
 
   // ---- logout + clock ----
   document.getElementById('logout').addEventListener('click',function(){ try{ localStorage.removeItem('zy_admin_session'); }catch(e){} location.replace('admin-login.html'); });
-  document.getElementById('admSignout').addEventListener('click',function(){ try{ localStorage.removeItem('zy_admin_session'); }catch(e){} location.replace('admin-login.html'); });
+  document.getElementById('admSignout').addEventListener('click', async function(){
+    try{ if(typeof sb !== 'undefined' && sb) await sb.auth.signOut(); }catch(e){}
+    try{ localStorage.removeItem('zy_admin_session'); }catch(e){}
+    location.replace('admin-login.html');
+  });
   function tick(){ var d=new Date(); document.getElementById('clock').textContent=d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' · '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+' MYT'; }
   tick(); setInterval(tick,30000);
 
