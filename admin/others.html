@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Others Transaction — ZY-Invest Admin</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0D2A52">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ZY Admin">
+<meta name="application-name" content="ZY Admin">
+<link rel="icon" type="image/png" href="../assets/img/favicon.png">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+<link rel="stylesheet" href="../assets/css/dashboard-portfolio.css">
+<link rel="stylesheet" href="../assets/css/admin.css">
+
+</head>
+<body>
+<script>
+(function(){
+  if('serviceWorker' in navigator){ window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
+  try{ var s=JSON.parse(localStorage.getItem('zy_admin_session')||'null'); if(!s||s.role!=='admin'){ location.replace('admin-login.html'); } }
+  catch(e){ location.replace('admin-login.html'); }
+})();
+</script>
+
+<header class="adm-top">
+  <a href="overview.html" class="brand">
+    <img src="../assets/img/logo.png" alt="ZY-Invest">
+    <span class="bt"><b>ZY-Invest</b><span>Admin Console</span></span>
+  </a>
+  <span class="adm-badge">🔒 Restricted</span>
+  <div class="adm-right">
+    <span class="adm-clock" id="clock">—</span>
+    <div class="adm-user"><span class="av">NZY</span><span><span class="nm">Ng Zhi Yao</span><br><span class="rl">Fund Manager · Admin</span></span></div>
+    <button class="adm-logout" id="logout">Logout</button>
+  </div>
+</header>
+
+<div class="adm-subbar">
+  <span class="sb-lab">Member Pages</span>
+  <div class="sub-group">
+    <button class="sub-top">Fund <span class="caret">▾</span></button>
+    <div class="sub-dd"><div class="sub-dd-card">
+      <a href="../members/fund-overview.html"><b>Fund Overview</b><span>Mandate, objective &amp; key facts</span></a>
+      <a href="../members/factsheet.html"><b>Factsheet</b><span>Holdings allocation each financial year</span></a>
+      <a href="../members/shareholder-list.html"><b>Shareholder List</b><span>Unitholders, units held &amp; ownership</span></a>
+    </div></div>
+  </div>
+  <div class="sub-group">
+    <button class="sub-top">Performance <span class="caret">▾</span></button>
+    <div class="sub-dd"><div class="sub-dd-card">
+      <a href="../members/financial-result.html"><b>Financial Result</b><span>Income statement, balance sheet &amp; cash flow</span></a>
+      <a href="../members/performance-analysis.html"><b>Performance Analysis</b><span>Returns &amp; benchmark comparison (FBM KLCI)</span></a>
+      <a href="../members/nta-history.html"><b>NTA History</b><span>Chart &amp; daily NTA / NAV history</span></a>
+    </div></div>
+  </div>
+  <div class="sub-group">
+    <button class="sub-top">Documents <span class="caret">▾</span></button>
+    <div class="sub-dd"><div class="sub-dd-card">
+      <a href="../members/statement-download.html"><b>Statement Download</b><span>Factsheets &amp; annual reports</span></a>
+    </div></div>
+  </div>
+</div>
+
+<div class="adm-shell" id="admShell">
+  <script>try{if(localStorage.getItem('zy_admin_sb')==='1'){document.getElementById('admShell').classList.add('collapsed');}}catch(e){}</script>
+  <aside class="adm-side">
+    <button class="adm-toggle" id="admToggle" title="Collapse menu"><span class="bars"><span></span><span></span><span></span></span><span class="tlbl">Menu</span></button>
+    <div class="grp">Operations</div>
+    <a class="adm-nav " href="overview.html"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span>Overview</a>
+    <a class="adm-nav " href="investors.html"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5 6-5s6 1.7 6 5"/><path d="M17 6.5a3 3 0 0 1 0 5.5M21 20c0-2.6-1.4-4.2-3.6-4.8"/></svg></span>Investors</a>
+    <a class="adm-nav " href="portfolio.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v9l7.5 4.3A9 9 0 1 0 12 3z"/><path d="M12 3a9 9 0 0 1 7.5 13.3L12 12z"/></svg></span>Portfolio</a>
+    <a class="adm-nav " href="instruments.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M8 16v-5M12 16V8M16 16v-7"/></svg></span>Instruments</a>
+    <a class="adm-nav " href="trades.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 7h13l-3-3M20 17H7l3 3"/></svg></span>Trade Transactions</a>
+    <a class="adm-nav " href="principal.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 8h14l-3-3"/><path d="M20 16H6l3 3"/></svg></span>Capital Injection</a>
+    <a class="adm-nav on" href="others.html"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="16" cy="12" r="1"/></svg></span>Others Transaction</a>
+    <a class="adm-nav " href="dividend.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M8 7h6a2.5 2.5 0 0 1 0 5H9a2.5 2.5 0 0 0 0 5h7"/></svg></span>Dividend</a>
+    <a class="adm-nav " href="settlement.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 7h18v12H3z"/><path d="M3 11h18"/><path d="M7 15h4"/></svg></span>Settlement</a>
+    <a class="adm-nav " href="compute-nta.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 17l5-5 4 4 8-8"/><path d="M21 8v5h-5"/></svg></span>Compute NTA</a>
+    <div class="grp">Management</div>
+    <a class="adm-nav " href="distributions.html"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/></svg></span>Distributions</a>
+    <a class="adm-nav " href="remuneration.html"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="16.5" cy="14.5" r="1.3"/></svg></span>Remuneration</a>
+    <div class="grp">Documents</div>
+    <a class="adm-nav " href="documents.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M9 13h6"/></svg></span>Documents</a>
+    <div style="flex:1;min-height:12px;"></div>
+    <a class="adm-nav adm-signout" id="admSignout" href="#"><span class="ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>Sign out</a>
+  </aside>
+  <main class="adm-main">
+<div class="ph"><h1>Others Transaction</h1><p>Non-principal cash movements — fees, expenses, FX and adjustments.</p></div>
+<div class="metric-row">
+  <div class="mc"><div class="label">Entries</div><div class="value blue" id="otCount">5</div><div class="sub">this month</div></div>
+  <div class="mc"><div class="label">Total Expenses</div><div class="value">RM 16,940</div><div class="sub">FY26 to date</div></div>
+  <div class="mc"><div class="label">FX Adjustments</div><div class="value">RM 2,310</div><div class="sub">net inflow</div></div>
+  <div class="mc"><div class="label">Pending</div><div class="value">1</div><div class="sub">awaiting approval</div></div>
+</div>
+<div class="panel mt16"><div class="panel-head"><h3>All Other Transactions</h3><button class="btn-mini" id="openOtModal">+ Add Transaction</button></div>
+  <table class="tbl"><thead><tr><th>Date</th><th>Category</th><th>Description</th><th class="td-right">Amount (RM)</th><th>Direction</th></tr></thead>
+  <tbody id="otBody"></tbody></table>
+</div>
+<div class="modal" id="otModal">
+  <div class="modal-head"><div><h3 id="otTitle">Add Other Transaction</h3><div class="sub">Record a fee, expense, FX or adjustment.</div></div><button class="modal-x" data-close>✕</button></div>
+  <div class="modal-body">
+    <div class="form-grid">
+      <div class="field"><label>Date</label><input type="date" id="ot-date" value="2026-03-19"></div>
+      <div class="field"><label>Category</label><select id="ot-cat"><option>Management Fee</option><option>Audit Fee</option><option>Bank Charges</option><option>FX Adjustment</option><option>Brokerage</option><option>Other Expense</option></select></div>
+      <div class="field fg-full"><label>Description</label><input type="text" id="ot-desc" placeholder="e.g. Quarterly trustee fee"></div>
+      <div class="field"><label>Amount (RM)</label><input type="text" id="ot-amt" placeholder="1,200.00"></div>
+      <div class="field"><label>Direction</label><select id="ot-dir"><option>Outflow</option><option>Inflow</option></select></div>
+    </div>
+  </div>
+  <div class="modal-foot"><button class="btn-line btn-sm" data-close>Cancel</button><button class="btn-fill btn-sm" id="ot-add">Add Transaction</button></div>
+</div>
+  </main>
+</div>
+<div class="modal-scrim" id="modalScrim"></div>
+<div class="toast" id="toast"><span class="ok">✓</span><span id="toastMsg">Saved</span></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/js/supabase-auth.js"></script>
+<script src="../assets/js/auth-logout.js"></script>
+<script src="../assets/js/admin-shell.js"></script>
+<script src="../assets/js/admin-supabase.js"></script>
+<script>
+(function(){
+  var OT=[
+    {date:'19 Mar 2026',cat:'Management Fee',desc:'Monthly management fee accrual',amt:1125,dir:'Outflow'},
+    {date:'17 Mar 2026',cat:'Brokerage',desc:'Bursa trade commissions',amt:430,dir:'Outflow'},
+    {date:'14 Mar 2026',cat:'FX Adjustment',desc:'USD holdings revaluation',amt:2310,dir:'Inflow'},
+    {date:'10 Mar 2026',cat:'Audit Fee',desc:'FY25 statutory audit',amt:8500,dir:'Outflow'},
+    {date:'05 Mar 2026',cat:'Bank Charges',desc:'Wire transfer fees',amt:75,dir:'Outflow'}
+  ];
+  var otBody=document.getElementById('otBody'), otEdit=-1;
+  function dirTag(d){ return d==='Inflow'?'<span class="tag-green">Inflow</span>':'<span class="tag-red">Outflow</span>'; }
+  function setDate(id,h){ var d=new Date(h); if(!isNaN(d)){ document.getElementById(id).value=d.toISOString().slice(0,10); } }
+  function render(){ otBody.innerHTML=''; OT.forEach(function(r,i){ var tr=document.createElement('tr'); tr.className='clickable'; tr.innerHTML='<td>'+r.date+'</td><td>'+r.cat+'</td><td class="td-sub">'+r.desc+'</td><td class="td-right">'+zyFmt(r.amt)+'</td><td>'+dirTag(r.dir)+'</td>'; tr.addEventListener('click',function(){ openOt(i); }); otBody.appendChild(tr); }); document.getElementById('otCount').textContent=OT.length; }
+  render();
+  function openOt(i){ otEdit=i; var btn=document.getElementById('ot-add'),head=document.getElementById('otTitle'); if(i>=0){ var r=OT[i]; setDate('ot-date',r.date); document.getElementById('ot-cat').value=r.cat; document.getElementById('ot-desc').value=r.desc==='—'?'':r.desc; document.getElementById('ot-amt').value=r.amt; document.getElementById('ot-dir').value=r.dir; head.textContent='Edit Transaction'; btn.textContent='Save Changes'; } else { document.getElementById('ot-amt').value=''; document.getElementById('ot-desc').value=''; head.textContent='Add Other Transaction'; btn.textContent='Add Transaction'; } zyModalOpen('otModal'); }
+  document.getElementById('openOtModal').addEventListener('click',function(){ openOt(-1); });
+  document.getElementById('ot-add').addEventListener('click',function(){ var amt=zyParseNum(document.getElementById('ot-amt').value); if(amt<=0){ zyToast('Enter a valid amount'); return; } var d=new Date(document.getElementById('ot-date').value); var ds=isNaN(d)?'19 Mar 2026':d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); var cat=document.getElementById('ot-cat').value,desc=document.getElementById('ot-desc').value||'—',dir=document.getElementById('ot-dir').value; if(otEdit>=0){ var r=OT[otEdit]; r.date=ds; r.cat=cat; r.desc=desc; r.amt=amt; r.dir=dir; zyToast('Transaction updated — '+cat); } else { OT.unshift({date:ds,cat:cat,desc:desc,amt:amt,dir:dir}); zyToast('Transaction added — '+cat); } render(); zyModalClose(); });
+})();
+</script>
+
+</body>
+</html>

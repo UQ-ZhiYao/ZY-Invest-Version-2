@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settlement — ZY-Invest Admin</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0D2A52">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ZY Admin">
+<meta name="application-name" content="ZY Admin">
+<link rel="icon" type="image/png" href="../assets/img/favicon.png">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+<link rel="stylesheet" href="../assets/css/dashboard-portfolio.css">
+<link rel="stylesheet" href="../assets/css/admin.css">
+
+</head>
+<body>
+<script>
+(function(){
+  if('serviceWorker' in navigator){ window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
+  try{ var s=JSON.parse(localStorage.getItem('zy_admin_session')||'null'); if(!s||s.role!=='admin'){ location.replace('admin-login.html'); } }
+  catch(e){ location.replace('admin-login.html'); }
+})();
+</script>
+
+<header class="adm-top">
+  <a href="overview.html" class="brand">
+    <img src="../assets/img/logo.png" alt="ZY-Invest">
+    <span class="bt"><b>ZY-Invest</b><span>Admin Console</span></span>
+  </a>
+  <span class="adm-badge">🔒 Restricted</span>
+  <div class="adm-right">
+    <span class="adm-clock" id="clock">—</span>
+    <div class="adm-user"><span class="av">NZY</span><span><span class="nm">Ng Zhi Yao</span><br><span class="rl">Fund Manager · Admin</span></span></div>
+    <button class="adm-logout" id="logout">Logout</button>
+  </div>
+</header>
+
+<div class="adm-subbar">
+  <span class="sb-lab">Member Pages</span>
+  <div class="sub-group">
+    <button class="sub-top">Fund <span class="caret">▾</span></button>
+    <div class="sub-dd"><div class="sub-dd-card">
+      <a href="../members/fund-overview.html"><b>Fund Overview</b><span>Mandate, objective &amp; key facts</span></a>
+      <a href="../members/factsheet.html"><b>Factsheet</b><span>Holdings allocation each financial year</span></a>
+      <a href="../members/shareholder-list.html"><b>Shareholder List</b><span>Unitholders, units held &amp; ownership</span></a>
+    </div></div>
+  </div>
+  <div class="sub-group">
+    <button class="sub-top">Performance <span class="caret">▾</span></button>
+    <div class="sub-dd"><div class="sub-dd-card">
+      <a href="../members/financial-result.html"><b>Financial Result</b><span>Income statement, balance sheet &amp; cash flow</span></a>
+      <a href="../members/performance-analysis.html"><b>Performance Analysis</b><span>Returns &amp; benchmark comparison (FBM KLCI)</span></a>
+      <a href="../members/nta-history.html"><b>NTA History</b><span>Chart &amp; daily NTA / NAV history</span></a>
+    </div></div>
+  </div>
+  <div class="sub-group">
+    <button class="sub-top">Documents <span class="caret">▾</span></button>
+    <div class="sub-dd"><div class="sub-dd-card">
+      <a href="../members/statement-download.html"><b>Statement Download</b><span>Factsheets &amp; annual reports</span></a>
+    </div></div>
+  </div>
+</div>
+
+<div class="adm-shell" id="admShell">
+  <script>try{if(localStorage.getItem('zy_admin_sb')==='1'){document.getElementById('admShell').classList.add('collapsed');}}catch(e){}</script>
+  <aside class="adm-side">
+    <button class="adm-toggle" id="admToggle" title="Collapse menu"><span class="bars"><span></span><span></span><span></span></span><span class="tlbl">Menu</span></button>
+    <div class="grp">Operations</div>
+    <a class="adm-nav " href="overview.html"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span>Overview</a>
+    <a class="adm-nav " href="investors.html"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5 6-5s6 1.7 6 5"/><path d="M17 6.5a3 3 0 0 1 0 5.5M21 20c0-2.6-1.4-4.2-3.6-4.8"/></svg></span>Investors</a>
+    <a class="adm-nav " href="portfolio.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v9l7.5 4.3A9 9 0 1 0 12 3z"/><path d="M12 3a9 9 0 0 1 7.5 13.3L12 12z"/></svg></span>Portfolio</a>
+    <a class="adm-nav " href="instruments.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M8 16v-5M12 16V8M16 16v-7"/></svg></span>Instruments</a>
+    <a class="adm-nav " href="trades.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 7h13l-3-3M20 17H7l3 3"/></svg></span>Trade Transactions</a>
+    <a class="adm-nav " href="principal.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 8h14l-3-3"/><path d="M20 16H6l3 3"/></svg></span>Capital Injection</a>
+    <a class="adm-nav " href="others.html"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="16" cy="12" r="1"/></svg></span>Others Transaction</a>
+    <a class="adm-nav " href="dividend.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M8 7h6a2.5 2.5 0 0 1 0 5H9a2.5 2.5 0 0 0 0 5h7"/></svg></span>Dividend</a>
+    <a class="adm-nav on" href="settlement.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 7h18v12H3z"/><path d="M3 11h18"/><path d="M7 15h4"/></svg></span>Settlement</a>
+    <a class="adm-nav " href="compute-nta.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 17l5-5 4 4 8-8"/><path d="M21 8v5h-5"/></svg></span>Compute NTA</a>
+    <div class="grp">Management</div>
+    <a class="adm-nav " href="distributions.html"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/></svg></span>Distributions</a>
+    <a class="adm-nav " href="remuneration.html"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="16.5" cy="14.5" r="1.3"/></svg></span>Remuneration</a>
+    <div class="grp">Documents</div>
+    <a class="adm-nav " href="documents.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M9 13h6"/></svg></span>Documents</a>
+    <div style="flex:1;min-height:12px;"></div>
+    <a class="adm-nav adm-signout" id="admSignout" href="#"><span class="ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>Sign out</a>
+  </aside>
+  <main class="adm-main">
+<div class="ph"><h1>Settlement</h1><p>Realized profit &amp; loss on closed positions — auto-generated from SELL trades, matched against weighted-average cost.</p></div>
+<div class="metric-row">
+  <div class="mc"><div class="label">Total Realised P&amp;L</div><div class="value green" id="stlPnl">RM 0</div><div class="sub">net of gains &amp; losses</div></div>
+  <div class="mc"><div class="label">Total Gains</div><div class="value green" id="stlGain">RM 0</div><div class="sub" id="stlGainN">0 winning trades</div></div>
+  <div class="mc"><div class="label">Total Losses</div><div class="value" id="stlLoss" style="color:var(--red);">RM 0</div><div class="sub" id="stlLossN">0 losing trades</div></div>
+  <div class="mc"><div class="label">Total Settlements</div><div class="value blue" id="stlCount2">0</div><div class="sub" id="stlWin">0% win rate</div></div>
+</div>
+<div class="panel mt16"><div class="panel-head"><h3>Settlement Records</h3>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <select id="stl-fy" style="font:inherit;font-size:0.84rem;border:1.5px solid var(--border);border-radius:var(--radius-md);padding:7px 11px;color:var(--fg-1);background:#fff;"><option value="">All FY</option><option>FY2026</option><option>FY2025</option></select>
+    <div class="search" style="min-width:240px;"><span class="ic">⌕</span><input placeholder="Search instrument, class, sector…" id="stl-search"></div>
+  </div>
+</div>
+  <table class="tbl"><thead><tr><th>Sell Date</th><th>Instrument</th><th>Class</th><th class="td-right">Units Sold</th><th class="td-right">VWAP Cost (RM)</th><th class="td-right">Sale Price (RM)</th><th class="td-right">Cost Basis (RM)</th><th class="td-right">Proceeds (RM)</th><th class="td-right">Realised P&amp;L (RM)</th><th class="td-right">Return %</th></tr></thead>
+  <tbody id="stlBody"></tbody></table>
+  <div style="padding:14px 20px;border-top:1px solid var(--border);font-size:0.82rem;color:var(--fg-3);">Settlement records are auto-generated when SELL trades are entered in Trade Transactions. Manual editing is not permitted.</div>
+</div>
+  </main>
+</div>
+<div class="modal-scrim" id="modalScrim"></div>
+<div class="toast" id="toast"><span class="ok">✓</span><span id="toastMsg">Saved</span></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/js/supabase-auth.js"></script>
+<script src="../assets/js/auth-logout.js"></script>
+<script src="../assets/js/admin-shell.js"></script>
+<script src="../assets/js/admin-supabase.js"></script>
+<script>
+(function(){
+  var STL=[
+    {date:'17 Mar 2026',fy:'FY2026',inst:'AirAsia',tk:'5099.KL',cls:'Securities',sector:'Consumer',units:8000,vwap:0.6520,sell:0.7200},
+    {date:'09 Mar 2026',fy:'FY2026',inst:'Microsoft',tk:'MSFT',cls:'Securities',sector:'Technology',units:140,vwap:1620.0000,sell:1875.2300},
+    {date:'28 Feb 2026',fy:'FY2026',inst:'Genting Bhd',tk:'3182.KL',cls:'Securities',sector:'Consumer',units:12000,vwap:4.8500,sell:4.4000},
+    {date:'14 Feb 2026',fy:'FY2026',inst:'Public Bank Berhad',tk:'1295.KL',cls:'Securities',sector:'Financials',units:5000,vwap:3.9500,sell:4.3200},
+    {date:'20 Dec 2025',fy:'FY2025',inst:'Tenaga Nasional',tk:'5347.KL',cls:'Securities',sector:'Utilities',units:3000,vwap:10.8000,sell:11.5000},
+    {date:'05 Nov 2025',fy:'FY2025',inst:'KLCI Dec Futures',tk:'FKLI',cls:'Derivatives',sector:'Index',units:5,vwap:1545.0000,sell:1502.0000}
+  ];
+  function d4(n){ return n.toLocaleString('en-MY',{minimumFractionDigits:4,maximumFractionDigits:4}); }
+  function d2(n){ return n.toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  var stlBody=document.getElementById('stlBody'), stlFY='', stlQ='';
+  function render(){ stlBody.innerHTML=''; var pnlT=0,g=0,l=0,win=0,lose=0,shown=0; STL.forEach(function(r){ if(stlFY&&r.fy!==stlFY) return; if(stlQ&&(r.inst+' '+r.cls+' '+r.sector+' '+r.tk).toLowerCase().indexOf(stlQ)===-1) return; shown++; var cb=r.vwap*r.units,pr=r.sell*r.units,pnl=pr-cb,ret=cb?(pnl/cb*100):0; pnlT+=pnl; if(pnl>0){g+=pnl;win++;} else if(pnl<0){l+=pnl;lose++;} var z=Math.abs(pnl)<0.005; var cls=z?'zero':(pnl>=0?'pos':'neg'),sign=z?'':(pnl>=0?'+':'−'); var pt=z?'—':sign+d2(Math.abs(pnl)),rt=(z?'':sign)+Math.abs(ret).toFixed(2)+'%'; var tr=document.createElement('tr'); tr.innerHTML='<td>'+r.date+'</td><td class="hold-name"><b>'+r.inst+'</b><span>'+r.tk+'</span></td><td class="td-sub">'+r.cls+'</td><td class="td-right">'+zyFmt(r.units)+'</td><td class="td-right">'+d4(r.vwap)+'</td><td class="td-right">'+d4(r.sell)+'</td><td class="td-right">'+d2(cb)+'</td><td class="td-right">'+d2(pr)+'</td><td class="td-right"><span class="pnl-pill '+cls+'">'+pt+'</span></td><td class="td-right"><span class="pnl-pill '+cls+'">'+rt+'</span></td>'; stlBody.appendChild(tr); }); if(shown===0){ stlBody.innerHTML='<tr><td colspan="10" style="text-align:center;padding:28px;color:var(--fg-3);">No settlement records match.</td></tr>'; } document.getElementById('stlPnl').textContent=(pnlT<0?'−':'')+'RM '+d2(Math.abs(pnlT)); document.getElementById('stlPnl').style.color=pnlT>=0?'':'var(--red)'; document.getElementById('stlGain').textContent='RM '+d2(g); document.getElementById('stlGainN').textContent=win+' winning trade'+(win===1?'':'s'); document.getElementById('stlLoss').textContent='−RM '+d2(Math.abs(l)); document.getElementById('stlLossN').textContent=lose+' losing trade'+(lose===1?'':'s'); document.getElementById('stlCount2').textContent=shown; var wr=(win+lose)?Math.round(win/(win+lose)*100):0; document.getElementById('stlWin').textContent=wr+'% win rate'; }
+  render();
+  document.getElementById('stl-fy').addEventListener('change',function(){ stlFY=this.value; render(); });
+  document.getElementById('stl-search').addEventListener('input',function(){ stlQ=this.value.toLowerCase(); render(); });
+})();
+</script>
+
+</body>
+</html>

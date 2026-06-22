@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Documents — ZY-Invest Admin</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0D2A52">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ZY Admin">
+<meta name="application-name" content="ZY Admin">
+<link rel="icon" type="image/png" href="../assets/img/favicon.png">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+<link rel="stylesheet" href="../assets/css/dashboard-portfolio.css">
+<link rel="stylesheet" href="../assets/css/admin.css">
+
+</head>
+<body>
+<script>
+(function(){
+  if('serviceWorker' in navigator){ window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
+  try{ var s=JSON.parse(localStorage.getItem('zy_admin_session')||'null'); if(!s||s.role!=='admin'){ location.replace('admin-login.html'); } }
+  catch(e){ location.replace('admin-login.html'); }
+})();
+</script>
+
+<header class="adm-top">
+  <a href="overview.html" class="brand">
+    <img src="../assets/img/logo.png" alt="ZY-Invest">
+    <span class="bt"><b>ZY-Invest</b><span>Admin Console</span></span>
+  </a>
+  <span class="adm-badge">🔒 Restricted</span>
+  <div class="adm-right">
+    <span class="adm-clock" id="clock">—</span>
+    <div class="adm-user"><span class="av">NZY</span><span><span class="nm">Ng Zhi Yao</span><br><span class="rl">Fund Manager · Admin</span></span></div>
+    <button class="adm-logout" id="logout">Logout</button>
+  </div>
+</header>
+
+<div class="adm-subbar">
+  <span class="sb-lab">Member Pages</span>
+  <div class="sub-group">
+    <button class="sub-top">Fund <span class="caret">▾</span></button>
+    <div class="sub-dd"><div class="sub-dd-card">
+      <a href="../members/fund-overview.html"><b>Fund Overview</b><span>Mandate, objective &amp; key facts</span></a>
+      <a href="../members/factsheet.html"><b>Factsheet</b><span>Holdings allocation each financial year</span></a>
+      <a href="../members/shareholder-list.html"><b>Shareholder List</b><span>Unitholders, units held &amp; ownership</span></a>
+    </div></div>
+  </div>
+  <div class="sub-group">
+    <button class="sub-top">Performance <span class="caret">▾</span></button>
+    <div class="sub-dd"><div class="sub-dd-card">
+      <a href="../members/financial-result.html"><b>Financial Result</b><span>Income statement, balance sheet &amp; cash flow</span></a>
+      <a href="../members/performance-analysis.html"><b>Performance Analysis</b><span>Returns &amp; benchmark comparison (FBM KLCI)</span></a>
+      <a href="../members/nta-history.html"><b>NTA History</b><span>Chart &amp; daily NTA / NAV history</span></a>
+    </div></div>
+  </div>
+  <div class="sub-group">
+    <button class="sub-top">Documents <span class="caret">▾</span></button>
+    <div class="sub-dd"><div class="sub-dd-card">
+      <a href="../members/statement-download.html"><b>Statement Download</b><span>Factsheets &amp; annual reports</span></a>
+    </div></div>
+  </div>
+</div>
+
+<div class="adm-shell" id="admShell">
+  <script>try{if(localStorage.getItem('zy_admin_sb')==='1'){document.getElementById('admShell').classList.add('collapsed');}}catch(e){}</script>
+  <aside class="adm-side">
+    <button class="adm-toggle" id="admToggle" title="Collapse menu"><span class="bars"><span></span><span></span><span></span></span><span class="tlbl">Menu</span></button>
+    <div class="grp">Operations</div>
+    <a class="adm-nav " href="overview.html"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span>Overview</a>
+    <a class="adm-nav " href="investors.html"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5 6-5s6 1.7 6 5"/><path d="M17 6.5a3 3 0 0 1 0 5.5M21 20c0-2.6-1.4-4.2-3.6-4.8"/></svg></span>Investors</a>
+    <a class="adm-nav " href="portfolio.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v9l7.5 4.3A9 9 0 1 0 12 3z"/><path d="M12 3a9 9 0 0 1 7.5 13.3L12 12z"/></svg></span>Portfolio</a>
+    <a class="adm-nav " href="instruments.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M8 16v-5M12 16V8M16 16v-7"/></svg></span>Instruments</a>
+    <a class="adm-nav " href="trades.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 7h13l-3-3M20 17H7l3 3"/></svg></span>Trade Transactions</a>
+    <a class="adm-nav " href="principal.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 8h14l-3-3"/><path d="M20 16H6l3 3"/></svg></span>Capital Injection</a>
+    <a class="adm-nav " href="others.html"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="16" cy="12" r="1"/></svg></span>Others Transaction</a>
+    <a class="adm-nav " href="dividend.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M8 7h6a2.5 2.5 0 0 1 0 5H9a2.5 2.5 0 0 0 0 5h7"/></svg></span>Dividend</a>
+    <a class="adm-nav " href="settlement.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 7h18v12H3z"/><path d="M3 11h18"/><path d="M7 15h4"/></svg></span>Settlement</a>
+    <a class="adm-nav " href="compute-nta.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 17l5-5 4 4 8-8"/><path d="M21 8v5h-5"/></svg></span>Compute NTA</a>
+    <div class="grp">Management</div>
+    <a class="adm-nav " href="distributions.html"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/></svg></span>Distributions</a>
+    <a class="adm-nav " href="remuneration.html"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="16.5" cy="14.5" r="1.3"/></svg></span>Remuneration</a>
+    <div class="grp">Documents</div>
+    <a class="adm-nav on" href="documents.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M9 13h6"/></svg></span>Documents</a>
+    <div style="flex:1;min-height:12px;"></div>
+    <a class="adm-nav adm-signout" id="admSignout" href="#"><span class="ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>Sign out</a>
+  </aside>
+  <main class="adm-main">
+<div class="ph" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;"><div><h1>Document Management</h1><p>View, download, preview, upload and delete all issued PDF statements and factsheets.</p></div><button class="btn-fill btn-sm" id="openDuModal" style="white-space:nowrap;">+ Upload Document</button></div>
+<div class="metric-row">
+  <div class="mc"><div class="label">Total Documents</div><div class="value blue" id="dmTotal">0</div><div class="sub" id="dmTotalSub">0 files in library</div></div>
+  <div class="mc"><div class="label">Statements Issued</div><div class="value" id="dmStmts">0</div><div class="sub">Sub · Red · Dividend</div></div>
+  <div class="mc"><div class="label">Account Statements</div><div class="value" id="dmAcct">0</div><div class="sub">Annual FY reports</div></div>
+  <div class="mc"><div class="label">Factsheets</div><div class="value" id="dmFact">0</div><div class="sub">Monthly fund reports</div></div>
+</div>
+<div class="filter-bar mt16" style="gap:10px;align-items:flex-end;">
+  <div class="search" style="flex:2;"><span class="ic">⌕</span><input placeholder="Name or title…" id="dmSearch"></div>
+  <div class="dm-filt"><label>Type</label><select id="dmType"><option value="">All Types</option><option>Factsheet</option><option>Account Statement</option><option>Dividend Statement</option><option>Subscription Statement</option><option>Redemption Statement</option></select></div>
+  <div class="dm-filt"><label>Financial Year</label><select id="dmFy"><option value="">All FYs</option><option>FY2026</option><option>FY2025</option><option>FY2024</option><option>FY2023</option><option>FY2022</option></select></div>
+  <div class="dm-filt"><label>Visibility</label><select id="dmVis"><option value="">All</option><option>Fund</option><option>Member</option></select></div>
+  <button class="btn-line btn-sm" id="dmClear" style="white-space:nowrap;">⟳ Clear</button>
+</div>
+<div class="bulk-bar" id="dmBulk">
+  <label class="bulk-chk"><input type="checkbox" id="dmBulkAll"><span id="dmSelCount">0 selected</span></label>
+  <button class="bulk-del" id="dmBulkDelete">🗑 Delete Selected</button>
+  <button class="bulk-dl" id="dmBulkDownload">⬇ Download Selected</button>
+  <button class="bulk-clear" id="dmBulkClear">✕ Clear</button>
+</div>
+<div class="panel"><div class="panel-head"><h3>Documents</h3><span class="td-sub" id="dmCount"></span></div>
+  <table class="tbl dm-tbl"><thead><tr><th style="width:40px;"><input type="checkbox" id="dmHeadChk"></th><th>Document</th><th>Type</th><th>Investor</th><th>FY</th><th>Visibility</th><th>Date</th><th style="width:120px;">Actions</th></tr></thead>
+  <tbody id="dmBody"></tbody></table>
+</div>
+<div class="modal trade-modal" id="duModal">
+  <div class="modal-head"><div><h3>Upload Document</h3><div class="sub">Add a factsheet or investor statement to the library.</div></div><button class="modal-x" data-close>✕</button></div>
+  <div class="modal-body">
+    <div class="trade-cols">
+      <div class="trade-col">
+        <div class="field"><label>Document Type</label><select id="du-type"><option value="Factsheet">Factsheet</option><option value="Account Statement">Account Statement</option><option value="Dividend Statement">Dividend Statement</option><option value="Subscription Statement">Subscription Statement</option></select></div>
+        <div class="field" id="du-scope-wrap"><label>Investor</label><select id="du-scope"></select></div>
+        <div class="two-up">
+          <div class="field"><label>Period / As-at</label><input type="date" id="du-period" value="2026-05-31"></div>
+          <div class="field"><label>Financial Year</label><select id="du-fy"><option>—</option><option>FY2026</option><option>FY2025</option><option>FY2024</option></select></div>
+        </div>
+        <div class="field"><label>Status</label><select id="du-status"><option>Published</option><option>Draft</option></select></div>
+        <div class="field"><label>File</label><div class="file-drop" id="du-file"><span class="fd-ic">⤓</span><span id="du-fname">Click to attach PDF</span></div></div>
+      </div>
+      <div class="trade-col">
+        <div class="cmp-head"><span>Statement Data</span><button type="button" class="btn-mini" id="du-compute">⚙ Compute</button></div>
+        <div class="cmp-box" id="du-cmp"><div class="cmp-empty">For statements, click <b>Compute</b> to pull the investor's figures needed for this document.</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-foot"><button class="btn-line btn-sm" data-close>Cancel</button><button class="btn-fill btn-sm" id="du-save">Upload Document</button></div>
+</div>
+  </main>
+</div>
+<div class="modal-scrim" id="modalScrim"></div>
+<div class="toast" id="toast"><span class="ok">✓</span><span id="toastMsg">Saved</span></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/js/supabase-auth.js"></script>
+<script src="../assets/js/auth-logout.js"></script>
+<script src="../assets/js/admin-shell.js"></script>
+<script src="../assets/js/admin-supabase.js"></script>
+<script>
+(function(){
+  var INVESTOR_NAMES=['Ng Zhi Yao','Tan Hui Mei','Lim Wealth Trust','Cheah Boon Hwa','Wong Mei Ling'];
+  var DOCS=[
+    {date:'15 Jun 2026',name:'ZY-Invest Monthly Factsheet — 30 May 2026',file:'ZY-Invest_Monthly_Factsheet_-_30_May_2026.pdf',type:'Factsheet',scope:'Fund-wide',fy:'—',vis:'Fund',size:'212 KB'},
+    {date:'04 May 2026',name:'ZY-Invest Monthly Factsheet — 29 April 2026',file:'ZY-Invest_Monthly_Factsheet_-_29_April_2026.pdf',type:'Factsheet',scope:'Fund-wide',fy:'—',vis:'Fund',size:'212 KB'},
+    {date:'07 Apr 2026',name:'Redemption Statement — Ng Zhi Yao',file:'Redemption_Statement_-_Ng_Zhi_Yao.pdf',type:'Redemption Statement',scope:'Ng Zhi Yao',fy:'FY2023',vis:'Member',size:'142 KB'},
+    {date:'28 Mar 2026',name:'Account Statement — Tan Hui Mei',file:'Account_Statement_-_Tan_Hui_Mei.pdf',type:'Account Statement',scope:'Tan Hui Mei',fy:'FY2025',vis:'Member',size:'96 KB'},
+    {date:'06 Mar 2026',name:'Subscription Statement — Lim Wealth Trust',file:'Subscription_Statement_-_Lim_Wealth_Trust.pdf',type:'Subscription Statement',scope:'Lim Wealth Trust',fy:'FY2026',vis:'Member',size:'90 KB'}
+  ];
+  function us(s){ return s.replace(/[^A-Za-z0-9]+/g,'_').replace(/^_|_$/g,''); }
+  function typePill(t){ var k=t.replace(' Statement',''); var c={'Factsheet':'tp-fact','Dividend':'tp-div','Subscription':'tp-sub','Redemption':'tp-red','Account':'tp-acct'}[k]||'tp-acct'; return '<span class="type-pill '+c+'">◆ '+k.toUpperCase()+'</span>'; }
+  function visPill(v){ return '<span class="vis-pill '+(v==='Fund'?'fund':'member')+'">◆ '+v.toUpperCase()+'</span>'; }
+  var dmBody=document.getElementById('dmBody'), dmSel=new Set();
+  function fIdx(){ var q=(document.getElementById('dmSearch').value||'').toLowerCase(),ft=document.getElementById('dmType').value,fy=document.getElementById('dmFy').value,fv=document.getElementById('dmVis').value,out=[]; DOCS.forEach(function(d,i){ if(ft&&d.type!==ft) return; if(fy&&d.fy!==fy) return; if(fv&&d.vis!==fv) return; if(q&&(d.name+' '+d.file+' '+d.scope).toLowerCase().indexOf(q)<0) return; out.push(i); }); return out; }
+  function render(){ dmBody.innerHTML=''; var idxs=fIdx(); idxs.forEach(function(i){ var d=DOCS[i]; var tr=document.createElement('tr'); if(dmSel.has(i)) tr.className='sel'; tr.innerHTML='<td><input type="checkbox" data-i="'+i+'"'+(dmSel.has(i)?' checked':'')+'></td><td class="hold-name"><b>'+d.name+'</b><span class="dm-fname">'+d.file+' · '+d.size+'</span></td><td>'+typePill(d.type)+'</td><td class="td-sub">'+d.scope+'</td><td>'+d.fy+'</td><td>'+visPill(d.vis)+'</td><td class="td-sub">'+d.date+'</td><td><div class="dm-act"><button class="dl" data-act="dl" data-i="'+i+'" title="Download"><svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 11l5 4 5-4"/><path d="M5 21h14"/></svg></button><button class="pv" data-act="pv" data-i="'+i+'" title="Preview"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="rm" data-act="rm" data-i="'+i+'" title="Delete"><svg viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><path d="M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13"/></svg></button></div></td>'; dmBody.appendChild(tr); });
+    document.getElementById('dmCount').textContent=idxs.length+' documents';
+    document.getElementById('dmTotal').textContent=DOCS.length;
+    document.getElementById('dmTotalSub').textContent=DOCS.length+' files in library';
+    document.getElementById('dmStmts').textContent=DOCS.filter(function(d){return /Dividend|Subscription|Redemption/.test(d.type);}).length;
+    document.getElementById('dmAcct').textContent=DOCS.filter(function(d){return d.type==='Account Statement';}).length;
+    document.getElementById('dmFact').textContent=DOCS.filter(function(d){return d.type==='Factsheet';}).length;
+    document.getElementById('dmBulk').classList.toggle('show',dmSel.size>0);
+    document.getElementById('dmSelCount').textContent=dmSel.size+' selected';
+    var head=document.getElementById('dmHeadChk'); head.checked=idxs.length>0&&idxs.every(function(i){return dmSel.has(i);});
+    document.getElementById('dmBulkAll').checked=head.checked;
+    dmBody.querySelectorAll('input[type=checkbox]').forEach(function(cb){ cb.addEventListener('change',function(){ var i=+cb.dataset.i; if(cb.checked)dmSel.add(i); else dmSel.delete(i); render(); }); });
+    dmBody.querySelectorAll('.dm-act button').forEach(function(b){ b.addEventListener('click',function(e){ e.stopPropagation(); var i=+b.dataset.i,a=b.dataset.act,d=DOCS[i]; if(a==='dl'){ zyToast('Downloading — '+d.file); } else if(a==='pv'){ zyToast('Preview — '+d.name); } else { var n=d.name; DOCS.splice(i,1); dmSel.clear(); render(); zyToast('Deleted — '+n); } }); });
+  }
+  render();
+  ['dmSearch','dmType','dmFy','dmVis'].forEach(function(id){ document.getElementById(id).addEventListener('input',function(){ dmSel.clear(); render(); }); document.getElementById(id).addEventListener('change',function(){ dmSel.clear(); render(); }); });
+  document.getElementById('dmClear').addEventListener('click',function(){ ['dmSearch','dmType','dmFy','dmVis'].forEach(function(id){ document.getElementById(id).value=''; }); dmSel.clear(); render(); });
+  function toggleAll(on){ fIdx().forEach(function(i){ if(on)dmSel.add(i); else dmSel.delete(i); }); render(); }
+  document.getElementById('dmHeadChk').addEventListener('change',function(){ toggleAll(this.checked); });
+  document.getElementById('dmBulkAll').addEventListener('change',function(){ toggleAll(this.checked); });
+  document.getElementById('dmBulkClear').addEventListener('click',function(){ dmSel.clear(); render(); });
+  document.getElementById('dmBulkDownload').addEventListener('click',function(){ zyToast('Downloading '+dmSel.size+' document'+(dmSel.size>1?'s':'')+'…'); });
+  document.getElementById('dmBulkDelete').addEventListener('click',function(){ var n=dmSel.size,keep=[]; DOCS.forEach(function(d,i){ if(!dmSel.has(i)) keep.push(d); }); DOCS.length=0; keep.forEach(function(d){DOCS.push(d);}); dmSel.clear(); render(); zyToast('Deleted '+n+' document'+(n>1?'s':'')); });
+  var duType=document.getElementById('du-type'),duScope=document.getElementById('du-scope'),duScopeWrap=document.getElementById('du-scope-wrap'),duFile=document.getElementById('du-file');
+  function fillScope(){ duScope.innerHTML=''; INVESTOR_NAMES.forEach(function(n){ var o=document.createElement('option'); o.value=n; o.textContent=n; duScope.appendChild(o); }); }
+  fillScope();
+  function syncScope(){ duScopeWrap.style.display=duType.value==='Factsheet'?'none':''; reset(); }
+  duType.addEventListener('change',syncScope);
+  function reset(){ document.getElementById('du-cmp').innerHTML='<div class="cmp-empty">For statements, click <b>Compute</b> to pull the investor\u2019s figures needed for this document.</div>'; }
+  duFile.addEventListener('click',function(){ duFile.classList.add('filled'); document.getElementById('du-fname').textContent='statement-draft.pdf · attached'; });
+  document.getElementById('du-compute').addEventListener('click',function(){ var box=document.getElementById('du-cmp'); if(duType.value==='Factsheet'){ box.innerHTML='<div class="cmp-row"><span class="ck">Fund NAV / unit</span><span class="cv">RM 1.0245</span></div><div class="cmp-row"><span class="ck">Fund Size (AUM)</span><span class="cv">RM 981,707</span></div><div class="cmp-row"><span class="ck">Units in Circulation</span><span class="cv">958,300</span></div>'; zyToast('Fund-level figures computed'); return; } var m=duScope.value; box.innerHTML='<div class="cmp-row"><span class="ck">Investor</span><span class="cv">'+m+'</span></div><div class="cmp-row"><span class="ck">NAV / Unit</span><span class="cv">RM 1.0245</span></div><div class="cmp-row tot"><span class="ck">Current Value</span><span class="cv">RM 99,171.60</span></div>'; zyToast('Statement figures computed for '+m); });
+  document.getElementById('openDuModal').addEventListener('click',function(){ duType.value='Factsheet'; syncScope(); duFile.classList.remove('filled'); document.getElementById('du-fname').textContent='Click to attach PDF'; zyModalOpen('duModal'); });
+  document.getElementById('du-save').addEventListener('click',function(){ var type=duType.value,scope=type==='Factsheet'?'Fund-wide':duScope.value; var d=new Date(document.getElementById('du-period').value); var per=isNaN(d)?'May 2026':d.toLocaleDateString('en-GB',{month:'short',year:'numeric'}); var name=type==='Factsheet'?('ZY-Invest Monthly Factsheet — '+per):(type.replace(' Statement','')+' Statement — '+scope); var fy=document.getElementById('du-fy').value; DOCS.unshift({date:'19 Jun 2026',name:name,file:us(name)+'.pdf',type:type,scope:scope,fy:(type==='Factsheet'?'—':(fy||'FY2026')),vis:(type==='Factsheet'?'Fund':'Member'),size:(Math.round(80+Math.random()*180))+' KB'}); render(); zyModalClose(); zyToast('Uploaded — '+name); });
+})();
+</script>
+
+</body>
+</html>
