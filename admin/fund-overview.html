@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Investors — ZY-Invest Admin</title>
+<title>Fund Overview — ZY-Invest Admin</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0D2A52">
 <meta name="mobile-web-app-capable" content="yes">
@@ -72,7 +72,7 @@
     <button class="adm-toggle" id="admToggle" title="Collapse menu"><span class="bars"><span></span><span></span><span></span></span><span class="tlbl">Menu</span></button>
     <div class="grp">Operations</div>
     <a class="adm-nav " href="overview.html"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span>Overview</a>
-    <a class="adm-nav on" href="investors.html"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5 6-5s6 1.7 6 5"/><path d="M17 6.5a3 3 0 0 1 0 5.5M21 20c0-2.6-1.4-4.2-3.6-4.8"/></svg></span>Investors</a>
+    <a class="adm-nav " href="investors.html"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5 6-5s6 1.7 6 5"/><path d="M17 6.5a3 3 0 0 1 0 5.5M21 20c0-2.6-1.4-4.2-3.6-4.8"/></svg></span>Investors</a>
     <a class="adm-nav " href="portfolio.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v9l7.5 4.3A9 9 0 1 0 12 3z"/><path d="M12 3a9 9 0 0 1 7.5 13.3L12 12z"/></svg></span>Portfolio</a>
     <a class="adm-nav " href="instruments.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M8 16v-5M12 16V8M16 16v-7"/></svg></span>Instruments</a>
     <a class="adm-nav " href="trades.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 7h13l-3-3M20 17H7l3 3"/></svg></span>Trade Transactions</a>
@@ -90,68 +90,42 @@
     <a class="adm-nav adm-signout" id="admSignout" href="#"><span class="ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>Sign out</a>
   </aside>
   <main class="adm-main">
-<div class="ph"><h1>Investors</h1><p>Members of the fund. Click a row to view and edit profile.</p></div>
-<div class="metric-row">
-  <div class="mc"><div class="label">Active Investors</div><div class="value blue">23</div><div class="sub">1 added FY26</div></div>
-  <div class="mc"><div class="label">Pending KYC</div><div class="value">1</div><div class="sub">Farhan Rahman</div></div>
-  <div class="mc"><div class="label">Units in Issue</div><div class="value">958,300</div><div class="sub">RM 981,707 NAV</div></div>
-  <div class="mc"><div class="label">Top-3 Concentration</div><div class="value">62.8%</div><div class="sub">Founder + family + trust</div></div>
-</div>
-<div class="filter-bar mt16">
-  <div class="search"><span class="ic">⌕</span><input placeholder="Search by name or phone…" id="invSearch"></div>
-  <button class="chip active" data-mem="">All</button>
-  <button class="chip" data-mem="Shareholder">Shareholder</button>
-  <button class="chip" data-mem="Director">Director</button>
-  <button class="chip" data-mem="Non-member">Non-member</button>
-  <button class="btn-fill btn-sm" id="newInvestor">+ New Investor</button>
-</div>
-<div class="panel"><div class="panel-head"><h3>Members</h3><span class="td-sub" id="invCount">— of record</span></div>
-  <table class="tbl"><thead><tr><th>Name</th><th>Membership</th><th>Member Since</th><th>Bank</th><th>Status</th></tr></thead>
-  <tbody id="invBody"></tbody></table>
+<div class="ph" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
+  <div><h1>Fund Overview <span style="font-size:0.7rem;font-weight:600;color:var(--blue);background:var(--blue-bg);padding:4px 10px;border-radius:999px;vertical-align:middle;margin-left:8px;">Editable</span></h1><p>Edit the mandate, key facts and headline figures shown to members. Saved to Supabase.</p></div>
+  <button class="btn-fill btn-sm" id="foSave" style="white-space:nowrap;">Save Changes</button>
 </div>
 
-<!-- investor modal -->
-<div class="modal inv-modal" id="invModal">
-  <div class="modal-head"><div style="display:flex;align-items:center;gap:13px;"><span class="av" id="dwAv" style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#1565C0,#2E7D32);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;">—</span><div><h3 id="dwName">—</h3><div class="sub" id="dwId">—</div></div></div><button class="modal-x" data-close>✕</button></div>
-  <div class="modal-body">
-    <div class="inv-stats">
-      <div><div class="k">Units Held</div><div class="v" id="dwUnits">—</div></div>
-      <div><div class="k">% of Fund</div><div class="v" id="dwPct">—</div></div>
-      <div><div class="k">Current Value</div><div class="v" id="dwVal">—</div></div>
-      <div><div class="k">Holder Since</div><div class="v" id="dwSince">—</div></div>
-    </div>
-    <div class="inv-cols">
-      <div class="inv-col">
-        <div class="inv-sec-title">Profile &amp; Account</div>
-        <div class="field"><label>Full Name</label><input type="text" id="dw-name"></div>
-        <div class="field"><label>Phone</label><input type="text" id="dw-phone" placeholder="+60 12-345 6789"></div>
-        <div class="field"><label>Bank</label><input type="text" id="dw-bank" placeholder="e.g. Maybank"></div>
-        <div class="two-up" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-          <div class="field"><label>Bank Account No.</label><input type="text" id="dw-acctno" placeholder="—"></div>
-          <div class="field"><label>Account Holder Name</label><input type="text" id="dw-bankHolder" placeholder="—"></div>
-        </div>
-        <div class="two-up" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-          <div class="field"><label>Membership</label><select id="dw-member"><option>Shareholder</option><option>Director</option><option>Non-member</option></select></div>
-          <div class="field"><label>Account Status</label><select id="dw-status"><option>Active</option><option>Pending</option><option>Suspended</option></select></div>
-        </div>
-        <p id="dw-memhint" style="font-size:0.76rem;color:var(--fg-3);margin:2px 0 0;line-height:1.5;"></p>
+<div id="foLoading" style="padding:40px;text-align:center;color:var(--fg-3);">Loading fund overview…</div>
+
+<div id="foForm" style="display:none;">
+  <div class="row-2 wide-left">
+    <div class="panel"><div class="panel-head"><h3>About the Fund</h3><span class="td-sub">One paragraph per line</span></div>
+      <div style="padding:16px;">
+        <textarea id="fo-about" rows="10" style="width:100%;font:inherit;font-size:0.9rem;line-height:1.6;color:var(--fg-1);border:1.5px solid var(--border);border-radius:var(--radius-md);padding:13px 15px;resize:vertical;box-sizing:border-box;"></textarea>
       </div>
-      <div class="inv-col">
-        <div class="inv-sec-title">Password &amp; Security</div>
-        <div class="field"><label>Password</label>
-          <div style="position:relative;"><input type="password" id="dw-pw" placeholder="Set / view password" style="padding-right:54px;"><button type="button" id="dw-pwToggle" style="position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;font:inherit;font-size:0.78rem;font-weight:600;color:var(--blue);cursor:pointer;">Show</button></div>
-          <span style="font-size:0.72rem;color:var(--fg-3);">Password is managed by Supabase Auth and changed via reset email.</span>
-        </div>
-        <div class="sec-toggle-row"><div><div class="st-t">Two-Factor Authentication</div><div class="st-d">Require an OTP at sign-in</div></div><button type="button" class="toggle-sw on" id="dw-2fa"></button></div>
-        <div class="sec-toggle-row"><div><div class="st-t">Login Notifications</div><div class="st-d">Email on each new sign-in</div></div><button type="button" class="toggle-sw" id="dw-notif"></button></div>
-        <button type="button" class="btn-line btn-sm" id="dw-revoke" style="width:100%;margin-top:2px;">Sign out all sessions</button>
+    </div>
+    <div class="panel"><div class="panel-head"><h3>Key Facts</h3></div>
+      <div style="padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:13px;">
+        <div class="field"><label>Inception</label><input type="text" id="fo-inception"></div>
+        <div class="field"><label>Domicile</label><input type="text" id="fo-domicile"></div>
+        <div class="field"><label>Base Currency</label><input type="text" id="fo-currency"></div>
+        <div class="field"><label>NTA Frequency</label><input type="text" id="fo-ntafreq"></div>
+        <div class="field"><label>Strategy</label><input type="text" id="fo-strategy"></div>
+        <div class="field"><label>Universe</label><input type="text" id="fo-universe"></div>
+        <div class="field"><label>Dealing</label><input type="text" id="fo-dealing"></div>
+        <div class="field"><label>Reporting</label><input type="text" id="fo-reporting"></div>
       </div>
     </div>
   </div>
-  <div class="modal-foot" style="justify-content:space-between;">
-    <button class="btn-line btn-sm" id="dwDelete" style="color:var(--red);border-color:var(--red);">Suspend Investor</button>
-    <div style="display:flex;gap:10px;"><button class="btn-line btn-sm" data-close>Cancel</button><button class="btn-fill btn-sm" id="dwSave">Save Changes</button></div>
+  <div class="panel mt16"><div class="panel-head"><h3>Headline Figures</h3><span class="td-sub">Shown in the metric row</span></div>
+    <div style="padding:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:13px;">
+      <div class="field"><label>Current NTA</label><input type="text" id="fo-nta" placeholder="RM 1.0245"></div>
+      <div class="field"><label>Annualised IRR</label><input type="text" id="fo-irr" placeholder="+14.8%"></div>
+      <div class="field"><label>Holdings</label><input type="text" id="fo-holdings" placeholder="18"></div>
+      <div class="field"><label>Track Record</label><input type="text" id="fo-track" placeholder="4 yrs"></div>
+    </div>
   </div>
+  <p style="font-size:0.78rem;color:var(--fg-3);margin-top:14px;">Last updated: <span id="fo-updated">—</span></p>
 </div>
   </main>
 </div>
@@ -162,6 +136,42 @@
 <script src="../assets/js/auth-logout.js"></script>
 <script src="../assets/js/admin-shell.js"></script>
 <script src="../assets/js/admin-supabase.js"></script>
+<script>
+(function(){
+  var FIELDS={ 'fo-about':'about_html','fo-inception':'inception','fo-domicile':'domicile','fo-currency':'base_currency','fo-ntafreq':'nta_frequency','fo-strategy':'strategy','fo-universe':'universe','fo-dealing':'dealing','fo-reporting':'reporting','fo-nta':'current_nta','fo-irr':'annualised_irr','fo-holdings':'holdings','fo-track':'track_record' };
+  function gv(id){ return document.getElementById(id); }
+
+  async function load(){
+    if(typeof sb==='undefined' || !sb){ document.getElementById('foLoading').textContent='Auth service not configured — set your Supabase URL and key in supabase-auth.js.'; return; }
+    var res=await sb.from('fund_overview').select('*').eq('id',1).single();
+    if(res.error){ document.getElementById('foLoading').textContent='Could not load fund overview: '+res.error.message+' (did you run the SQL?)'; return; }
+    var d=res.data;
+    for(var id in FIELDS){ var v=d[FIELDS[id]]; if(gv(id)) gv(id).value=(v==null?'':v); }
+    var u=d.updated_at?new Date(d.updated_at).toLocaleString('en-GB'):'—';
+    document.getElementById('fo-updated').textContent=u;
+    document.getElementById('foLoading').style.display='none';
+    document.getElementById('foForm').style.display='block';
+  }
+
+  async function save(){
+    if(typeof sb==='undefined' || !sb){ if(window.zyToast) zyToast('Auth service not configured'); return; }
+    var upd={};
+    for(var id in FIELDS){ if(gv(id)) upd[FIELDS[id]]=gv(id).value; }
+    var btn=document.getElementById('foSave'); btn.disabled=true; btn.textContent='Saving…';
+    var res=await sb.from('fund_overview').update(upd).eq('id',1);
+    btn.disabled=false; btn.textContent='Save Changes';
+    if(res.error){ if(window.zyToast) zyToast('Save failed: '+res.error.message); return; }
+    if(window.zyToast) zyToast('Fund overview saved — members will see the update.');
+    load();
+  }
+
+  window.addEventListener('DOMContentLoaded',function(){
+    document.getElementById('foSave').addEventListener('click',save);
+    // admin-supabase.js runs its own guard; load after a tick so sb session is ready
+    setTimeout(load, 400);
+  });
+})();
+</script>
 
 </body>
 </html>

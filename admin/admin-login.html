@@ -163,7 +163,7 @@ body{font-family:var(--font-body);color:var(--ink);background:#0B1220;-webkit-fo
     var password=pw.value;
     btn.disabled=true; btnText.textContent='Signing in…'; spin.style.display='block';
     try{
-      if(!sb) throw new Error('Auth service not configured.');
+      if(!sb) throw new Error('Supabase not configured — set SUPABASE_URL and SUPABASE_ANON in assets/js/supabase-auth.js');
 
       /* Always sign out any existing session first to ensure clean state */
       try{ await sb.auth.signOut(); }catch(ex){}
