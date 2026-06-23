@@ -118,8 +118,10 @@
 
   function wireInvestors(userId){
     var _is=document.getElementById('invSearch');
-    _is.value=''; invQ='';                 // clear any browser autofill on load
-    setTimeout(function(){ if(_is.value){ _is.value=''; invQ=''; renderInvestors(); } },300);
+    function _clearSearch(){ if(_is && _is.value){ _is.value=''; invQ=''; renderInvestors(); } }
+    _is.value=''; invQ='';
+    // Chrome can refill after load; clear repeatedly over the first second
+    [50,200,500,1000].forEach(function(ms){ setTimeout(_clearSearch, ms); });
     _is.addEventListener('input',function(){ invQ=this.value.toLowerCase(); renderInvestors(); });
     document.querySelectorAll('.filter-bar .chip').forEach(function(c){ c.addEventListener('click',function(){ document.querySelectorAll('.filter-bar .chip').forEach(function(x){x.classList.remove('active');}); c.classList.add('active'); invMem=c.dataset.mem||''; renderInvestors(); }); });
     document.getElementById('dw-member').addEventListener('change',refreshMemHint);
