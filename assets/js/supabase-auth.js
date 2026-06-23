@@ -3,8 +3,8 @@
    Replace SUPABASE_URL and SUPABASE_ANON with your real values
    (Supabase Dashboard → Project Settings → API).
    ============================================================ */
-var SUPABASE_URL  = 'https://wvaibdjkjnnesefantjc.supabase.co';   // ← replace
-var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind2YWliZGpram5uZXNlZmFudGpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4NDM3NDEsImV4cCI6MjA5NzQxOTc0MX0.tWiXzeFVDQ_iFGAcKfJ141aN1ghRHToWwrzRjwEGLgM';               // ← replace
+var SUPABASE_URL  = 'https://YOUR-PROJECT.supabase.co';   // ← replace
+var SUPABASE_ANON = 'YOUR-PUBLIC-ANON-KEY';               // ← replace
 var ZY_DEMO = SUPABASE_URL.indexOf('YOUR-PROJECT') !== -1;
 var sb = null;
 if (!ZY_DEMO && window.supabase && window.supabase.createClient) {
