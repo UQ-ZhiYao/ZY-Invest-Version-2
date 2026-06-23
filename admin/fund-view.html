@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Overview — ZY-Invest Admin</title>
+<title>Fund — ZY-Invest Admin</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0D2A52">
 <meta name="mobile-web-app-capable" content="yes">
@@ -71,7 +71,7 @@
   <aside class="adm-side">
     <button class="adm-toggle" id="admToggle" title="Collapse menu"><span class="bars"><span></span><span></span><span></span></span><span class="tlbl">Menu</span></button>
     <div class="grp">Operations</div>
-    <a class="adm-nav on" href="overview.html"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span>Overview</a>
+    <a class="adm-nav " href="overview.html"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span>Overview</a>
     <a class="adm-nav " href="investors.html"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5 6-5s6 1.7 6 5"/><path d="M17 6.5a3 3 0 0 1 0 5.5M21 20c0-2.6-1.4-4.2-3.6-4.8"/></svg></span>Investors</a>
     <a class="adm-nav " href="portfolio.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v9l7.5 4.3A9 9 0 1 0 12 3z"/><path d="M12 3a9 9 0 0 1 7.5 13.3L12 12z"/></svg></span>Portfolio</a>
     <a class="adm-nav " href="instruments.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M8 16v-5M12 16V8M16 16v-7"/></svg></span>Instruments</a>
@@ -90,29 +90,12 @@
     <a class="adm-nav adm-signout" id="admSignout" href="#"><span class="ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>Sign out</a>
   </aside>
   <main class="adm-main">
-<div class="ph"><h1>Fund Overview</h1><p>Operational snapshot of the fund as at today.</p></div>
-<div class="metric-row">
-  <div class="mc"><div class="label">Active Investors</div><div class="value blue">23</div><div class="sub">1 pending KYC</div></div>
-  <div class="mc"><div class="label">Units in Issue</div><div class="value">958,300</div><div class="sub">4 members this month</div></div>
-  <div class="mc"><div class="label">NAV (Mark-to-Market)</div><div class="value">RM 981,707</div><div class="sub">as of 19 Mar 2026</div></div>
-  <div class="mc"><div class="label">Current NTA</div><div class="value green">RM 1.0245</div><div class="sub">+0.42% today</div></div>
+<div class="ph" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
+  <div><h1 id="fvTitle">Fund</h1><p id="fvDesc">Auto-computed fund report — read-only. Figures update automatically from fund data.</p></div>
+  <span style="font-size:0.7rem;font-weight:600;color:var(--fg-3);background:var(--gray-100);padding:6px 12px;border-radius:999px;white-space:nowrap;">⚙ Auto-computed</span>
 </div>
-<div class="row-2 wide-left mt16">
-  <div class="panel"><div class="panel-head"><h3>Recent Activity</h3><a class="act-link" href="principal.html">View principal →</a></div>
-    <table class="tbl"><thead><tr><th>Date</th><th>Event</th><th>Investor</th><th class="td-right">Amount (RM)</th></tr></thead><tbody>
-      <tr><td>19 Mar 2026</td><td><span class="tag-blue">Subscription</span></td><td>Tan Hui Mei</td><td class="td-right">25,000</td></tr>
-      <tr><td>18 Mar 2026</td><td><span class="tag-orange">Distribution</span></td><td>All unitholders</td><td class="td-right">33,460</td></tr>
-      <tr><td>15 Mar 2026</td><td><span class="tag-blue">Subscription</span></td><td>Lim Wealth Trust</td><td class="td-right">50,000</td></tr>
-      <tr><td>12 Mar 2026</td><td><span class="tag-blue">Redemption</span></td><td>Cheah Boon Hwa</td><td class="td-right">18,000</td></tr>
-    </tbody></table>
-  </div>
-  <div class="panel"><div class="panel-head"><h3>Action Items</h3></div>
-    <div style="padding:8px;">
-      <div class="kyc-row" style="padding:13px 14px;"><span class="kyc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span><span class="kyc-meta"><span class="kt">KYC review</span><span class="kd">Farhan Rahman — new investor</span></span><span class="pill-warn">Pending</span></div>
-      <div class="kyc-row" style="padding:13px 14px;"><span class="kyc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 17l5-5 4 4 8-8"/></svg></span><span class="kyc-meta"><span class="kt">Daily NTA</span><span class="kd">Not yet computed for 19 Mar</span></span><span class="pill-warn">Due</span></div>
-      <div class="kyc-row" style="padding:13px 14px;"><span class="kyc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 2h9l5 5v15H6z"/></svg></span><span class="kyc-meta"><span class="kt">FY26 tax vouchers</span><span class="kd">2 documents awaiting review</span></span><span class="pill-warn">Review</span></div>
-    </div>
-  </div>
+<div class="panel" style="padding:0;overflow:hidden;">
+  <iframe id="fvFrame" title="Fund report" style="width:100%;min-height:calc(100vh - 230px);border:none;display:block;background:#fff;"></iframe>
 </div>
   </main>
 </div>
@@ -123,6 +106,29 @@
 <script src="../assets/js/auth-logout.js"></script>
 <script src="../assets/js/admin-shell.js"></script>
 <script src="../assets/js/admin-supabase.js"></script>
+<script>
+(function(){
+  var ALLOWED={
+    'factsheet.html':'Factsheet',
+    'shareholder-list.html':'Shareholder List',
+    'financial-result.html':'Financial Result',
+    'performance-analysis.html':'Performance Analysis',
+    'nta-history.html':'NTA History',
+    'statement-download.html':'Statement Download'
+  };
+  var q=new URLSearchParams(location.search);
+  var src=q.get('src')||'factsheet.html';
+  if(!ALLOWED[src]) src='factsheet.html';
+  var title=ALLOWED[src];
+  document.getElementById('fvTitle').textContent=title;
+  document.title=title+' — ZY-Invest Admin';
+  var fr=document.getElementById('fvFrame');
+  fr.src='../members/'+src+'?embed=1';
+  function size(){ try{ var d=fr.contentDocument; if(d&&d.documentElement){ fr.style.height=Math.max(d.documentElement.scrollHeight, window.innerHeight-230)+'px'; } }catch(e){} }
+  fr.addEventListener('load',function(){ size(); setTimeout(size,300); setTimeout(size,800); });
+  window.addEventListener('resize',size);
+})();
+</script>
 
 </body>
 </html>
