@@ -45,6 +45,9 @@
   async function loadInvestors(){
     var res=await sb.from('profiles').select('*').order('created_at',{ascending:true});
     if(res.error){ if(window.zyToast) zyToast('Load failed: '+res.error.message); return; }
+    if(!res.data || res.data.length===0){
+      if(window.zyToast) zyToast('No rows returned from profiles. Check the table read policy and that is_admin() returns true for your account.');
+    }
     INVESTORS=(res.data||[]).map(function(p){
       var joined=p.created_at?new Date(p.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—';
       return {
@@ -114,7 +117,10 @@
   }
 
   function wireInvestors(userId){
-    document.getElementById('invSearch').addEventListener('input',function(){ invQ=this.value.toLowerCase(); renderInvestors(); });
+    var _is=document.getElementById('invSearch');
+    _is.value=''; invQ='';                 // clear any browser autofill on load
+    setTimeout(function(){ if(_is.value){ _is.value=''; invQ=''; renderInvestors(); } },300);
+    _is.addEventListener('input',function(){ invQ=this.value.toLowerCase(); renderInvestors(); });
     document.querySelectorAll('.filter-bar .chip').forEach(function(c){ c.addEventListener('click',function(){ document.querySelectorAll('.filter-bar .chip').forEach(function(x){x.classList.remove('active');}); c.classList.add('active'); invMem=c.dataset.mem||''; renderInvestors(); }); });
     document.getElementById('dw-member').addEventListener('change',refreshMemHint);
     document.getElementById('dw-2fa').addEventListener('click',function(){ this.classList.toggle('on'); });
