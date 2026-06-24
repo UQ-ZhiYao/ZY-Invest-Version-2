@@ -17,38 +17,28 @@
 <link rel="stylesheet" href="../assets/css/dashboard-portfolio.css">
 <link rel="stylesheet" href="../assets/css/admin.css">
 <style>
-/* ── table left-align ── */
+/* left-align all cells */
 .tbl.pt-tbl thead th,
 .tbl.pt-tbl tbody td { text-align:left; padding-left:20px; }
 
-/* ── colour tags shared ── */
-.tag-sub  { display:inline-block; padding:3px 10px; border-radius:99px; font-size:0.76rem; font-weight:700; background:#D1FAE5; color:#065F46; }
-.tag-red-type { display:inline-block; padding:3px 10px; border-radius:99px; font-size:0.76rem; font-weight:700; background:#FEE2E2; color:#991B1B; }
-.pill-green  { display:inline-block; padding:3px 10px; border-radius:99px; font-size:0.76rem; font-weight:700; background:#D1FAE5; color:#065F46; }
-.pill-yellow { display:inline-block; padding:3px 10px; border-radius:99px; font-size:0.76rem; font-weight:700; background:#FEF9C3; color:#854D0E; }
-.pill-red    { display:inline-block; padding:3px 10px; border-radius:99px; font-size:0.76rem; font-weight:700; background:#FEE2E2; color:#991B1B; }
-
-/* ── wide view modal: doc 2/3, info 1/3 ── */
+/* wide view modal: doc 2/3, info 1/3 */
 .view-modal { max-width:1000px !important; width:94vw !important; }
 .view-modal-body { display:grid; grid-template-columns:2fr 1fr; gap:0; min-height:440px; }
 .view-doc-col { border-right:1px solid var(--border); padding:22px; display:flex; flex-direction:column; gap:14px; overflow:auto; }
 .view-info-col { padding:22px; display:flex; flex-direction:column; }
 .doc-preview-wrap { display:flex; flex-direction:column; gap:10px; }
-.doc-preview-wrap img { width:100%; border-radius:8px; border:1px solid var(--border); object-fit:contain; }
-.doc-preview-wrap iframe { width:100%; height:420px; border-radius:8px; border:1px solid var(--border); }
-.doc-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; height:260px; color:var(--fg-3); font-size:0.85rem; gap:10px; }
-.doc-empty span { font-size:2.5rem; }
-.doc-link { display:inline-flex; align-items:center; gap:7px; font-size:0.83rem; font-weight:600; color:var(--blue); text-decoration:none; padding:7px 13px; border:1px solid var(--blue); border-radius:var(--radius-md); align-self:flex-start; }
-.doc-link:hover { background:var(--blue-bg,#EBF3FF); }
+.doc-preview-wrap iframe { width:100%; height:480px; border-radius:8px; border:1px solid var(--border); display:block; }
+.doc-preview-wrap img { width:100%; border-radius:8px; border:1px solid var(--border); }
+.doc-empty-state { display:flex; flex-direction:column; align-items:center; justify-content:center; height:260px; color:var(--fg-3); font-size:0.85rem; gap:10px; }
+.doc-empty-state span { font-size:2.5rem; }
 .rev-row { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; padding:9px 0; border-bottom:1px solid var(--border); font-size:0.86rem; }
 .rev-row:last-of-type { border-bottom:none; }
 .rk { color:var(--fg-3); min-width:90px; flex-shrink:0; font-size:0.82rem; }
-.rv { font-weight:600; color:var(--fg-1); text-align:right; word-break:break-all; font-size:0.86rem; }
+.rv { font-weight:600; color:var(--fg-1); text-align:right; word-break:break-all; }
 .status-actions { display:flex; gap:10px; margin-top:auto; padding-top:20px; }
-.sa-approve { flex:1; padding:10px; border-radius:var(--radius-md); border:none; background:#2E7D32; color:#fff; font-weight:700; cursor:pointer; font-size:0.88rem; }
-.sa-approve:hover { background:#1B5E20; }
-.sa-reject { flex:1; padding:10px; border-radius:var(--radius-md); border:none; background:#DC2626; color:#fff; font-weight:700; cursor:pointer; font-size:0.88rem; }
-.sa-reject:hover { background:#b91c1c; }
+.doc-ext-link { display:inline-flex; align-items:center; gap:6px; font-size:0.83rem; font-weight:600; color:var(--blue); text-decoration:none;
+  padding:7px 13px; border:1px solid var(--blue); border-radius:var(--radius-md); align-self:flex-start; }
+.doc-ext-link:hover { background:var(--blue-bg); }
 .file-drop { border:2px dashed var(--border); border-radius:var(--radius-md); padding:16px; text-align:center; cursor:pointer; font-size:0.84rem; color:var(--fg-3); transition:.15s; }
 .file-drop:hover,.file-drop.has-file { border-color:var(--blue); color:var(--blue); background:var(--blue-bg,#EBF3FF); }
 .file-drop .fd-ic { font-size:1.4rem; display:block; margin-bottom:4px; }
@@ -111,14 +101,8 @@
   <div class="panel-head"><h3>All Capital Injections</h3><button class="btn-mini" id="openPtModal">+ Post Transaction</button></div>
   <table class="tbl pt-tbl">
     <thead><tr>
-      <th>Date</th>
-      <th>Investor</th>
-      <th>Type</th>
-      <th>Reference ID</th>
-      <th>Amount (RM)</th>
-      <th>NTA</th>
-      <th>Units</th>
-      <th>Status</th>
+      <th>Date</th><th>Investor</th><th>Type</th><th>Reference ID</th>
+      <th>Amount (RM)</th><th>NTA</th><th>Units</th><th>Status</th>
     </tr></thead>
     <tbody id="ptBody"><tr><td colspan="8" style="padding:24px;color:var(--fg-3);">Loading…</td></tr></tbody>
   </table>
@@ -144,19 +128,17 @@
   <div class="modal-foot"><button class="btn-line btn-sm" data-close>Cancel</button><button class="btn-fill btn-sm" id="pt-post">Post Transaction</button></div>
 </div>
 
-<!-- VIEW / STATUS MODAL — doc left (2/3), info right (1/3) -->
+<!-- VIEW / STATUS MODAL — doc left 2/3, info right 1/3 -->
 <div class="modal view-modal" id="statusModal">
   <div class="modal-head">
     <div><h3>Transaction Detail</h3><div class="sub" id="st-refid" style="font-family:monospace;font-size:0.82rem;">—</div></div>
     <button class="modal-x" data-close>✕</button>
   </div>
   <div class="view-modal-body">
-    <!-- LEFT: document (2/3 width) -->
     <div class="view-doc-col">
       <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--fg-3);">Document</div>
-      <div id="st-doc-preview"><div class="doc-empty"><span>📄</span>No document attached</div></div>
+      <div id="st-doc-preview"><div class="doc-empty-state"><span>📄</span>No document attached</div></div>
     </div>
-    <!-- RIGHT: info + actions (1/3 width) -->
     <div class="view-info-col">
       <div class="rev-row"><span class="rk">Investor</span><span class="rv" id="st-inv">—</span></div>
       <div class="rev-row"><span class="rk">Type</span><span class="rv" id="st-type">—</span></div>
