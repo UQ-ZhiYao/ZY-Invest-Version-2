@@ -163,11 +163,18 @@
 
       this.disabled=true; this.textContent='Updating…';
       try{
-        var res;
         if(!ZY_DEMO){
-          // Use Supabase admin API to update the user's password
-          res=await sb.auth.admin.updateUserById(curInv._sbId,{ password: pw1 });
-          if(res.error) throw res.error;
+          // Call the Edge Function — it runs server-side with the service role key
+          var session=await sb.auth.getSession();
+          var accessToken=session.data&&session.data.session?session.data.session.access_token:'';
+          var fnUrl=(typeof SUPABASE_URL!=='undefined'?SUPABASE_URL:'')+'/functions/v1/admin-update-password';
+          var fnRes=await fetch(fnUrl,{
+            method:'POST',
+            headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+accessToken },
+            body:JSON.stringify({ target_user_id:curInv._sbId, new_password:pw1 })
+          });
+          var fnData=await fnRes.json();
+          if(!fnRes.ok || fnData.error) throw new Error(fnData.error||'Edge Function error');
         }
         document.getElementById('dw-pw-new').value='';
         document.getElementById('dw-pw-confirm').value='';
