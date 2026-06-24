@@ -7,16 +7,29 @@
 <link rel="stylesheet" href="../assets/css/dashboard.css">
 <link rel="stylesheet" href="../assets/css/dashboard-portfolio.css">
 <style>
-/* ── table: all left-aligned ── */
+/* left-align table */
 .tbl.tx-tbl thead th,
 .tbl.tx-tbl tbody td { text-align:left; padding-left:20px; }
 
-/* ── colour tags ── */
-.tag-sub  { display:inline-block; padding:3px 10px; border-radius:99px; font-size:0.76rem; font-weight:700; background:#D1FAE5; color:#065F46; }
-.tag-red-type { display:inline-block; padding:3px 10px; border-radius:99px; font-size:0.76rem; font-weight:700; background:#FEE2E2; color:#991B1B; }
-.pill-green  { display:inline-block; padding:3px 10px; border-radius:99px; font-size:0.76rem; font-weight:700; background:#D1FAE5; color:#065F46; }
-.pill-yellow { display:inline-block; padding:3px 10px; border-radius:99px; font-size:0.76rem; font-weight:700; background:#FEF9C3; color:#854D0E; }
-.pill-red    { display:inline-block; padding:3px 10px; border-radius:99px; font-size:0.76rem; font-weight:700; background:#FEE2E2; color:#991B1B; }
+/* doc preview modal */
+.doc-scrim { position:fixed; inset:0; background:rgba(15,23,42,.5); z-index:200; opacity:0; visibility:hidden; transition:.2s; }
+.doc-scrim.open { opacity:1; visibility:visible; }
+.doc-modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-48%) scale(.98); width:820px; max-width:95vw; max-height:92vh;
+  overflow-y:auto; background:#fff; border-radius:var(--radius-xl,14px); box-shadow:var(--shadow-lg); z-index:201;
+  opacity:0; visibility:hidden; transition:.2s; }
+.doc-modal.open { opacity:1; visibility:visible; transform:translate(-50%,-50%) scale(1); }
+.doc-modal-head { display:flex; align-items:center; justify-content:space-between; padding:16px 22px; border-bottom:1px solid var(--border); }
+.doc-modal-head h3 { margin:0; font-size:1rem; font-weight:600; color:var(--fg-1); }
+.doc-modal-body { padding:20px 22px; }
+.doc-modal-body img { width:100%; border-radius:8px; border:1px solid var(--border); }
+.doc-modal-body iframe { width:100%; height:520px; border-radius:8px; border:1px solid var(--border); display:block; }
+.doc-modal-foot { padding:14px 22px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; gap:12px; background:var(--gray-50,#F8FAFC); }
+.doc-open-link { display:inline-flex; align-items:center; gap:6px; font-size:0.84rem; font-weight:600; color:var(--blue); text-decoration:none;
+  padding:8px 14px; border:1px solid var(--blue); border-radius:var(--radius-md); }
+.doc-open-link:hover { background:var(--blue-bg); }
+.doc-close-btn { font:inherit; font-size:0.84rem; font-weight:600; padding:8px 16px; border-radius:var(--radius-md);
+  border:1px solid var(--border); background:#fff; cursor:pointer; color:var(--fg-2); }
+.doc-close-btn:hover { background:var(--gray-50); }
 </style>
 </head>
 <body>
@@ -97,7 +110,6 @@
         <span class="tsep">•</span>
         <span class="tk"><span class="flag">🇯🇵</span><span class="tname">NIKKEI 225</span><span class="tval">38,505.0</span><span class="tchg up">+0.88%</span></span>
         <span class="tsep">•</span>
-        <!-- duplicate for seamless loop -->
         <span class="tk"><span class="flag">🇺🇸</span><span class="tname">S&amp;P 500</span><span class="tval">5,218.2</span><span class="tchg up">+0.47%</span></span>
         <span class="tsep">•</span>
         <span class="tk"><span class="flag">🇲🇾</span><span class="tname">FBM KLCI</span><span class="tval">1,612.40</span><span class="tchg up">+0.60%</span></span>
@@ -169,47 +181,85 @@
   </div>
 </div>
 
+<!-- DOCUMENT PREVIEW MODAL -->
+<div class="doc-scrim" id="docScrim"></div>
+<div class="doc-modal" id="docModal">
+  <div class="doc-modal-head">
+    <h3 id="docModalTitle">Document Preview</h3>
+    <button style="background:none;border:none;font-size:1.2rem;color:var(--fg-3);cursor:pointer;" id="docModalClose">✕</button>
+  </div>
+  <div class="doc-modal-body" id="docModalBody"></div>
+  <div class="doc-modal-foot">
+    <a href="#" target="_blank" id="docModalLink" class="doc-open-link">↗ Open in new tab</a>
+    <button class="doc-close-btn" id="docModalCloseBtn">Close</button>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../assets/js/supabase-auth.js"></script>
 <script src="../assets/js/auth-logout.js"></script>
 <script src="../assets/js/member-search.js"></script>
 <script>
 (function(){
-  // ── sidebar collapse ──
+  // ── sidebar ──
   var shell=document.getElementById('shell'), sbToggle=document.getElementById('sbToggle'), scrim=document.getElementById('scrim');
   if(sbToggle){ sbToggle.addEventListener('click',function(){ var c=shell.classList.toggle('collapsed'); try{localStorage.setItem('zy-sb-collapsed',c?'1':'0');}catch(e){} }); }
   if(scrim){ scrim.addEventListener('click',function(){ shell.classList.remove('collapsed'); shell.classList.remove('nav-open'); }); }
 
-  // ── nav dropdowns ──
+  // ── fund nav dropdowns ──
   document.querySelectorAll('.nav-group').forEach(function(g){
     g.querySelector('.nav-top').addEventListener('click',function(e){ e.stopPropagation(); g.classList.toggle('open'); document.querySelectorAll('.nav-group').forEach(function(x){ if(x!==g) x.classList.remove('open'); }); });
   });
   document.addEventListener('click',function(){ document.querySelectorAll('.nav-group').forEach(function(g){ g.classList.remove('open'); }); });
 
-  // ── avatar dropdown ──
+  // ── avatar dropdown — mirrors dashboard.html exactly ──
   var userBtn=document.getElementById('userBtn'), userMenu=document.getElementById('userMenu');
-  if(userBtn){ userBtn.addEventListener('click',function(e){ e.stopPropagation(); userMenu.classList.toggle('open'); }); }
-  document.addEventListener('click',function(e){
-    if(userMenu && !userMenu.contains(e.target) && e.target!==userBtn) userMenu.classList.remove('open');
+  userBtn.addEventListener('click',function(e){
+    e.stopPropagation();
+    userMenu.classList.toggle('open');
   });
+  document.addEventListener('click',function(e){
+    if(userMenu.classList.contains('open') && !userMenu.contains(e.target) && e.target!==userBtn){
+      userMenu.classList.remove('open');
+    }
+  });
+
+  // ── doc preview modal ──
+  var docScrim=document.getElementById('docScrim'), docModal=document.getElementById('docModal');
+  var docModalBody=document.getElementById('docModalBody'), docModalLink=document.getElementById('docModalLink');
+  var docModalTitle=document.getElementById('docModalTitle');
+  function openDocModal(url, refId){
+    docModalTitle.textContent='Document — '+(refId||'Preview');
+    docModalLink.href=url;
+    docModalBody.innerHTML='';
+    var ext=url.split('?')[0].split('.').pop().toLowerCase();
+    if(['jpg','jpeg','png','gif','webp'].indexOf(ext)>-1){
+      var img=document.createElement('img'); img.src=url; docModalBody.appendChild(img);
+    } else {
+      var ifr=document.createElement('iframe'); ifr.src=url; ifr.title='Document'; docModalBody.appendChild(ifr);
+    }
+    docModal.classList.add('open'); docScrim.classList.add('open');
+  }
+  function closeDocModal(){ docModal.classList.remove('open'); docScrim.classList.remove('open'); }
+  document.getElementById('docModalClose').addEventListener('click', closeDocModal);
+  document.getElementById('docModalCloseBtn').addEventListener('click', closeDocModal);
+  docScrim.addEventListener('click', closeDocModal);
 
   // ── helpers ──
   function fmt(n){ return parseFloat(n||0).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2}); }
   function fmtDate(d){ if(!d) return '—'; return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
   function initials(n){ return (n||'?').split(' ').filter(Boolean).slice(0,2).map(function(w){return w[0];}).join('').toUpperCase(); }
 
-  // ── type tag: green=subscription, red=redemption ──
+  // native admin.css / dashboard-portfolio.css classes
   function tTag(t){
-    if(t==='Subscription') return '<span class="tag-sub">Subscription</span>';
-    return '<span class="tag-red-type">Redemption</span>';
+    if(t==='Subscription') return '<span class="tag-green">Subscription</span>';
+    return '<span class="tag-red">Redemption</span>';
   }
-
-  // ── status pill: green=approved, yellow=pending, red=rejected ──
   function sPill(s){
     var v=(s||'pending').toLowerCase();
-    if(v==='approved') return '<span class="pill-green">Approved</span>';
-    if(v==='rejected') return '<span class="pill-red">Rejected</span>';
-    return '<span class="pill-yellow">Pending</span>';
+    if(v==='approved') return '<span class="pill-ok">Approved</span>';
+    if(v==='rejected') return '<span class="pill-rej">Rejected</span>';
+    return '<span class="pill-warn">Pending</span>';
   }
 
   var ALL_TX=[], curFilter='';
@@ -224,7 +274,9 @@
     tbody.innerHTML='';
     filtered.forEach(function(r){
       var units=(r.amount&&r.nta)?fmt(r.amount/r.nta):'—';
+      var hasDoc=!!r.document;
       var tr=document.createElement('tr');
+      tr.style.cursor='pointer';
       tr.innerHTML=
         '<td>'+fmtDate(r.date)+'</td>'+
         '<td>'+tTag(r.type||'Subscription')+'</td>'+
@@ -233,6 +285,12 @@
         '<td>'+(r.nta?parseFloat(r.nta).toFixed(4):'—')+'</td>'+
         '<td>'+units+'</td>'+
         '<td>'+sPill(r.status)+'</td>';
+      if(hasDoc){
+        tr.title='Click to view document';
+        tr.addEventListener('click',function(){
+          openDocModal(r.document, r.reference_id);
+        });
+      }
       tbody.appendChild(tr);
     });
   }
@@ -257,11 +315,9 @@
     if(typeof sb==='undefined'||!sb) return;
     var sres=await sb.auth.getSession();
     if(!sres.data||!sres.data.session){ window.location.href='../login.html'; return; }
-    var session=sres.data.session;
-    var userId=session.user.id;
-    var email=session.user.email||'';
+    var session=sres.data.session, userId=session.user.id, email=session.user.email||'';
 
-    // populate nav user
+    // populate nav user info
     var pres=await sb.from('profiles').select('full_name,preferred_name').eq('id',userId).single();
     if(pres.data){
       var name=pres.data.preferred_name||pres.data.full_name||email;
@@ -274,10 +330,10 @@
     document.getElementById('navRole').textContent=email;
     document.getElementById('menuEmail').textContent=email;
 
-    // load own transactions — RLS also enforces server-side
+    // load own transactions
     var res=await sb.from('capital_injection').select('*').eq('uid',userId).order('date',{ascending:false});
     if(res.error){
-      document.getElementById('txBody').innerHTML='<tr><td colspan="7" style="padding:24px;color:var(--red,#DC2626);">Failed to load: '+res.error.message+'</td></tr>';
+      document.getElementById('txBody').innerHTML='<tr><td colspan="7" style="padding:24px;color:#DC2626;">Failed to load: '+res.error.message+'</td></tr>';
       return;
     }
     ALL_TX=res.data||[];
@@ -285,13 +341,10 @@
     renderTable(ALL_TX);
   }
 
-  // filter buttons
   document.querySelectorAll('.seg-ctrl button').forEach(function(btn){
     btn.addEventListener('click',function(){
       document.querySelectorAll('.seg-ctrl button').forEach(function(b){b.classList.remove('on');});
-      btn.classList.add('on');
-      curFilter=btn.dataset.filter||'';
-      renderTable(ALL_TX);
+      btn.classList.add('on'); curFilter=btn.dataset.filter||''; renderTable(ALL_TX);
     });
   });
 
