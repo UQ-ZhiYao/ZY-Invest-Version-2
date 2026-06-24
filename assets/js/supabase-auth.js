@@ -3,8 +3,8 @@
    Replace SUPABASE_URL and SUPABASE_ANON with your real values
    (Supabase Dashboard → Project Settings → API).
    ============================================================ */
-var SUPABASE_URL  = 'https://wvaibdjkjnnesefantjc.supabase.co';   // ← replace
-var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind2YWliZGpram5uZXNlZmFudGpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4NDM3NDEsImV4cCI6MjA5NzQxOTc0MX0.tWiXzeFVDQ_iFGAcKfJ141aN1ghRHToWwrzRjwEGLgM';               // ← replace
+var SUPABASE_URL  = 'https://wvaibdjkjnnesefantjc.supabase.co';
+var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind2YWliZGpram5uZXNlZmFudGpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4NDM3NDEsImV4cCI6MjA5NzQxOTc0MX0.tWiXzeFVDQ_iFGAcKfJ141aN1ghRHToWwrzRjwEGLgM';
 var ZY_DEMO = SUPABASE_URL.indexOf('YOUR-PROJECT') !== -1;
 var sb = null;
 if (!ZY_DEMO && window.supabase && window.supabase.createClient) {
@@ -18,6 +18,10 @@ async function zySignUp({ name, email, password }) {
   var r = await sb.auth.signUp({ email:email, password:password, options:{ data:{ full_name:name }, emailRedirectTo:zyVerifyRedirect() } });
   if (r.error) throw r.error;
   try{ localStorage.setItem('zy_pending_email', email); }catch(e){}
+  // Write email into the profiles row so admin can see it without joining auth.users
+  if (r.data && r.data.user) {
+    await sb.from('profiles').update({ email: email }).eq('id', r.data.user.id);
+  }
   return { needsVerification: !r.data.session, email:email, session:r.data.session };
 }
 async function zyVerifyFromUrl() {

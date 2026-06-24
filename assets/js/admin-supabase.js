@@ -109,7 +109,11 @@
     document.getElementById('dwSince').textContent=m.joined||'—';
     document.getElementById('dw-name').value=m.name||'';
     document.getElementById('dw-phone').value=m.phone||'';
-    document.getElementById('dw-email').value=m.email||'';
+    var emailEl=document.getElementById('dw-email');
+    emailEl.value=m.email||'';
+    emailEl.readOnly=true;
+    emailEl.style.opacity='0.6';
+    emailEl.style.cursor='not-allowed';
     document.getElementById('dw-address').value=m.address||'';
     document.getElementById('dw-bank').value=m.bank||'';
     document.getElementById('dw-acctno').value=m.acctno||'';
