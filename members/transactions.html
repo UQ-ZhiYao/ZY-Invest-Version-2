@@ -7,13 +7,22 @@
 <link rel="stylesheet" href="../assets/css/dashboard.css">
 <link rel="stylesheet" href="../assets/css/dashboard-portfolio.css">
 <style>
+/* ── table: all left-aligned ── */
 .tbl.tx-tbl thead th,
 .tbl.tx-tbl tbody td { text-align:left; padding-left:20px; }
+
+/* ── colour tags ── */
+.tag-sub  { display:inline-block; padding:3px 10px; border-radius:99px; font-size:0.76rem; font-weight:700; background:#D1FAE5; color:#065F46; }
+.tag-red-type { display:inline-block; padding:3px 10px; border-radius:99px; font-size:0.76rem; font-weight:700; background:#FEE2E2; color:#991B1B; }
+.pill-green  { display:inline-block; padding:3px 10px; border-radius:99px; font-size:0.76rem; font-weight:700; background:#D1FAE5; color:#065F46; }
+.pill-yellow { display:inline-block; padding:3px 10px; border-radius:99px; font-size:0.76rem; font-weight:700; background:#FEF9C3; color:#854D0E; }
+.pill-red    { display:inline-block; padding:3px 10px; border-radius:99px; font-size:0.76rem; font-weight:700; background:#FEE2E2; color:#991B1B; }
 </style>
 </head>
 <body>
 <div class="app" id="app">
 
+  <!-- TOP NAV -->
   <header class="topnav">
     <a href="../index.html" class="brand">
       <img src="../assets/img/logo.png" alt="ZY-Invest">
@@ -44,7 +53,7 @@
       </div>
     </nav>
     <div class="nav-right">
-      <button class="icon-btn" title="Search" id="searchBtn">⌕</button>
+      <button class="icon-btn" title="Search">⌕</button>
       <button class="icon-btn" title="Notifications">🔔<span class="badge-dot"></span></button>
       <div class="nav-user-wrap">
         <div class="nav-user" id="userBtn">
@@ -58,23 +67,52 @@
         <div class="user-menu" id="userMenu">
           <div class="um-head">
             <div class="avatar" id="menuAvatar">—</div>
-            <div><div class="um-name" id="menuName">—</div><div class="um-mail" id="menuEmail">—</div></div>
+            <div>
+              <div class="um-name" id="menuName">—</div>
+              <div class="um-mail" id="menuEmail">—</div>
+            </div>
           </div>
           <a class="um-item" href="profile.html"><span class="um-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span><span><b>Profile</b><span>Personal &amp; account details</span></span></a>
           <a class="um-item" href="profile.html#security"><span class="um-ic"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span><span><b>Password</b><span>Sign-in &amp; security</span></span></a>
+          <a class="um-item" href="profile.html#nominee"><span class="um-ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20c0-3 2.5-4.6 5.5-4.6S14.5 17 14.5 20"/><circle cx="17" cy="9" r="2.6"/><path d="M16 15.6c2.6.2 4.5 1.7 4.5 4.4"/></svg></span><span><b>Nominee</b><span>Beneficiary nomination</span></span></a>
           <div class="um-sep"></div>
           <a class="um-item danger logout" href="../login.html"><span class="um-ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span><span><b>Sign out</b></span></a>
         </div>
       </div>
+      <a href="../login.html" class="btn-logout logout">Logout</a>
     </div>
   </header>
 
-  <div class="ticker-bar"><div class="ticker-track" id="tickerTrack">
-    <span class="tk"><span class="flag">🇲🇾</span><span class="tname">FBM KLCI</span><span class="tval">1,612.40</span><span class="tchg up">+0.60%</span></span>
-    <span class="tsep">•</span>
-    <span class="tk"><span class="flag">🇺🇸</span><span class="tname">S&amp;P 500</span><span class="tval">5,218.2</span><span class="tchg up">+0.47%</span></span>
-  </div></div>
+  <!-- TICKER -->
+  <div class="ticker">
+    <div class="ticker-mask">
+      <div class="ticker-track" id="tickerTrack">
+        <span class="tk"><span class="flag">🇺🇸</span><span class="tname">S&amp;P 500</span><span class="tval">5,218.2</span><span class="tchg up">+0.47%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇲🇾</span><span class="tname">FBM KLCI</span><span class="tval">1,612.40</span><span class="tchg up">+0.60%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇸🇬</span><span class="tname">STI</span><span class="tval">3,340.6</span><span class="tchg up">+0.30%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇭🇰</span><span class="tname">HANG SENG</span><span class="tval">18,902.4</span><span class="tchg down">−0.52%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇯🇵</span><span class="tname">NIKKEI 225</span><span class="tval">38,505.0</span><span class="tchg up">+0.88%</span></span>
+        <span class="tsep">•</span>
+        <!-- duplicate for seamless loop -->
+        <span class="tk"><span class="flag">🇺🇸</span><span class="tname">S&amp;P 500</span><span class="tval">5,218.2</span><span class="tchg up">+0.47%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇲🇾</span><span class="tname">FBM KLCI</span><span class="tval">1,612.40</span><span class="tchg up">+0.60%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇸🇬</span><span class="tname">STI</span><span class="tval">3,340.6</span><span class="tchg up">+0.30%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇭🇰</span><span class="tname">HANG SENG</span><span class="tval">18,902.4</span><span class="tchg down">−0.52%</span></span>
+        <span class="tsep">•</span>
+        <span class="tk"><span class="flag">🇯🇵</span><span class="tname">NIKKEI 225</span><span class="tval">38,505.0</span><span class="tchg up">+0.88%</span></span>
+        <span class="tsep">•</span>
+      </div>
+    </div>
+  </div>
 
+  <!-- SHELL -->
   <div class="shell" id="shell">
     <script>try{if(localStorage.getItem('zy-sb-collapsed')==='1'){document.getElementById('shell').classList.add('collapsed');}}catch(e){}</script>
     <div class="sidebar-scrim" id="scrim"></div>
@@ -114,9 +152,9 @@
         </div>
         <table class="tbl tx-tbl">
           <thead><tr>
-            <th>Reference ID</th>
             <th>Date</th>
             <th>Type</th>
+            <th>Reference ID</th>
             <th>Amount (RM)</th>
             <th>NTA</th>
             <th>Units</th>
@@ -137,36 +175,44 @@
 <script src="../assets/js/member-search.js"></script>
 <script>
 (function(){
-  // sidebar collapse
-  var shell=document.getElementById('shell');
-  var sbToggle=document.getElementById('sbToggle');
+  // ── sidebar collapse ──
+  var shell=document.getElementById('shell'), sbToggle=document.getElementById('sbToggle'), scrim=document.getElementById('scrim');
   if(sbToggle){ sbToggle.addEventListener('click',function(){ var c=shell.classList.toggle('collapsed'); try{localStorage.setItem('zy-sb-collapsed',c?'1':'0');}catch(e){} }); }
-  document.getElementById('scrim').addEventListener('click',function(){ shell.classList.remove('collapsed'); });
+  if(scrim){ scrim.addEventListener('click',function(){ shell.classList.remove('collapsed'); shell.classList.remove('nav-open'); }); }
 
-  // nav user dropdown
-  var userBtn=document.getElementById('userBtn'), userMenu=document.getElementById('userMenu');
-  userBtn.addEventListener('click',function(e){ e.stopPropagation(); userMenu.classList.toggle('open'); });
-  document.addEventListener('click',function(){ userMenu.classList.remove('open'); });
-
-  // nav top dropdowns
+  // ── nav dropdowns ──
   document.querySelectorAll('.nav-group').forEach(function(g){
     g.querySelector('.nav-top').addEventListener('click',function(e){ e.stopPropagation(); g.classList.toggle('open'); document.querySelectorAll('.nav-group').forEach(function(x){ if(x!==g) x.classList.remove('open'); }); });
   });
   document.addEventListener('click',function(){ document.querySelectorAll('.nav-group').forEach(function(g){ g.classList.remove('open'); }); });
 
-  function fmt(n){ return parseFloat(n||0).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2}); }
-  function fmtDate(d){ if(!d) return '—'; var dt=new Date(d); return dt.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
-  function sPill(s){
-    if(!s) return '<span class="pill-warn">Pending</span>';
-    s=s.charAt(0).toUpperCase()+s.slice(1).toLowerCase();
-    if(s==='Approved') return '<span class="pill-ok">Approved</span>';
-    if(s==='Rejected') return '<span class="pill-rej">Rejected</span>';
-    return '<span class="pill-warn">Pending</span>';
-  }
-  function tTag(t){ return t==='Subscription'?'<span class="tag-blue">Subscription</span>':'<span class="tag-orange">Redemption</span>'; }
+  // ── avatar dropdown ──
+  var userBtn=document.getElementById('userBtn'), userMenu=document.getElementById('userMenu');
+  if(userBtn){ userBtn.addEventListener('click',function(e){ e.stopPropagation(); userMenu.classList.toggle('open'); }); }
+  document.addEventListener('click',function(e){
+    if(userMenu && !userMenu.contains(e.target) && e.target!==userBtn) userMenu.classList.remove('open');
+  });
 
-  var ALL_TX = [];
-  var curFilter = '';
+  // ── helpers ──
+  function fmt(n){ return parseFloat(n||0).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  function fmtDate(d){ if(!d) return '—'; return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+  function initials(n){ return (n||'?').split(' ').filter(Boolean).slice(0,2).map(function(w){return w[0];}).join('').toUpperCase(); }
+
+  // ── type tag: green=subscription, red=redemption ──
+  function tTag(t){
+    if(t==='Subscription') return '<span class="tag-sub">Subscription</span>';
+    return '<span class="tag-red-type">Redemption</span>';
+  }
+
+  // ── status pill: green=approved, yellow=pending, red=rejected ──
+  function sPill(s){
+    var v=(s||'pending').toLowerCase();
+    if(v==='approved') return '<span class="pill-green">Approved</span>';
+    if(v==='rejected') return '<span class="pill-red">Rejected</span>';
+    return '<span class="pill-yellow">Pending</span>';
+  }
+
+  var ALL_TX=[], curFilter='';
 
   function renderTable(rows){
     var tbody=document.getElementById('txBody');
@@ -180,9 +226,9 @@
       var units=(r.amount&&r.nta)?fmt(r.amount/r.nta):'—';
       var tr=document.createElement('tr');
       tr.innerHTML=
-        '<td style="font-family:monospace;font-size:0.82rem;">'+(r.reference_id||'—')+'</td>'+
         '<td>'+fmtDate(r.date)+'</td>'+
         '<td>'+tTag(r.type||'Subscription')+'</td>'+
+        '<td style="font-family:monospace;font-size:0.82rem;">'+(r.reference_id||'—')+'</td>'+
         '<td>'+fmt(r.amount)+'</td>'+
         '<td>'+(r.nta?parseFloat(r.nta).toFixed(4):'—')+'</td>'+
         '<td>'+units+'</td>'+
@@ -192,11 +238,11 @@
   }
 
   function updateMetrics(rows){
-    var subUnits=0, subCount=0, redUnits=0, redCount=0, pending=0;
+    var subUnits=0,subCount=0,redUnits=0,redCount=0,pending=0;
     rows.forEach(function(r){
-      var u=r.units||((r.amount&&r.nta)?r.amount/r.nta:0);
-      if(r.type==='Subscription'){ subUnits+=parseFloat(u)||0; subCount++; }
-      else { redUnits+=parseFloat(u)||0; redCount++; }
+      var u=parseFloat(r.units)||(r.amount&&r.nta?r.amount/r.nta:0);
+      if(r.type==='Subscription'){ subUnits+=u; subCount++; }
+      else { redUnits+=u; redCount++; }
       if((r.status||'').toLowerCase()==='pending') pending++;
     });
     document.getElementById('mcSubscribed').textContent=fmt(subUnits);
@@ -207,30 +253,31 @@
     document.getElementById('mcPending').textContent=pending;
   }
 
-  async function loadTransactions(){
+  async function loadAll(){
     if(typeof sb==='undefined'||!sb) return;
     var sres=await sb.auth.getSession();
-    if(!sres.data||!sres.data.session) return;
-    var userId=sres.data.session.user.id;
+    if(!sres.data||!sres.data.session){ window.location.href='../login.html'; return; }
+    var session=sres.data.session;
+    var userId=session.user.id;
+    var email=session.user.email||'';
 
-    // Populate nav user info
-    var email=sres.data.session.user.email||'';
+    // populate nav user
     var pres=await sb.from('profiles').select('full_name,preferred_name').eq('id',userId).single();
     if(pres.data){
       var name=pres.data.preferred_name||pres.data.full_name||email;
       document.getElementById('navName').textContent=name;
       document.getElementById('menuName').textContent=name;
-      var av=name.split(' ').filter(Boolean).slice(0,2).map(function(w){return w[0];}).join('').toUpperCase();
+      var av=initials(name);
       document.getElementById('navAvatar').textContent=av;
       document.getElementById('menuAvatar').textContent=av;
     }
     document.getElementById('navRole').textContent=email;
     document.getElementById('menuEmail').textContent=email;
 
-    // Load own transactions only — RLS enforces this server-side too
+    // load own transactions — RLS also enforces server-side
     var res=await sb.from('capital_injection').select('*').eq('uid',userId).order('date',{ascending:false});
     if(res.error){
-      document.getElementById('txBody').innerHTML='<tr><td colspan="7" style="padding:24px;color:var(--red);">Failed to load: '+res.error.message+'</td></tr>';
+      document.getElementById('txBody').innerHTML='<tr><td colspan="7" style="padding:24px;color:var(--red,#DC2626);">Failed to load: '+res.error.message+'</td></tr>';
       return;
     }
     ALL_TX=res.data||[];
@@ -248,7 +295,7 @@
     });
   });
 
-  window.addEventListener('DOMContentLoaded', loadTransactions);
+  window.addEventListener('DOMContentLoaded', loadAll);
 })();
 </script>
 </body>
