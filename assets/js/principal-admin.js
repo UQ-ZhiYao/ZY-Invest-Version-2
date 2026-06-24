@@ -76,10 +76,10 @@
         '<td>'+(r.full_name||'—')+'</td>'+
         '<td>'+tTag(r.type||'Subscription')+'</td>'+
         '<td style="font-family:monospace;font-size:0.82rem;">'+(r.reference_id||'—')+'</td>'+
-        '<td>'+fmt(r.amount)+'</td>'+
-        '<td>'+(r.nta?parseFloat(r.nta).toFixed(4):'—')+'</td>'+
-        '<td>'+units+'</td>'+
-        '<td>'+sPill(r.status)+'</td>';
+        '<td class="r">'+fmt(r.amount)+'</td>'+
+        '<td class="r">'+(r.nta?parseFloat(r.nta).toFixed(4):'—')+'</td>'+
+        '<td class="r">'+units+'</td>'+
+        '<td class="r">'+sPill(r.status)+'</td>';
       tr.addEventListener('click',function(){ openStatus(r); });
       tbody.appendChild(tr);
     });
