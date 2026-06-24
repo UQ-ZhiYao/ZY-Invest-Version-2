@@ -16,7 +16,27 @@
 <link rel="stylesheet" href="../assets/css/dashboard.css">
 <link rel="stylesheet" href="../assets/css/dashboard-portfolio.css">
 <link rel="stylesheet" href="../assets/css/admin.css">
-
+<style>
+.doc-preview-wrap { margin-top:10px; }
+.doc-preview-wrap img { max-width:100%; border-radius:6px; border:1px solid var(--border); }
+.doc-preview-wrap iframe { width:100%; height:340px; border-radius:6px; border:1px solid var(--border); }
+.doc-link { display:inline-flex; align-items:center; gap:7px; font-size:0.83rem; font-weight:600; color:var(--blue); text-decoration:none; padding:7px 13px; border:1px solid var(--blue); border-radius:var(--radius-md); margin-top:6px; }
+.doc-link:hover { background:var(--blue-bg,#EBF3FF); }
+.file-drop { border:2px dashed var(--border); border-radius:var(--radius-md); padding:16px; text-align:center; cursor:pointer; font-size:0.84rem; color:var(--fg-3); transition:.15s; }
+.file-drop:hover, .file-drop.has-file { border-color:var(--blue); color:var(--blue); background:var(--blue-bg,#EBF3FF); }
+.file-drop .fd-ic { font-size:1.4rem; display:block; margin-bottom:4px; }
+.rev-row { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding:9px 0; border-bottom:1px solid var(--border); font-size:0.86rem; }
+.rev-row:last-of-type { border-bottom:none; }
+.rk { color:var(--fg-3); min-width:100px; }
+.rv { font-weight:600; color:var(--fg-1); text-align:right; word-break:break-all; }
+.status-actions { display:flex; gap:10px; margin-top:18px; }
+.sa-approve { flex:1; padding:10px; border-radius:var(--radius-md); border:none; background:#2E7D32; color:#fff; font-weight:700; cursor:pointer; font-size:0.9rem; }
+.sa-approve:hover { background:#1B5E20; }
+.sa-reject { flex:1; padding:10px; border-radius:var(--radius-md); border:none; background:var(--red,#DC2626); color:#fff; font-weight:700; cursor:pointer; font-size:0.9rem; }
+.sa-reject:hover { background:#b91c1c; }
+.act-link { background:none; border:none; color:var(--fg-3); font-size:0.8rem; cursor:pointer; text-decoration:underline; }
+.act-link:hover { color:var(--fg-1); }
+</style>
 </head>
 <body>
 <script>
@@ -90,43 +110,72 @@
     <a class="adm-nav adm-signout" id="admSignout" href="#"><span class="ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>Sign out</a>
   </aside>
   <main class="adm-main">
+
 <div class="ph"><h1>Capital Injection</h1><p>Investor capital injections and redemptions. Click any transaction to review and set its status.</p></div>
-<div class="panel"><div class="panel-head"><h3>All Capital Injections</h3><button class="btn-mini" id="openPtModal">+ Post Transaction</button></div>
-  <table class="tbl"><thead><tr><th>Date</th><th>Investor</th><th>Type</th><th class="td-right">Amount (RM)</th><th class="td-right">NTA</th><th class="td-right">Units</th><th>Status</th></tr></thead>
-  <tbody id="ptBody"></tbody></table>
+
+<div class="panel">
+  <div class="panel-head"><h3>All Capital Injections</h3><button class="btn-mini" id="openPtModal">+ Post Transaction</button></div>
+  <table class="tbl">
+    <thead><tr><th>Date</th><th>Investor</th><th>Type</th><th class="td-right">Amount (RM)</th><th class="td-right">NTA</th><th class="td-right">Units</th><th>Status</th></tr></thead>
+    <tbody id="ptBody"><tr><td colspan="7" style="text-align:center;color:var(--fg-3);padding:24px;">Loading…</td></tr></tbody>
+  </table>
 </div>
 
+<!-- ── POST TRANSACTION MODAL ── -->
 <div class="modal" id="ptModal">
-  <div class="modal-head"><div><h3>Post Principal Transaction</h3><div class="sub">Units are issued or cancelled at the prevailing NTA.</div></div><button class="modal-x" data-close>✕</button></div>
+  <div class="modal-head">
+    <div><h3>Post Principal Transaction</h3><div class="sub">Units are issued or cancelled at the prevailing NTA.</div></div>
+    <button class="modal-x" data-close>✕</button>
+  </div>
   <div class="modal-body">
     <div class="form-grid">
-      <div class="field fg-full"><label>Investor</label><select id="pt-investor"></select></div>
+      <div class="field fg-full"><label>Investor</label><select id="pt-investor"><option value="">— Select investor —</option></select></div>
       <div class="field"><label>Type</label><select id="pt-type"><option>Subscription</option><option>Redemption</option></select></div>
-      <div class="field"><label>Trade Date</label><input type="date" id="pt-date" value="2026-03-19"></div>
+      <div class="field"><label>Trade Date</label><input type="date" id="pt-date"></div>
       <div class="field"><label>Amount (RM)</label><input type="text" id="pt-amount" placeholder="25,000.00"></div>
-      <div class="field"><label>NTA per Unit (RM)</label><input type="text" id="pt-nta" value="1.0245"></div>
+      <div class="field"><label>NTA per Unit (RM)</label><input type="text" id="pt-nta" placeholder="1.0245"></div>
       <div class="field fg-full"><label>Units (auto)</label><input type="text" id="pt-units" value="—" disabled><span class="hint">Units = amount ÷ NTA, computed on amount entry.</span></div>
-      <div class="field fg-full"><label>Note</label><input type="text" id="pt-note" placeholder="e.g. Monthly subscription via bank transfer"></div>
+      <div class="field fg-full">
+        <label>Document <span style="font-size:0.75rem;color:var(--fg-3);">PDF, JPG or PNG</span></label>
+        <div class="file-drop" id="pt-drop">
+          <span class="fd-ic">⤓</span>
+          <span id="pt-fname">Click to attach deposit slip or transfer receipt</span>
+          <input type="file" id="pt-file" accept=".pdf,.jpg,.jpeg,.png" style="display:none;">
+        </div>
+      </div>
     </div>
   </div>
   <div class="modal-foot"><button class="btn-line btn-sm" data-close>Cancel</button><button class="btn-fill btn-sm" id="pt-post">Post Transaction</button></div>
 </div>
 
+<!-- ── VIEW / STATUS MODAL ── -->
 <div class="modal" id="statusModal">
-  <div class="modal-head"><div><h3>Review Transaction</h3><div class="sub" id="st-sub">—</div></div><button class="modal-x" data-close>✕</button></div>
+  <div class="modal-head">
+    <div><h3>Transaction Detail</h3><div class="sub" id="st-sub">—</div></div>
+    <button class="modal-x" data-close>✕</button>
+  </div>
   <div class="modal-body">
     <div class="rev-row"><span class="rk">Investor</span><span class="rv" id="st-inv">—</span></div>
     <div class="rev-row"><span class="rk">Type</span><span class="rv" id="st-type">—</span></div>
-    <div class="rev-row"><span class="rk">Amount</span><span class="rv" id="st-amt">—</span></div>
+    <div class="rev-row"><span class="rk">Date</span><span class="rv" id="st-date">—</span></div>
+    <div class="rev-row"><span class="rk">Amount (RM)</span><span class="rv" id="st-amt">—</span></div>
+    <div class="rev-row"><span class="rk">NTA / Unit</span><span class="rv" id="st-nta">—</span></div>
     <div class="rev-row"><span class="rk">Units</span><span class="rv" id="st-units">—</span></div>
     <div class="rev-row"><span class="rk">Current Status</span><span class="rv" id="st-cur">—</span></div>
+    <div class="rev-row" id="st-doc-row" style="display:none;">
+      <span class="rk">Document</span>
+      <span class="rv"><div class="doc-preview-wrap" id="st-doc-preview"></div></span>
+    </div>
     <div class="status-actions">
       <button class="sa-approve" id="st-approve">✓ Approve</button>
       <button class="sa-reject" id="st-reject">✕ Reject</button>
     </div>
-    <div style="text-align:center;margin-top:12px;"><button class="act-link" id="st-pending">Set back to Pending</button></div>
+    <div style="text-align:center;margin-top:12px;">
+      <button class="act-link" id="st-pending">Set back to Pending</button>
+    </div>
   </div>
 </div>
+
   </main>
 </div>
 <div class="modal-scrim" id="modalScrim"></div>
@@ -136,36 +185,6 @@
 <script src="../assets/js/auth-logout.js"></script>
 <script src="../assets/js/admin-shell.js"></script>
 <script src="../assets/js/admin-supabase.js"></script>
-<script>
-(function(){
-  var INVESTOR_NAMES=['Ng Zhi Yao','Ng Family Holdings','Tan Hui Mei','Lim Wealth Trust','Cheah Boon Hwa','Wong Mei Ling','Raj & Associates','Sim Kok Wai','Abdullah bin Hassan','Goh Family Office','Farhan Rahman'];
-  var PT=[
-    {date:'19 Mar 2026',inv:'Tan Hui Mei',type:'Subscription',amt:25000,nta:1.0245,status:'Pending'},
-    {date:'18 Mar 2026',inv:'Farhan Rahman',type:'Subscription',amt:40000,nta:1.0233,status:'Pending'},
-    {date:'15 Mar 2026',inv:'Lim Wealth Trust',type:'Subscription',amt:50000,nta:1.0168,status:'Approved'},
-    {date:'12 Mar 2026',inv:'Cheah Boon Hwa',type:'Redemption',amt:18000,nta:1.0142,status:'Approved'},
-    {date:'06 Mar 2026',inv:'Wong Mei Ling',type:'Subscription',amt:21500,nta:1.0098,status:'Approved'},
-    {date:'28 Feb 2026',inv:'Sim Kok Wai',type:'Redemption',amt:9000,nta:1.0061,status:'Rejected'}
-  ];
-  function sPill(s){ if(s==='Approved')return '<span class="pill-ok">Approved</span>'; if(s==='Rejected')return '<span class="pill-rej">Rejected</span>'; return '<span class="pill-pending">Pending</span>'; }
-  function tTag(t){ return t==='Subscription'?'<span class="tag-blue">Subscription</span>':'<span class="tag-orange">Redemption</span>'; }
-  var ptBody=document.getElementById('ptBody');
-  function render(){ ptBody.innerHTML=''; PT.forEach(function(r,i){ var tr=document.createElement('tr'); tr.className='clickable'; tr.innerHTML='<td>'+r.date+'</td><td>'+r.inv+'</td><td>'+tTag(r.type)+'</td><td class="td-right">'+zyFmt(r.amt)+'</td><td class="td-right">'+r.nta.toFixed(4)+'</td><td class="td-right">'+zyFmt(r.amt/r.nta)+'</td><td>'+sPill(r.status)+'</td>'; tr.addEventListener('click',function(){ openStatus(i); }); ptBody.appendChild(tr); }); }
-  render();
-  var sel=document.getElementById('pt-investor'); INVESTOR_NAMES.forEach(function(n){ var o=document.createElement('option'); o.textContent=n; sel.appendChild(o); });
-  var ptAmount=document.getElementById('pt-amount'), ptNta=document.getElementById('pt-nta'), ptUnits=document.getElementById('pt-units');
-  function recalc(){ var a=zyParseNum(ptAmount.value), n=zyParseNum(ptNta.value); ptUnits.value=(a>0&&n>0)?zyFmt(a/n):'—'; }
-  ptAmount.addEventListener('input',recalc); ptNta.addEventListener('input',recalc);
-  document.getElementById('openPtModal').addEventListener('click',function(){ zyModalOpen('ptModal'); });
-  document.getElementById('pt-post').addEventListener('click',function(){ var inv=sel.value,type=document.getElementById('pt-type').value,amt=zyParseNum(ptAmount.value),nta=zyParseNum(ptNta.value); if(amt<=0){ zyToast('Enter a valid amount'); return; } var d=new Date(document.getElementById('pt-date').value); var ds=isNaN(d)?'19 Mar 2026':d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); PT.unshift({date:ds,inv:inv,type:type,amt:amt,nta:nta,status:'Pending'}); render(); zyModalClose(); zyToast(type+' of RM '+zyFmt(amt)+' posted for '+inv); ptAmount.value=''; ptUnits.value='—'; });
-  var stIdx=-1;
-  function openStatus(i){ stIdx=i; var r=PT[i]; document.getElementById('st-sub').textContent=r.date; document.getElementById('st-inv').textContent=r.inv; document.getElementById('st-type').textContent=r.type; document.getElementById('st-amt').textContent='RM '+zyFmt(r.amt); document.getElementById('st-units').textContent=zyFmt(r.amt/r.nta); document.getElementById('st-cur').innerHTML=sPill(r.status); zyModalOpen('statusModal'); }
-  function setStatus(s){ if(stIdx<0) return; var nm=PT[stIdx].inv; PT[stIdx].status=s; render(); zyModalClose(); zyToast('Transaction '+s.toLowerCase()+' — '+nm); }
-  document.getElementById('st-approve').addEventListener('click',function(){ setStatus('Approved'); });
-  document.getElementById('st-reject').addEventListener('click',function(){ setStatus('Rejected'); });
-  document.getElementById('st-pending').addEventListener('click',function(){ setStatus('Pending'); });
-})();
-</script>
-
+<script src="../assets/js/principal-admin.js"></script>
 </body>
 </html>
