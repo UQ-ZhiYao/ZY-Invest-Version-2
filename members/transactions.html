@@ -10,6 +10,7 @@
 /* left-align table */
 .tbl.tx-tbl thead th,
 .tbl.tx-tbl tbody td { text-align:left; padding-left:20px; }
+.tbl.tx-tbl thead th.r,.tbl.tx-tbl tbody td.r { text-align:right; padding-right:20px; padding-left:0; }
 
 /* doc preview modal */
 .doc-scrim { position:fixed; inset:0; background:rgba(15,23,42,.5); z-index:200; opacity:0; visibility:hidden; transition:.2s; }
@@ -167,10 +168,10 @@
             <th>Date</th>
             <th>Type</th>
             <th>Reference ID</th>
-            <th>Amount (RM)</th>
-            <th>NTA</th>
-            <th>Units</th>
-            <th>Status</th>
+            <th class="r">Amount (RM)</th>
+            <th class="r">NTA (RM)</th>
+            <th class="r">Units</th>
+            <th class="r">Status</th>
           </tr></thead>
           <tbody id="txBody">
             <tr><td colspan="7" style="padding:24px;color:var(--fg-3);">Loading…</td></tr>
@@ -277,10 +278,10 @@
         '<td>'+fmtDate(r.date)+'</td>'+
         '<td>'+tTag(r.type||'Subscription')+'</td>'+
         '<td style="font-family:monospace;font-size:0.82rem;">'+(r.reference_id||'—')+'</td>'+
-        '<td>'+fmt(r.amount)+'</td>'+
-        '<td>'+(r.nta?parseFloat(r.nta).toFixed(4):'—')+'</td>'+
-        '<td>'+units+'</td>'+
-        '<td>'+sPill(r.status)+'</td>';
+        '<td class="r">'+fmt(r.amount)+'</td>'+
+        '<td class="r">'+(r.nta?parseFloat(r.nta).toFixed(4):'—')+'</td>'+
+        '<td class="r">'+units+'</td>'+
+        '<td class="r">'+sPill(r.status)+'</td>';
       if(hasDoc){
         tr.title='Click to view document';
         tr.addEventListener('click',function(){
