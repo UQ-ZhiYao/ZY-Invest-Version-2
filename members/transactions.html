@@ -212,17 +212,13 @@
   });
   document.addEventListener('click',function(){ document.querySelectorAll('.nav-group').forEach(function(g){ g.classList.remove('open'); }); });
 
-  // ── avatar dropdown — mirrors dashboard.html exactly ──
-  var userBtn=document.getElementById('userBtn'), userMenu=document.getElementById('userMenu');
-  userBtn.addEventListener('click',function(e){
-    e.stopPropagation();
-    userMenu.classList.toggle('open');
-  });
-  document.addEventListener('click',function(e){
-    if(userMenu.classList.contains('open') && !userMenu.contains(e.target) && e.target!==userBtn){
-      userMenu.classList.remove('open');
-    }
-  });
+  // ── avatar dropdown — toggle open on nav-user-wrap (matches dashboard-portfolio.css) ──
+  (function(){
+    var wrap=document.querySelector('.nav-user-wrap'), btn=document.getElementById('userBtn');
+    if(!wrap||!btn) return;
+    btn.addEventListener('click',function(e){ e.stopPropagation(); wrap.classList.toggle('open'); });
+    document.addEventListener('click',function(e){ if(!wrap.contains(e.target)) wrap.classList.remove('open'); });
+  })();
 
   // ── doc preview modal ──
   var docScrim=document.getElementById('docScrim'), docModal=document.getElementById('docModal');
