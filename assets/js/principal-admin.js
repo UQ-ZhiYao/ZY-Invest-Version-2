@@ -9,18 +9,18 @@
   function parseNum(s){ return parseFloat((s||'').toString().replace(/,/g,''))||0; }
   function fmtDate(d){ if(!d) return '—'; return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
 
-  // green=subscription, red=redemption
+  // Subscription = green (tag-green), Redemption = red (tag-red) — native admin.css classes
   function tTag(t){
-    if(t==='Subscription') return '<span class="tag-sub">Subscription</span>';
-    return '<span class="tag-red-type">Redemption</span>';
+    if(t==='Subscription') return '<span class="tag-green">Subscription</span>';
+    return '<span class="tag-red">Redemption</span>';
   }
 
-  // green=approved, yellow=pending, red=rejected
+  // Approved = green (pill-ok), Pending = yellow (pill-warn), Rejected = red (pill-rej)
   function sPill(s){
     var v=(s||'pending').toLowerCase();
-    if(v==='approved') return '<span class="pill-green">Approved</span>';
-    if(v==='rejected') return '<span class="pill-red">Rejected</span>';
-    return '<span class="pill-yellow">Pending</span>';
+    if(v==='approved') return '<span class="pill-ok">Approved</span>';
+    if(v==='rejected') return '<span class="pill-rej">Rejected</span>';
+    return '<span class="pill-warn">Pending</span>';
   }
 
   function buildRefId(type, date, nric){
@@ -63,7 +63,7 @@
     });
   }
 
-  // render table — column order: Date, Investor, Type, Reference ID, Amount, NTA, Units, Status
+  // render table — Date, Investor, Type, Reference ID, Amount, NTA, Units, Status
   function renderTable(rows){
     var tbody=document.getElementById('ptBody');
     if(!rows||rows.length===0){ tbody.innerHTML='<tr><td colspan="8" style="padding:24px;color:var(--fg-3);">No transactions found.</td></tr>'; return; }
@@ -137,6 +137,7 @@
     document.getElementById('st-units').textContent=(r.amount&&r.nta)?fmt(r.amount/r.nta):'—';
     document.getElementById('st-cur').innerHTML=sPill(r.status);
 
+    // document preview
     var docPrev=document.getElementById('st-doc-preview');
     docPrev.innerHTML='';
     if(r.document){
@@ -144,14 +145,18 @@
       var ext=url.split('?')[0].split('.').pop().toLowerCase();
       var wrap=document.createElement('div'); wrap.className='doc-preview-wrap';
       if(['jpg','jpeg','png','gif','webp'].indexOf(ext)>-1){
-        var img=document.createElement('img'); img.src=url; wrap.appendChild(img);
+        var img=document.createElement('img'); img.src=url; img.style.cssText='width:100%;border-radius:8px;border:1px solid var(--border);'; wrap.appendChild(img);
       } else {
-        var ifr=document.createElement('iframe'); ifr.src=url; ifr.title='Document'; wrap.appendChild(ifr);
+        var ifr=document.createElement('iframe'); ifr.src=url; ifr.title='Document';
+        ifr.style.cssText='width:100%;height:480px;border-radius:8px;border:1px solid var(--border);display:block;';
+        wrap.appendChild(ifr);
       }
-      var lnk=document.createElement('a'); lnk.href=url; lnk.target='_blank'; lnk.className='doc-link'; lnk.textContent='↗ Open in new tab'; wrap.appendChild(lnk);
+      var lnk=document.createElement('a'); lnk.href=url; lnk.target='_blank';
+      lnk.style.cssText='display:inline-flex;align-items:center;gap:6px;font-size:0.83rem;font-weight:600;color:var(--blue);text-decoration:none;padding:7px 13px;border:1px solid var(--blue);border-radius:var(--radius-md);margin-top:10px;';
+      lnk.textContent='↗ Open in new tab'; wrap.appendChild(lnk);
       docPrev.appendChild(wrap);
     } else {
-      docPrev.innerHTML='<div class="doc-empty"><span>📄</span>No document attached</div>';
+      docPrev.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:260px;color:var(--fg-3);font-size:0.85rem;gap:10px;"><span style="font-size:2.5rem;">📄</span>No document attached</div>';
     }
     zyModalOpen('statusModal');
   }
