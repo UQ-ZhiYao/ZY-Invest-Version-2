@@ -20,6 +20,7 @@
 /* left-align all cells */
 .tbl.pt-tbl thead th,
 .tbl.pt-tbl tbody td { text-align:left; padding-left:20px; }
+.tbl.pt-tbl thead th.r,.tbl.pt-tbl tbody td.r { text-align:right; padding-right:20px; padding-left:0; }
 
 /* wide view modal: doc 2/3, info 1/3 */
 .view-modal { max-width:1000px !important; width:94vw !important; }
@@ -102,7 +103,7 @@
   <table class="tbl pt-tbl">
     <thead><tr>
       <th>Date</th><th>Investor</th><th>Type</th><th>Reference ID</th>
-      <th>Amount (RM)</th><th>NTA</th><th>Units</th><th>Status</th>
+      <th class="r">Amount (RM)</th><th class="r">NTA (RM)</th><th class="r">Units</th><th class="r">Status</th>
     </tr></thead>
     <tbody id="ptBody"><tr><td colspan="8" style="padding:24px;color:var(--fg-3);">Loading…</td></tr></tbody>
   </table>
