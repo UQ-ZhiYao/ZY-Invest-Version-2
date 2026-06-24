@@ -17,24 +17,31 @@
 <link rel="stylesheet" href="../assets/css/dashboard-portfolio.css">
 <link rel="stylesheet" href="../assets/css/admin.css">
 <style>
-.doc-preview-wrap { margin-top:10px; }
+.tbl.pt-tbl thead th,
+.tbl.pt-tbl tbody td { text-align:left; padding-left:20px; }
+.view-modal { max-width:860px !important; }
+.view-modal-body { display:grid; grid-template-columns:1fr 1fr; gap:0; min-height:360px; }
+.view-doc-col { border-right:1px solid var(--border); padding:20px; display:flex; flex-direction:column; gap:12px; }
+.view-info-col { padding:20px; display:flex; flex-direction:column; }
 .doc-preview-wrap img { max-width:100%; border-radius:6px; border:1px solid var(--border); }
-.doc-preview-wrap iframe { width:100%; height:340px; border-radius:6px; border:1px solid var(--border); }
-.doc-link { display:inline-flex; align-items:center; gap:7px; font-size:0.83rem; font-weight:600; color:var(--blue); text-decoration:none; padding:7px 13px; border:1px solid var(--blue); border-radius:var(--radius-md); margin-top:6px; }
+.doc-preview-wrap iframe { width:100%; height:300px; border-radius:6px; border:1px solid var(--border); }
+.doc-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; height:180px; color:var(--fg-3); font-size:0.85rem; gap:8px; }
+.doc-empty span { font-size:2rem; }
+.doc-link { display:inline-flex; align-items:center; gap:7px; font-size:0.83rem; font-weight:600; color:var(--blue); text-decoration:none; padding:7px 13px; border:1px solid var(--blue); border-radius:var(--radius-md); margin-top:8px; }
 .doc-link:hover { background:var(--blue-bg,#EBF3FF); }
-.file-drop { border:2px dashed var(--border); border-radius:var(--radius-md); padding:16px; text-align:center; cursor:pointer; font-size:0.84rem; color:var(--fg-3); transition:.15s; }
-.file-drop:hover, .file-drop.has-file { border-color:var(--blue); color:var(--blue); background:var(--blue-bg,#EBF3FF); }
-.file-drop .fd-ic { font-size:1.4rem; display:block; margin-bottom:4px; }
 .rev-row { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding:9px 0; border-bottom:1px solid var(--border); font-size:0.86rem; }
 .rev-row:last-of-type { border-bottom:none; }
-.rk { color:var(--fg-3); min-width:100px; }
+.rk { color:var(--fg-3); min-width:110px; flex-shrink:0; }
 .rv { font-weight:600; color:var(--fg-1); text-align:right; word-break:break-all; }
-.status-actions { display:flex; gap:10px; margin-top:18px; }
+.status-actions { display:flex; gap:10px; margin-top:auto; padding-top:20px; }
 .sa-approve { flex:1; padding:10px; border-radius:var(--radius-md); border:none; background:#2E7D32; color:#fff; font-weight:700; cursor:pointer; font-size:0.9rem; }
 .sa-approve:hover { background:#1B5E20; }
 .sa-reject { flex:1; padding:10px; border-radius:var(--radius-md); border:none; background:var(--red,#DC2626); color:#fff; font-weight:700; cursor:pointer; font-size:0.9rem; }
 .sa-reject:hover { background:#b91c1c; }
-.act-link { background:none; border:none; color:var(--fg-3); font-size:0.8rem; cursor:pointer; text-decoration:underline; }
+.file-drop { border:2px dashed var(--border); border-radius:var(--radius-md); padding:16px; text-align:center; cursor:pointer; font-size:0.84rem; color:var(--fg-3); transition:.15s; }
+.file-drop:hover,.file-drop.has-file { border-color:var(--blue); color:var(--blue); background:var(--blue-bg,#EBF3FF); }
+.file-drop .fd-ic { font-size:1.4rem; display:block; margin-bottom:4px; }
+.act-link { background:none; border:none; color:var(--fg-3); font-size:0.8rem; cursor:pointer; text-decoration:underline; margin-top:8px; display:block; text-align:center; }
 .act-link:hover { color:var(--fg-1); }
 </style>
 </head>
@@ -111,17 +118,26 @@
   </aside>
   <main class="adm-main">
 
-<div class="ph"><h1>Capital Injection</h1><p>Investor capital injections and redemptions. Click any transaction to review and set its status.</p></div>
+<div class="ph"><h1>Capital Injection</h1><p>Investor capital injections and redemptions. Click any row to view details and update status.</p></div>
 
 <div class="panel">
   <div class="panel-head"><h3>All Capital Injections</h3><button class="btn-mini" id="openPtModal">+ Post Transaction</button></div>
-  <table class="tbl">
-    <thead><tr><th>Date</th><th>Investor</th><th>Type</th><th class="td-right">Amount (RM)</th><th class="td-right">NTA</th><th class="td-right">Units</th><th>Status</th></tr></thead>
-    <tbody id="ptBody"><tr><td colspan="7" style="text-align:center;color:var(--fg-3);padding:24px;">Loading…</td></tr></tbody>
+  <table class="tbl pt-tbl">
+    <thead><tr>
+      <th>Reference ID</th>
+      <th>Date</th>
+      <th>Investor</th>
+      <th>Type</th>
+      <th>Amount (RM)</th>
+      <th>NTA</th>
+      <th>Units</th>
+      <th>Status</th>
+    </tr></thead>
+    <tbody id="ptBody"><tr><td colspan="8" style="padding:24px;color:var(--fg-3);">Loading…</td></tr></tbody>
   </table>
 </div>
 
-<!-- ── POST TRANSACTION MODAL ── -->
+<!-- POST TRANSACTION MODAL -->
 <div class="modal" id="ptModal">
   <div class="modal-head">
     <div><h3>Post Principal Transaction</h3><div class="sub">Units are issued or cancelled at the prevailing NTA.</div></div>
@@ -148,29 +164,31 @@
   <div class="modal-foot"><button class="btn-line btn-sm" data-close>Cancel</button><button class="btn-fill btn-sm" id="pt-post">Post Transaction</button></div>
 </div>
 
-<!-- ── VIEW / STATUS MODAL ── -->
-<div class="modal" id="statusModal">
+<!-- VIEW / STATUS MODAL -->
+<div class="modal view-modal" id="statusModal">
   <div class="modal-head">
-    <div><h3>Transaction Detail</h3><div class="sub" id="st-sub">—</div></div>
+    <div><h3>Transaction Detail</h3><div class="sub" id="st-refid" style="font-family:monospace;font-size:0.82rem;">—</div></div>
     <button class="modal-x" data-close>✕</button>
   </div>
-  <div class="modal-body">
-    <div class="rev-row"><span class="rk">Investor</span><span class="rv" id="st-inv">—</span></div>
-    <div class="rev-row"><span class="rk">Type</span><span class="rv" id="st-type">—</span></div>
-    <div class="rev-row"><span class="rk">Date</span><span class="rv" id="st-date">—</span></div>
-    <div class="rev-row"><span class="rk">Amount (RM)</span><span class="rv" id="st-amt">—</span></div>
-    <div class="rev-row"><span class="rk">NTA / Unit</span><span class="rv" id="st-nta">—</span></div>
-    <div class="rev-row"><span class="rk">Units</span><span class="rv" id="st-units">—</span></div>
-    <div class="rev-row"><span class="rk">Current Status</span><span class="rv" id="st-cur">—</span></div>
-    <div class="rev-row" id="st-doc-row" style="display:none;">
-      <span class="rk">Document</span>
-      <span class="rv"><div class="doc-preview-wrap" id="st-doc-preview"></div></span>
+  <div class="view-modal-body">
+    <div class="view-doc-col">
+      <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--fg-3);">Document</div>
+      <div id="st-doc-preview">
+        <div class="doc-empty"><span>📄</span>No document attached</div>
+      </div>
     </div>
-    <div class="status-actions">
-      <button class="sa-approve" id="st-approve">✓ Approve</button>
-      <button class="sa-reject" id="st-reject">✕ Reject</button>
-    </div>
-    <div style="text-align:center;margin-top:12px;">
+    <div class="view-info-col">
+      <div class="rev-row"><span class="rk">Investor</span><span class="rv" id="st-inv">—</span></div>
+      <div class="rev-row"><span class="rk">Type</span><span class="rv" id="st-type">—</span></div>
+      <div class="rev-row"><span class="rk">Date</span><span class="rv" id="st-date">—</span></div>
+      <div class="rev-row"><span class="rk">Amount (RM)</span><span class="rv" id="st-amt">—</span></div>
+      <div class="rev-row"><span class="rk">NTA / Unit</span><span class="rv" id="st-nta">—</span></div>
+      <div class="rev-row"><span class="rk">Units</span><span class="rv" id="st-units">—</span></div>
+      <div class="rev-row"><span class="rk">Status</span><span class="rv" id="st-cur">—</span></div>
+      <div class="status-actions">
+        <button class="sa-approve" id="st-approve">✓ Approve</button>
+        <button class="sa-reject" id="st-reject">✕ Reject</button>
+      </div>
       <button class="act-link" id="st-pending">Set back to Pending</button>
     </div>
   </div>
