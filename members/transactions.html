@@ -6,11 +6,14 @@
 <title>Principal Transactions — ZY-Invest</title>
 <link rel="stylesheet" href="../assets/css/dashboard.css">
 <link rel="stylesheet" href="../assets/css/dashboard-portfolio.css">
+<style>
+.tbl.tx-tbl thead th,
+.tbl.tx-tbl tbody td { text-align:left; padding-left:20px; }
+</style>
 </head>
 <body>
 <div class="app" id="app">
 
-  <!-- ===================== TOP NAV — FUND INFORMATION ===================== -->
   <header class="topnav">
     <a href="../index.html" class="brand">
       <img src="../assets/img/logo.png" alt="ZY-Invest">
@@ -41,278 +44,212 @@
       </div>
     </nav>
     <div class="nav-right">
-      <button class="icon-btn" title="Search">⌕</button>
+      <button class="icon-btn" title="Search" id="searchBtn">⌕</button>
       <button class="icon-btn" title="Notifications">🔔<span class="badge-dot"></span></button>
       <div class="nav-user-wrap">
         <div class="nav-user" id="userBtn">
           <div class="nu-text" style="text-align:right;">
-            <div class="nu-name">Tan Hui Mei</div>
-            <div class="nu-role">ZYI-2024-0014</div>
+            <div class="nu-name" id="navName">—</div>
+            <div class="nu-role" id="navRole">—</div>
           </div>
-          <div class="avatar">THM</div>
+          <div class="avatar" id="navAvatar">—</div>
           <span class="nu-caret">▾</span>
         </div>
         <div class="user-menu" id="userMenu">
           <div class="um-head">
-            <div class="avatar">THM</div>
-            <div>
-              <div class="um-name">Tan Hui Mei</div>
-              <div class="um-mail">huimei.tan@example.com</div>
-            </div>
+            <div class="avatar" id="menuAvatar">—</div>
+            <div><div class="um-name" id="menuName">—</div><div class="um-mail" id="menuEmail">—</div></div>
           </div>
-          <a class="um-item" href="profile.html">
-            <span class="um-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span>
-            <span><b>Profile</b><span>Personal &amp; account details</span></span>
-          </a>
-          <a class="um-item" href="profile.html#security">
-            <span class="um-ic"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
-            <span><b>Password</b><span>Sign-in &amp; security</span></span>
-          </a>
-          <a class="um-item" href="profile.html#nominee">
-            <span class="um-ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20c0-3 2.5-4.6 5.5-4.6S14.5 17 14.5 20"/><circle cx="17" cy="9" r="2.6"/><path d="M16 15.6c2.6.2 4.5 1.7 4.5 4.4"/></svg></span>
-            <span><b>Nominee</b><span>Beneficiary nomination</span></span>
-          </a>
+          <a class="um-item" href="profile.html"><span class="um-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span><span><b>Profile</b><span>Personal &amp; account details</span></span></a>
+          <a class="um-item" href="profile.html#security"><span class="um-ic"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span><span><b>Password</b><span>Sign-in &amp; security</span></span></a>
           <div class="um-sep"></div>
-          <a class="um-item danger" href="../login.html">
-            <span class="um-ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>
-            <span><b>Sign out</b></span>
-          </a>
+          <a class="um-item danger logout" href="../login.html"><span class="um-ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span><span><b>Sign out</b></span></a>
         </div>
       </div>
-      <a href="../login.html" class="btn-logout">Logout</a>
     </div>
   </header>
 
-  <!-- ===================== INDEX TICKER ===================== -->
-  <div class="ticker">
-    <div class="ticker-mask">
-      <div class="ticker-track" id="tickerTrack">
-        <span class="tk"><span class="flag">🇺🇸</span><span class="tname">S&amp;P 500</span><span class="tval">5,432.10</span><span class="tchg up">+0.42%</span></span>
-        <span class="tsep">•</span>
-        <span class="tk"><span class="flag">🇺🇸</span><span class="tname">NASDAQ</span><span class="tval">17,210.5</span><span class="tchg up">+0.71%</span></span>
-        <span class="tsep">•</span>
-        <span class="tk"><span class="flag">🇺🇸</span><span class="tname">DOW</span><span class="tval">39,150.2</span><span class="tchg up">+0.18%</span></span>
-        <span class="tsep">•</span>
-        <span class="tk"><span class="flag">🇸🇬</span><span class="tname">STI</span><span class="tval">3,340.6</span><span class="tchg up">+0.30%</span></span>
-        <span class="tsep">•</span>
-        <span class="tk"><span class="flag">🇭🇰</span><span class="tname">HANG SENG</span><span class="tval">18,902.4</span><span class="tchg down">−0.52%</span></span>
-        <span class="tsep">•</span>
-        <span class="tk"><span class="flag">🇯🇵</span><span class="tname">NIKKEI 225</span><span class="tval">38,505.0</span><span class="tchg up">+0.88%</span></span>
-        <span class="tsep">•</span>
-        <span class="tk"><span class="flag">🇲🇾</span><span class="tname">FBM KLCI</span><span class="tval">1,612.40</span><span class="tchg up">+0.60%</span></span>
-        <span class="tsep">•</span>
-        <!-- duplicate for seamless loop -->
-        <span class="tk"><span class="flag">🇺🇸</span><span class="tname">S&amp;P 500</span><span class="tval">5,432.10</span><span class="tchg up">+0.42%</span></span>
-        <span class="tsep">•</span>
-        <span class="tk"><span class="flag">🇺🇸</span><span class="tname">NASDAQ</span><span class="tval">17,210.5</span><span class="tchg up">+0.71%</span></span>
-        <span class="tsep">•</span>
-        <span class="tk"><span class="flag">🇺🇸</span><span class="tname">DOW</span><span class="tval">39,150.2</span><span class="tchg up">+0.18%</span></span>
-        <span class="tsep">•</span>
-        <span class="tk"><span class="flag">🇸🇬</span><span class="tname">STI</span><span class="tval">3,340.6</span><span class="tchg up">+0.30%</span></span>
-        <span class="tsep">•</span>
-        <span class="tk"><span class="flag">🇭🇰</span><span class="tname">HANG SENG</span><span class="tval">18,902.4</span><span class="tchg down">−0.52%</span></span>
-        <span class="tsep">•</span>
-        <span class="tk"><span class="flag">🇯🇵</span><span class="tname">NIKKEI 225</span><span class="tval">38,505.0</span><span class="tchg up">+0.88%</span></span>
-        <span class="tsep">•</span>
-        <span class="tk"><span class="flag">🇲🇾</span><span class="tname">FBM KLCI</span><span class="tval">1,612.40</span><span class="tchg up">+0.60%</span></span>
-        <span class="tsep">•</span>
-      </div>
-    </div>
-  </div>
+  <div class="ticker-bar"><div class="ticker-track" id="tickerTrack">
+    <span class="tk"><span class="flag">🇲🇾</span><span class="tname">FBM KLCI</span><span class="tval">1,612.40</span><span class="tchg up">+0.60%</span></span>
+    <span class="tsep">•</span>
+    <span class="tk"><span class="flag">🇺🇸</span><span class="tname">S&amp;P 500</span><span class="tval">5,218.2</span><span class="tchg up">+0.47%</span></span>
+  </div></div>
 
-  <!-- ===================== SHELL: SIDEBAR + MAIN ===================== -->
   <div class="shell" id="shell">
     <script>try{if(localStorage.getItem('zy-sb-collapsed')==='1'){document.getElementById('shell').classList.add('collapsed');}}catch(e){}</script>
     <div class="sidebar-scrim" id="scrim"></div>
-
-    <!-- left sidebar: personal account -->
     <aside class="sidebar" id="sidebar">
       <button class="sb-toggle" id="sbToggle" title="Collapse menu"><span class="sb-bars"><span></span><span></span><span></span></span><span class="sb-tlbl">Menu</span></button>
       <div class="sb-group">Account</div>
-      <a class="sb-item" href="dashboard.html">
-        <span class="sb-ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span>
-        <span class="sb-label">Account Summary</span>
-      </a>
-      <a class="sb-item" href="holdings.html">
-        <span class="sb-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 12V3"/><path d="M12 12l7.5 5"/></svg></span>
-        <span class="sb-label">Holdings</span>
-      </a>
-      <a class="sb-item active" href="transactions.html">
-        <span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M4 8h14l-3-3"/><path d="M20 16H6l3 3"/></svg></span>
-        <span class="sb-label">Principal Transactions</span>
-      </a>
-      <a class="sb-item" href="distributions.html">
-        <span class="sb-ic"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg></span>
-        <span class="sb-label">Distributions</span>
-      </a>
+      <a class="sb-item" href="dashboard.html"><span class="sb-ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><span class="sb-label">Account Summary</span></a>
+      <a class="sb-item" href="holdings.html"><span class="sb-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 12V3"/><path d="M12 12l7.5 5"/></svg></span><span class="sb-label">Holdings</span></a>
+      <a class="sb-item active" href="transactions.html"><span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M4 8h14l-3-3"/><path d="M20 16H6l3 3"/></svg></span><span class="sb-label">Principal Transactions</span></a>
+      <a class="sb-item" href="distributions.html"><span class="sb-ic"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg></span><span class="sb-label">Distributions</span></a>
       <div class="sb-group">Records</div>
-      <a class="sb-item" href="documents.html">
-        <span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>
-        <span class="sb-label">Statements</span>
-      </a>
+      <a class="sb-item" href="documents.html"><span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span><span class="sb-label">Statements</span></a>
       <div class="sb-spacer"></div>
-      <a class="sb-item logout" href="../login.html">
-        <span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>
-        <span class="sb-label">Sign out</span>
-      </a>
+      <a class="sb-item logout" href="../login.html"><span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span><span class="sb-label">Sign out</span></a>
     </aside>
 
-    <!-- main -->
     <main class="main">
       <div class="ph-xl">
         <h1><span class="ph-accent">Principal Transactions</span></h1>
         <p>Your subscriptions and redemptions of fund units, settled at the dealing-day NTA.</p>
       </div>
       <div class="metric-row">
-        <div class="mc"><div class="label">Units Subscribed</div><div class="value">13,845.68</div><div class="sub">7 subscriptions</div></div>
-        <div class="mc"><div class="label">Units Redeemed</div><div class="value">1,500.00</div><div class="sub">1 redemption</div></div>
-        <div class="mc"><div class="label">Net Units Held</div><div class="value blue">12,345.68</div><div class="sub">Current balance</div></div>
-        <div class="mc"><div class="label">Avg Cost / Unit</div><div class="value">RM 1.0003</div><div class="sub">Money-weighted</div></div>
+        <div class="mc"><div class="label">Units Subscribed</div><div class="value" id="mcSubscribed">—</div><div class="sub" id="mcSubCount">—</div></div>
+        <div class="mc"><div class="label">Units Redeemed</div><div class="value" id="mcRedeemed">—</div><div class="sub" id="mcRedCount">—</div></div>
+        <div class="mc"><div class="label">Net Units</div><div class="value blue" id="mcNet">—</div><div class="sub">Current balance</div></div>
+        <div class="mc"><div class="label">Pending</div><div class="value" id="mcPending" style="color:var(--orange);">—</div><div class="sub">awaiting approval</div></div>
       </div>
+
       <div class="panel" style="margin-top:16px;">
-        <div class="panel-head"><h3>Transaction History</h3><div class="seg-ctrl"><button class="on">All</button><button>Subscriptions</button><button>Redemptions</button></div></div>
-        <table class="tbl">
-          <thead><tr><th>Date</th><th>Reference</th><th>Type</th><th class="td-right">Units</th><th class="td-right">NTA</th><th class="td-right">Amount (RM)</th><th class="td-right">Status</th></tr></thead>
-          <tbody>
-                <tr><td>15 Mar 2026</td><td class="hold-name"><span>SUB-20260315-0014</span></td><td><span class="pos">Subscription</span></td><td class="td-right">+1,000.00</td><td class="td-right">1.0245</td><td class="td-right">1,024.50</td><td class="td-right"><span class="pill-ok">Settled</span></td></tr>
-                <tr><td>01 Dec 2025</td><td class="hold-name"><span>SUB-20251201-0014</span></td><td><span class="pos">Subscription</span></td><td class="td-right">+500.00</td><td class="td-right">1.0112</td><td class="td-right">505.60</td><td class="td-right"><span class="pill-ok">Settled</span></td></tr>
-                <tr><td>18 Aug 2025</td><td class="hold-name"><span>RED-20250818-0014</span></td><td><span class="neg">Redemption</span></td><td class="td-right">−1,500.00</td><td class="td-right">1.0033</td><td class="td-right">1,504.95</td><td class="td-right"><span class="pill-ok">Settled</span></td></tr>
-                <tr><td>02 Jun 2025</td><td class="hold-name"><span>SUB-20250602-0014</span></td><td><span class="pos">Subscription</span></td><td class="td-right">+2,000.00</td><td class="td-right">0.9920</td><td class="td-right">1,984.00</td><td class="td-right"><span class="pill-ok">Settled</span></td></tr>
-                <tr><td>14 Feb 2025</td><td class="hold-name"><span>SUB-20250214-0014</span></td><td><span class="pos">Subscription</span></td><td class="td-right">+3,000.00</td><td class="td-right">0.9805</td><td class="td-right">2,941.50</td><td class="td-right"><span class="pill-ok">Settled</span></td></tr>
-                <tr><td>20 Sep 2024</td><td class="hold-name"><span>SUB-20240920-0014</span></td><td><span class="pos">Subscription</span></td><td class="td-right">+2,500.00</td><td class="td-right">0.9740</td><td class="td-right">2,435.00</td><td class="td-right"><span class="pill-ok">Settled</span></td></tr>
-                <tr><td>11 May 2024</td><td class="hold-name"><span>SUB-20240511-0014</span></td><td><span class="pos">Subscription</span></td><td class="td-right">+2,845.68</td><td class="td-right">0.9688</td><td class="td-right">2,756.50</td><td class="td-right"><span class="pill-ok">Settled</span></td></tr>
-                <tr><td>18 Mar 2024</td><td class="hold-name"><span>SUB-20240318-0014</span></td><td><span class="pos">Subscription</span></td><td class="td-right">+2,000.00</td><td class="td-right">0.9650</td><td class="td-right">1,930.00</td><td class="td-right"><span class="pill-ok">Settled</span></td></tr>
+        <div class="panel-head">
+          <h3>Transaction History</h3>
+          <div class="seg-ctrl">
+            <button class="on" data-filter="">All</button>
+            <button data-filter="Subscription">Subscriptions</button>
+            <button data-filter="Redemption">Redemptions</button>
+          </div>
+        </div>
+        <table class="tbl tx-tbl">
+          <thead><tr>
+            <th>Reference ID</th>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Amount (RM)</th>
+            <th>NTA</th>
+            <th>Units</th>
+            <th>Status</th>
+          </tr></thead>
+          <tbody id="txBody">
+            <tr><td colspan="7" style="padding:24px;color:var(--fg-3);">Loading…</td></tr>
           </tbody>
         </table>
       </div>
-
     </main>
   </div>
 </div>
 
-<!-- ===================== FLOATING CHAT ASSISTANT ===================== -->
-<button class="fab" id="chatFab" title="Ask ZY Assistant">
-  <svg viewBox="0 0 100 100" aria-hidden="true"><g transform="translate(50,50)" fill="#fff"><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4"/><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4" transform="rotate(45)"/><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4" transform="rotate(90)"/><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4" transform="rotate(135)"/></g></svg>
-  <span class="fab-ping">1</span>
-</button>
-
-<section class="chat-pop" id="chatPop" aria-label="ZY Assistant">
-  <div class="chat-head">
-    <div class="ch-logo">
-      <svg viewBox="0 0 100 100" aria-hidden="true"><g transform="translate(50,50)" fill="#1565C0"><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4"/><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4" transform="rotate(45)"/><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4" transform="rotate(90)"/><rect x="-3.4" y="-32" width="6.8" height="64" rx="3.4" transform="rotate(135)"/></g></svg>
-    </div>
-    <div class="ch-id"><b>ZY Assistant</b><span>Online · replies instantly</span></div>
-    <button class="ch-btn" id="chatMin" title="Minimize">⌄</button>
-  </div>
-  <div class="chat-body" id="chatBody">
-    <div class="chat-time">3:52 PM</div>
-    <div class="msg-label">ZY Assistant</div>
-    <div class="msg bot">
-      Welcome back, Hui Mei 👋 I can help with your account, distributions, and documents.
-      <br><br>
-      <span style="font-size:0.78rem;color:var(--fg-3);">Note: responses are a general guide. For formal confirmations, refer to your statements or contact the fund.</span>
-    </div>
-    <div class="chat-action"><button>View account summary</button></div>
-    <div class="msg user">When is my next distribution?</div>
-    <div class="msg bot">
-      Your next income distribution is the <b>FY26 interim</b>:
-      <ul>
-        <li>Expected ex-date <b>30 Nov 2026</b></li>
-        <li>Estimated on <b>12,345.68 units</b> held</li>
-        <li>Paid to Maybank ····2048 within 15 business days</li>
-      </ul>
-    </div>
-  </div>
-  <div class="chat-chips">
-    <button class="chat-chip">Explain my P&amp;L</button>
-    <button class="chat-chip">How is NTA computed?</button>
-    <button class="chat-chip">My documents</button>
-  </div>
-  <div class="chat-foot">
-    <button class="clip" title="Attach">📎</button>
-    <div class="field-box"><input type="text" id="chatInput" placeholder="Type a message…"></div>
-    <button class="send" id="chatSend" title="Send">➤</button>
-  </div>
-</section>
-
-<script>
-(function(){
-  var shell=document.getElementById('shell');
-  var toggle=document.getElementById('sbToggle');
-  var scrim=document.getElementById('scrim');
-
-  function isMobile(){ return window.matchMedia('(max-width:860px)').matches; }
-  // restore persisted collapsed state so the sidebar keeps its mode across pages
-  try{ if(localStorage.getItem('zy-sb-collapsed')==='1'){ shell.classList.add('collapsed'); } }catch(e){}
-  toggle.addEventListener('click',function(){
-    if(isMobile()){ shell.classList.toggle('nav-open'); }
-    else { var c=shell.classList.toggle('collapsed'); try{ localStorage.setItem('zy-sb-collapsed', c?'1':'0'); }catch(e){} }
-  });
-  scrim.addEventListener('click',function(){ shell.classList.remove('nav-open'); });
-
-  // user dropdown menu
-  (function(){
-    var wrap=document.querySelector('.nav-user-wrap'), btn=document.getElementById('userBtn');
-    if(!wrap||!btn) return;
-    btn.addEventListener('click',function(e){ e.stopPropagation(); wrap.classList.toggle('open'); });
-    document.addEventListener('click',function(e){ if(!wrap.contains(e.target)) wrap.classList.remove('open'); });
-  })();
-
-  // NTA chart hover tooltip — only show on hover, follow the line
-  (function(){
-    var main=document.querySelector('.chart-main');
-    var svg=main && main.querySelector('.chart-svg');
-    var tip=document.getElementById('ntaTip');
-    if(!main||!svg||!tip) return;
-    var path=svg.querySelector('.line');
-    var dEl=tip.querySelector('.ft-d'), vEl=tip.querySelector('.ft-v');
-    var len=path.getTotalLength();
-    // map x (0..1) to a date + NTA value
-    var start=new Date(2023,0,1), end=new Date(2026,2,19);
-    function fmtDate(t){ var d=new Date(start.getTime()+(end-start)*t);
-      return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
-    function ntaAt(t){ var v=1.0003+(0.0242)*Math.pow(t,0.92); return 'RM '+v.toFixed(4); }
-    function move(e){
-      var r=svg.getBoundingClientRect();
-      var x=Math.min(Math.max((e.clientX-r.left)/r.width,0),1);
-      // find point on path at this x fraction (path x is monotonic with length here)
-      var pt=path.getPointAtLength(len*x);
-      var vb=svg.viewBox.baseVal;
-      var px=(pt.x/vb.width)*100, py=(pt.y/vb.height)*100;
-      tip.style.left=px+'%'; tip.style.top=(py-14)+'%';
-      dEl.textContent=fmtDate(x); vEl.textContent=ntaAt(x);
-    }
-    main.addEventListener('mouseenter',function(){ tip.style.display='block'; });
-    main.addEventListener('mousemove',move);
-    main.addEventListener('mouseleave',function(){ tip.style.display='none'; });
-  })();
-
-  // period toggle
-  document.querySelectorAll('.seg-ctrl').forEach(function(g){
-    g.querySelectorAll('button').forEach(function(b){
-      b.addEventListener('click',function(){ g.querySelectorAll('button').forEach(function(x){x.classList.remove('on');}); b.classList.add('on'); });
-    });
-  });
-
-  // floating chat
-  var fab=document.getElementById('chatFab'), min=document.getElementById('chatMin');
-  var body=document.getElementById('chatBody'), input=document.getElementById('chatInput'), send=document.getElementById('chatSend');
-  function openChat(){ document.body.classList.add('chat-open'); setTimeout(function(){ if(input) input.focus(); },240); var p=fab.querySelector('.fab-ping'); if(p) p.style.display='none'; }
-  function closeChat(){ document.body.classList.remove('chat-open'); }
-  fab.addEventListener('click',openChat);
-  min.addEventListener('click',closeChat);
-  function addMsg(text, who){ var m=document.createElement('div'); m.className='msg '+who; m.textContent=text; body.appendChild(m); body.scrollTop=body.scrollHeight; }
-  function sendMsg(){ var v=(input.value||'').trim(); if(!v) return; addMsg(v,'user'); input.value='';
-    setTimeout(function(){ addMsg('Thanks — a member-services teammate will follow up here. You can also open your statements under Documents.','bot'); },650); }
-  send.addEventListener('click',sendMsg);
-  input.addEventListener('keydown',function(e){ if(e.key==='Enter') sendMsg(); });
-  document.querySelectorAll('.chat-chip').forEach(function(c){ c.addEventListener('click',function(){ input.value=c.textContent; input.focus(); }); });
-})();
-</script>
-<script src="../assets/js/member-search.js"></script>
-<script src="../assets/js/member-notifications.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../assets/js/supabase-auth.js"></script>
 <script src="../assets/js/auth-logout.js"></script>
+<script src="../assets/js/member-search.js"></script>
+<script>
+(function(){
+  // sidebar collapse
+  var shell=document.getElementById('shell');
+  var sbToggle=document.getElementById('sbToggle');
+  if(sbToggle){ sbToggle.addEventListener('click',function(){ var c=shell.classList.toggle('collapsed'); try{localStorage.setItem('zy-sb-collapsed',c?'1':'0');}catch(e){} }); }
+  document.getElementById('scrim').addEventListener('click',function(){ shell.classList.remove('collapsed'); });
+
+  // nav user dropdown
+  var userBtn=document.getElementById('userBtn'), userMenu=document.getElementById('userMenu');
+  userBtn.addEventListener('click',function(e){ e.stopPropagation(); userMenu.classList.toggle('open'); });
+  document.addEventListener('click',function(){ userMenu.classList.remove('open'); });
+
+  // nav top dropdowns
+  document.querySelectorAll('.nav-group').forEach(function(g){
+    g.querySelector('.nav-top').addEventListener('click',function(e){ e.stopPropagation(); g.classList.toggle('open'); document.querySelectorAll('.nav-group').forEach(function(x){ if(x!==g) x.classList.remove('open'); }); });
+  });
+  document.addEventListener('click',function(){ document.querySelectorAll('.nav-group').forEach(function(g){ g.classList.remove('open'); }); });
+
+  function fmt(n){ return parseFloat(n||0).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  function fmtDate(d){ if(!d) return '—'; var dt=new Date(d); return dt.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+  function sPill(s){
+    if(!s) return '<span class="pill-warn">Pending</span>';
+    s=s.charAt(0).toUpperCase()+s.slice(1).toLowerCase();
+    if(s==='Approved') return '<span class="pill-ok">Approved</span>';
+    if(s==='Rejected') return '<span class="pill-rej">Rejected</span>';
+    return '<span class="pill-warn">Pending</span>';
+  }
+  function tTag(t){ return t==='Subscription'?'<span class="tag-blue">Subscription</span>':'<span class="tag-orange">Redemption</span>'; }
+
+  var ALL_TX = [];
+  var curFilter = '';
+
+  function renderTable(rows){
+    var tbody=document.getElementById('txBody');
+    var filtered=rows.filter(function(r){ return !curFilter||r.type===curFilter; });
+    if(!filtered.length){
+      tbody.innerHTML='<tr><td colspan="7" style="padding:24px;color:var(--fg-3);">No transactions found.</td></tr>';
+      return;
+    }
+    tbody.innerHTML='';
+    filtered.forEach(function(r){
+      var units=(r.amount&&r.nta)?fmt(r.amount/r.nta):'—';
+      var tr=document.createElement('tr');
+      tr.innerHTML=
+        '<td style="font-family:monospace;font-size:0.82rem;">'+(r.reference_id||'—')+'</td>'+
+        '<td>'+fmtDate(r.date)+'</td>'+
+        '<td>'+tTag(r.type||'Subscription')+'</td>'+
+        '<td>'+fmt(r.amount)+'</td>'+
+        '<td>'+(r.nta?parseFloat(r.nta).toFixed(4):'—')+'</td>'+
+        '<td>'+units+'</td>'+
+        '<td>'+sPill(r.status)+'</td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  function updateMetrics(rows){
+    var subUnits=0, subCount=0, redUnits=0, redCount=0, pending=0;
+    rows.forEach(function(r){
+      var u=r.units||((r.amount&&r.nta)?r.amount/r.nta:0);
+      if(r.type==='Subscription'){ subUnits+=parseFloat(u)||0; subCount++; }
+      else { redUnits+=parseFloat(u)||0; redCount++; }
+      if((r.status||'').toLowerCase()==='pending') pending++;
+    });
+    document.getElementById('mcSubscribed').textContent=fmt(subUnits);
+    document.getElementById('mcSubCount').textContent=subCount+' subscription'+(subCount!==1?'s':'');
+    document.getElementById('mcRedeemed').textContent=fmt(redUnits);
+    document.getElementById('mcRedCount').textContent=redCount+' redemption'+(redCount!==1?'s':'');
+    document.getElementById('mcNet').textContent=fmt(subUnits-redUnits);
+    document.getElementById('mcPending').textContent=pending;
+  }
+
+  async function loadTransactions(){
+    if(typeof sb==='undefined'||!sb) return;
+    var sres=await sb.auth.getSession();
+    if(!sres.data||!sres.data.session) return;
+    var userId=sres.data.session.user.id;
+
+    // Populate nav user info
+    var email=sres.data.session.user.email||'';
+    var pres=await sb.from('profiles').select('full_name,preferred_name').eq('id',userId).single();
+    if(pres.data){
+      var name=pres.data.preferred_name||pres.data.full_name||email;
+      document.getElementById('navName').textContent=name;
+      document.getElementById('menuName').textContent=name;
+      var av=name.split(' ').filter(Boolean).slice(0,2).map(function(w){return w[0];}).join('').toUpperCase();
+      document.getElementById('navAvatar').textContent=av;
+      document.getElementById('menuAvatar').textContent=av;
+    }
+    document.getElementById('navRole').textContent=email;
+    document.getElementById('menuEmail').textContent=email;
+
+    // Load own transactions only — RLS enforces this server-side too
+    var res=await sb.from('capital_injection').select('*').eq('uid',userId).order('date',{ascending:false});
+    if(res.error){
+      document.getElementById('txBody').innerHTML='<tr><td colspan="7" style="padding:24px;color:var(--red);">Failed to load: '+res.error.message+'</td></tr>';
+      return;
+    }
+    ALL_TX=res.data||[];
+    updateMetrics(ALL_TX);
+    renderTable(ALL_TX);
+  }
+
+  // filter buttons
+  document.querySelectorAll('.seg-ctrl button').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      document.querySelectorAll('.seg-ctrl button').forEach(function(b){b.classList.remove('on');});
+      btn.classList.add('on');
+      curFilter=btn.dataset.filter||'';
+      renderTable(ALL_TX);
+    });
+  });
+
+  window.addEventListener('DOMContentLoaded', loadTransactions);
+})();
+</script>
 </body>
 </html>
