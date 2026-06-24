@@ -52,8 +52,11 @@
       var joined=p.created_at?new Date(p.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—';
       return {
         _sbId:p.id,
+        _email:p.email||'',
         name:p.full_name||'—',
         phone:p.phone||'',
+        email:p.email||'',
+        address:p.address||'',
         bank:p.bank_name||'',
         acctno:p.bank_account_no||'',
         bankHolder:p.bank_account_holder||'',
@@ -106,12 +109,22 @@
     document.getElementById('dwSince').textContent=m.joined||'—';
     document.getElementById('dw-name').value=m.name||'';
     document.getElementById('dw-phone').value=m.phone||'';
+    document.getElementById('dw-email').value=m.email||'';
+    document.getElementById('dw-address').value=m.address||'';
     document.getElementById('dw-bank').value=m.bank||'';
     document.getElementById('dw-acctno').value=m.acctno||'';
     document.getElementById('dw-bankHolder').value=m.bankHolder||'';
     document.getElementById('dw-member').value=m.member||'Shareholder';
     document.getElementById('dw-status').value=m.status||'Pending';
-    document.getElementById('dw-pw').value=''; document.getElementById('dw-pw').type='password'; document.getElementById('dw-pwToggle').textContent='Show';
+    // Reset password fields
+    document.getElementById('dw-pw-new').value='';
+    document.getElementById('dw-pw-new').type='password';
+    document.getElementById('dw-pwNewToggle').textContent='Show';
+    document.getElementById('dw-pw-confirm').value='';
+    document.getElementById('dw-pw-confirm').type='password';
+    document.getElementById('dw-pwConfirmToggle').textContent='Show';
+    document.getElementById('dw-pw-hint').textContent='Leave blank to keep existing password unchanged.';
+    document.getElementById('dw-pw-hint').style.color='var(--fg-3)';
     refreshMemHint();
     zyModalOpen('invModal');
   }
@@ -127,7 +140,47 @@
     document.getElementById('dw-member').addEventListener('change',refreshMemHint);
     document.getElementById('dw-2fa').addEventListener('click',function(){ this.classList.toggle('on'); });
     document.getElementById('dw-notif').addEventListener('click',function(){ this.classList.toggle('on'); });
-    document.getElementById('dw-pwToggle').addEventListener('click',function(){ var f=document.getElementById('dw-pw'); if(f.type==='password'){ f.type='text'; this.textContent='Hide'; } else { f.type='password'; this.textContent='Show'; } });
+
+    // Show/Hide toggles for password fields
+    document.getElementById('dw-pwNewToggle').addEventListener('click',function(){
+      var f=document.getElementById('dw-pw-new');
+      if(f.type==='password'){ f.type='text'; this.textContent='Hide'; } else { f.type='password'; this.textContent='Show'; }
+    });
+    document.getElementById('dw-pwConfirmToggle').addEventListener('click',function(){
+      var f=document.getElementById('dw-pw-confirm');
+      if(f.type==='password'){ f.type='text'; this.textContent='Hide'; } else { f.type='password'; this.textContent='Show'; }
+    });
+
+    // Update Password button
+    document.getElementById('dw-pwUpdate').addEventListener('click', async function(){
+      var hintEl=document.getElementById('dw-pw-hint');
+      var pw1=document.getElementById('dw-pw-new').value;
+      var pw2=document.getElementById('dw-pw-confirm').value;
+      if(!pw1){ hintEl.textContent='Enter a new password first.'; hintEl.style.color='var(--red)'; return; }
+      if(pw1.length < 8){ hintEl.textContent='Password must be at least 8 characters.'; hintEl.style.color='var(--red)'; return; }
+      if(pw1!==pw2){ hintEl.textContent='Passwords do not match.'; hintEl.style.color='var(--red)'; return; }
+      if(!curInv || !curInv._sbId){ hintEl.textContent='No investor selected.'; hintEl.style.color='var(--red)'; return; }
+
+      this.disabled=true; this.textContent='Updating…';
+      try{
+        var res;
+        if(!ZY_DEMO){
+          // Use Supabase admin API to update the user's password
+          res=await sb.auth.admin.updateUserById(curInv._sbId,{ password: pw1 });
+          if(res.error) throw res.error;
+        }
+        document.getElementById('dw-pw-new').value='';
+        document.getElementById('dw-pw-confirm').value='';
+        hintEl.textContent='Password updated successfully ✓';
+        hintEl.style.color='var(--green,#2E7D32)';
+        if(window.zyToast) zyToast('Password updated for '+(curInv.name||'investor'));
+      }catch(ex){
+        hintEl.textContent='Update failed: '+((ex&&ex.message)||'Unknown error');
+        hintEl.style.color='var(--red)';
+      }
+      this.disabled=false; this.textContent='Update Password';
+    });
+
     document.getElementById('dw-revoke').addEventListener('click',function(){ if(window.zyToast) zyToast('Session revoke is managed in Supabase Auth.'); });
 
     // New investor — info only (real accounts come from member registration)
@@ -142,6 +195,8 @@
       if(!nm){ if(window.zyToast) zyToast('Enter the investor name'); return; }
       curInv.name=nm;
       curInv.phone=document.getElementById('dw-phone').value.trim();
+      curInv.email=document.getElementById('dw-email').value.trim();
+      curInv.address=document.getElementById('dw-address').value.trim();
       curInv.bank=document.getElementById('dw-bank').value.trim();
       curInv.acctno=document.getElementById('dw-acctno').value.trim();
       curInv.bankHolder=document.getElementById('dw-bankHolder').value.trim();
@@ -151,6 +206,7 @@
         var res=await sb.from('profiles').update({
           full_name:curInv.name,
           phone:curInv.phone||null,
+          address:curInv.address||null,
           bank_name:curInv.bank||null,
           bank_account_no:curInv.acctno||null,
           bank_account_holder:curInv.bankHolder||null,
