@@ -250,12 +250,13 @@
   // ── open trade modal ──────────────────────────────────────
   document.getElementById('btnTrade').addEventListener('click', function(){
     document.getElementById('tr-inst-sel').value = '';
-    var lbl = document.getElementById('tr-inst-label');
-    if(lbl){ lbl.textContent = '— Select instrument —'; lbl.classList.add('inst-placeholder'); }
+    var search = document.getElementById('tr-inst-search');
+    if(search){ search.value = ''; }
+    var list = document.getElementById('tr-inst-list');
+    if(list){ list.classList.remove('open'); }
     ordersWrap.innerHTML = ''; addLotRow();
     document.getElementById('tr-fee').value = '';
     document.getElementById('tr-date').value = new Date().toISOString().slice(0,10);
-    instDdFilter = ''; closeInstDd();
     setAction('Buy');
     updateConsideration();
     zyModalOpen('tradeModal');
