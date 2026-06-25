@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FY Settings — ZY-Invest Admin</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0D2A52">
+<link rel="icon" type="image/png" href="../assets/img/favicon.png">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+<link rel="stylesheet" href="../assets/css/dashboard-portfolio.css">
+<link rel="stylesheet" href="../assets/css/admin.css">
+<style>
+.fy-table-wrap { overflow-x:auto; }
+.fy-tbl thead th, .fy-tbl tbody td { text-align:left; padding-left:18px; }
+.fy-tbl thead th.r, .fy-tbl tbody td.r { text-align:right; padding-right:18px; padding-left:0; }
+.active-fy { display:inline-block; padding:3px 10px; border-radius:99px; font-size:0.74rem; font-weight:700; background:var(--green-bg); color:var(--green); }
+.closed-fy { display:inline-block; padding:3px 10px; border-radius:99px; font-size:0.74rem; font-weight:700; background:var(--gray-100); color:var(--fg-3); }
+.del-btn { background:none; border:none; color:var(--red); cursor:pointer; font-size:0.82rem; font-weight:600; }
+.del-btn:hover { text-decoration:underline; }
+</style>
+</head>
+<body>
+<script>
+(function(){
+  if('serviceWorker' in navigator){ window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
+  try{ var s=JSON.parse(localStorage.getItem('zy_admin_session')||'null'); if(!s||s.role!=='admin'){ location.replace('admin-login.html'); } }
+  catch(e){ location.replace('admin-login.html'); }
+})();
+</script>
+
+<header class="adm-top">
+  <a href="overview.html" class="brand"><img src="../assets/img/logo.png" alt="ZY-Invest"><span class="bt"><b>ZY-Invest</b><span>Admin Console</span></span></a>
+  <span class="adm-badge">🔒 Restricted</span>
+  <div class="adm-right">
+    <span class="adm-clock" id="clock">—</span>
+    <div class="adm-user"><span class="av">NZY</span><span><span class="nm">Ng Zhi Yao</span><br><span class="rl">Fund Manager · Admin</span></span></div>
+    <button class="adm-logout" id="logout">Logout</button>
+  </div>
+</header>
+
+<div class="adm-subbar">
+  <span class="sb-lab">FUND PAGES</span>
+  <div class="sub-group"><button class="sub-top">Fund <span class="caret">▾</span></button><div class="sub-dd"><div class="sub-dd-card"><a href="fund-overview.html"><b>Fund Overview</b><span>Mandate &amp; key facts</span></a><a href="fund-view.html?src=factsheet.html"><b>Factsheet</b></a><a href="fund-view.html?src=shareholder-list.html"><b>Shareholder List</b></a></div></div></div>
+  <div class="sub-group"><button class="sub-top">Performance <span class="caret">▾</span></button><div class="sub-dd"><div class="sub-dd-card"><a href="fund-view.html?src=financial-result.html"><b>Financial Result</b></a><a href="fund-view.html?src=performance-analysis.html"><b>Performance Analysis</b></a><a href="fund-view.html?src=nta-history.html"><b>NTA History</b></a></div></div></div>
+  <div class="sub-group"><button class="sub-top">Documents <span class="caret">▾</span></button><div class="sub-dd"><div class="sub-dd-card"><a href="fund-view.html?src=statement-download.html"><b>Statement Download</b></a></div></div></div>
+</div>
+
+<div class="adm-shell" id="admShell">
+  <script>try{if(localStorage.getItem('zy_admin_sb')==='1'){document.getElementById('admShell').classList.add('collapsed');}}catch(e){}</script>
+  <aside class="adm-side">
+    <button class="adm-toggle" id="admToggle" title="Collapse menu"><span class="bars"><span></span><span></span><span></span></span><span class="tlbl">Menu</span></button>
+    <div class="grp">Operations</div>
+    <a class="adm-nav" href="overview.html"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span>Overview</a>
+    <a class="adm-nav" href="investors.html"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5 6-5s6 1.7 6 5"/><path d="M17 6.5a3 3 0 0 1 0 5.5M21 20c0-2.6-1.4-4.2-3.6-4.8"/></svg></span>Investors</a>
+    <a class="adm-nav" href="portfolio.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v9l7.5 4.3A9 9 0 1 0 12 3z"/></svg></span>Portfolio</a>
+    <a class="adm-nav" href="instruments.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M8 16v-5M12 16V8M16 16v-7"/></svg></span>Instruments</a>
+    <a class="adm-nav" href="trades.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 7h13l-3-3M20 17H7l3 3"/></svg></span>Trade Transactions</a>
+    <a class="adm-nav" href="principal.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 8h14l-3-3"/><path d="M20 16H6l3 3"/></svg></span>Capital Injection</a>
+    <a class="adm-nav" href="others.html"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="16" cy="12" r="1"/></svg></span>Others Transaction</a>
+    <a class="adm-nav" href="dividend.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M8 7h6a2.5 2.5 0 0 1 0 5H9a2.5 2.5 0 0 0 0 5h7"/></svg></span>Dividend</a>
+    <a class="adm-nav" href="settlement.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 7h18v12H3z"/><path d="M3 11h18"/><path d="M7 15h4"/></svg></span>Settlement</a>
+    <a class="adm-nav" href="compute-nta.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 17l5-5 4 4 8-8"/><path d="M21 8v5h-5"/></svg></span>Compute NTA</a>
+    <div class="grp">Management</div>
+    <a class="adm-nav" href="distributions.html"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/></svg></span>Distributions</a>
+    <a class="adm-nav" href="remuneration.html"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="16.5" cy="14.5" r="1.3"/></svg></span>Remuneration</a>
+    <div class="grp">Documents</div>
+    <a class="adm-nav" href="documents.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M9 13h6"/></svg></span>Documents</a>
+    <div class="grp">Settings</div>
+    <a class="adm-nav on" href="fy-settings.html"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>FY Settings</a>
+    <div style="flex:1;min-height:12px;"></div>
+    <a class="adm-nav adm-signout" id="admSignout" href="#"><span class="ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>Sign out</a>
+  </aside>
+  <main class="adm-main">
+
+<div class="ph"><h1>Financial Year Settings</h1><p>Define fund financial years. These are used to filter Trade Transactions, Distributions and other reports.</p></div>
+
+<div class="panel">
+  <div class="panel-head"><h3>Financial Years</h3><button class="btn-mini" id="openFyModal">+ Add FY</button></div>
+  <div class="fy-table-wrap">
+    <table class="tbl fy-tbl">
+      <thead><tr>
+        <th>Label</th>
+        <th>Start Date</th>
+        <th>End Date</th>
+        <th>Status</th>
+        <th>Created</th>
+        <th></th>
+      </tr></thead>
+      <tbody id="fyBody"><tr><td colspan="6" style="padding:24px;color:var(--fg-3);">Loading…</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ADD FY MODAL -->
+<div class="modal" id="fyModal">
+  <div class="modal-head"><div><h3>Add Financial Year</h3><div class="sub">Set the label and date range for this FY.</div></div><button class="modal-x" data-close>✕</button></div>
+  <div class="modal-body">
+    <div class="form-grid">
+      <div class="field fg-full"><label>Label <span style="font-size:0.75rem;color:var(--fg-3);">e.g. FY2026</span></label><input type="text" id="fy-label" placeholder="FY2026" maxlength="20"></div>
+      <div class="field"><label>Start Date</label><input type="date" id="fy-start"></div>
+      <div class="field"><label>End Date</label><input type="date" id="fy-end"></div>
+      <div class="field fg-full"><label>Status</label><select id="fy-status"><option value="Active">Active</option><option value="Closed">Closed</option></select></div>
+    </div>
+  </div>
+  <div class="modal-foot"><button class="btn-line btn-sm" data-close>Cancel</button><button class="btn-fill btn-sm" id="fy-save">Save</button></div>
+</div>
+
+  </main>
+</div>
+<div class="modal-scrim" id="modalScrim"></div>
+<div class="toast" id="toast"><span class="ok">✓</span><span id="toastMsg">Saved</span></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/js/supabase-auth.js"></script>
+<script src="../assets/js/auth-logout.js"></script>
+<script src="../assets/js/admin-shell.js"></script>
+<script src="../assets/js/admin-supabase.js"></script>
+<script>
+(function(){
+  function fmtDate(d){ if(!d) return '—'; return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+
+  async function loadFY(){
+    if(typeof sb==='undefined'||!sb) return;
+    var res=await sb.from('fy_settings').select('*').order('start_date',{ascending:false});
+    var tbody=document.getElementById('fyBody');
+    if(res.error){ tbody.innerHTML='<tr><td colspan="6" style="padding:24px;color:var(--red);">'+res.error.message+'</td></tr>'; return; }
+    var rows=res.data||[];
+    if(!rows.length){ tbody.innerHTML='<tr><td colspan="6" style="padding:24px;color:var(--fg-3);">No financial years defined yet.</td></tr>'; return; }
+    tbody.innerHTML='';
+    rows.forEach(function(r){
+      var pill=r.status==='Active'?'<span class="active-fy">Active</span>':'<span class="closed-fy">Closed</span>';
+      var tr=document.createElement('tr');
+      tr.innerHTML=
+        '<td><b>'+r.label+'</b></td>'+
+        '<td>'+fmtDate(r.start_date)+'</td>'+
+        '<td>'+fmtDate(r.end_date)+'</td>'+
+        '<td>'+pill+'</td>'+
+        '<td class="td-sub">'+fmtDate(r.created_at)+'</td>'+
+        '<td><button class="del-btn" data-id="'+r.id+'">Delete</button></td>';
+      tr.querySelector('.del-btn').addEventListener('click',async function(){
+        if(!confirm('Delete '+r.label+'?')) return;
+        await sb.from('fy_settings').delete().eq('id',r.id);
+        loadFY();
+        if(window.zyToast) zyToast(r.label+' deleted');
+      });
+      tbody.appendChild(tr);
+    });
+  }
+
+  document.getElementById('openFyModal').addEventListener('click',function(){ zyModalOpen('fyModal'); });
+
+  document.getElementById('fy-save').addEventListener('click',async function(){
+    var label=document.getElementById('fy-label').value.trim();
+    var start=document.getElementById('fy-start').value;
+    var end=document.getElementById('fy-end').value;
+    var status=document.getElementById('fy-status').value;
+    if(!label||!start||!end){ if(window.zyToast) zyToast('Fill in all fields'); return; }
+    if(end<=start){ if(window.zyToast) zyToast('End date must be after start date'); return; }
+    var res=await sb.from('fy_settings').insert({label:label,start_date:start,end_date:end,status:status});
+    if(res.error){ if(window.zyToast) zyToast('Error: '+res.error.message); return; }
+    zyModalClose();
+    document.getElementById('fy-label').value='';
+    document.getElementById('fy-start').value='';
+    document.getElementById('fy-end').value='';
+    loadFY();
+    if(window.zyToast) zyToast(label+' saved');
+  });
+
+  window.addEventListener('DOMContentLoaded',function(){
+    setTimeout(function(){ if(typeof sb!=='undefined'&&sb) loadFY(); },600);
+  });
+})();
+</script>
+</body>
+</html>
