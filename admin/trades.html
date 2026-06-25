@@ -31,35 +31,29 @@
 .btn-fill.sell:hover { background:#C62828 !important; }
 
 /* ── custom select dropdown (keyboard-jumpable) ── */
-/* ── custom instrument dropdown (name left / code right) ── */
+/* ── custom instrument dropdown — input IS the filter box ── */
 .inst-dd-wrap { position:relative; }
-.inst-dd-input {
-  width:100%; box-sizing:border-box; padding:9px 12px;
+.inst-dd-wrap input[type="text"] {
+  width:100%; box-sizing:border-box; padding:9px 32px 9px 12px;
   border:1.5px solid var(--border); border-radius:var(--radius-md);
-  font:inherit; font-size:0.88rem; color:var(--fg-1);
-  background:#fff; cursor:pointer; user-select:none;
-  display:flex; align-items:center; justify-content:space-between;
+  font:inherit; font-size:0.88rem; color:var(--fg-1); background:#fff;
 }
-.inst-dd-input:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px var(--blue-bg); }
-.inst-dd-input .inst-placeholder { color:var(--fg-3); }
-.inst-dd-input .inst-caret { color:var(--fg-3); font-size:0.75rem; flex:none; margin-left:8px; }
+.inst-dd-wrap input[type="text"]:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px var(--blue-bg); }
+.inst-dd-caret {
+  position:absolute; right:11px; top:50%; transform:translateY(-50%);
+  color:var(--fg-3); font-size:0.72rem; pointer-events:none;
+}
 .inst-dd-list {
   position:absolute; top:calc(100% + 3px); left:0; right:0; z-index:400;
   background:#fff; border:1.5px solid var(--border); border-radius:var(--radius-md);
   box-shadow:var(--shadow-md); max-height:240px; overflow-y:auto; display:none;
 }
 .inst-dd-list.open { display:block; }
-.inst-dd-search {
-  width:100%; box-sizing:border-box; padding:9px 12px;
-  border:none; border-bottom:1px solid var(--border);
-  font:inherit; font-size:0.86rem; outline:none; background:#fff;
-}
 .inst-dd-option {
   display:flex; align-items:center; justify-content:space-between;
   padding:9px 13px; cursor:pointer; font-size:0.87rem; gap:10px;
 }
-.inst-dd-option:hover, .inst-dd-option.focused { background:var(--blue-bg); }
-.inst-dd-option.selected { background:#EFF6FF; }
+.inst-dd-option:hover { background:var(--blue-bg); }
 .inst-opt-name { color:var(--fg-1); font-weight:500; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .inst-opt-code { color:var(--fg-3); font-family:monospace; font-size:0.8rem; flex:none; text-align:right; }
 .inst-dd-empty { padding:12px 13px; font-size:0.84rem; color:var(--fg-3); }
@@ -228,18 +222,15 @@
       <button class="tt-sell" data-act="Sell">Sell</button>
     </div>
 
-    <!-- Symbol / Instrument — custom dropdown with name + code -->
+    <!-- Symbol / Instrument — input IS the filter, dropdown below -->
     <div class="tm-row one">
       <div class="field">
         <label>Symbol</label>
         <div class="inst-dd-wrap" id="tr-inst-wrap">
-          <div class="inst-dd-input" id="tr-inst-display" tabindex="0">
-            <span class="inst-placeholder" id="tr-inst-label">— Select instrument —</span>
-            <span class="inst-caret">▾</span>
-          </div>
+          <input type="text" id="tr-inst-search" placeholder="— Select instrument —" autocomplete="off">
+          <span class="inst-dd-caret">▾</span>
           <input type="hidden" id="tr-inst-sel">
           <div class="inst-dd-list" id="tr-inst-list">
-            <input type="text" class="inst-dd-search" id="tr-inst-search" placeholder="Type to filter…" autocomplete="off">
             <div id="tr-inst-options"></div>
           </div>
         </div>
