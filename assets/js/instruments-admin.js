@@ -47,6 +47,7 @@
           '<td>'+prodPill(x.product)+'</td>'+
           '<td class="hold-name"><b>'+x.name+'</b></td>'+
           '<td class="td-sub">'+(x.ticker||'—')+'</td>'+
+          '<td class="td-sub">'+(x.code||'—')+'</td>'+
           '<td class="td-sub">'+(x.sector||'—')+'</td>'+
           '<td>'+(x.currency||x.ccy||'MYR')+'</td>';
         tr.addEventListener('click', function(){ openEdit(x); });
@@ -71,8 +72,9 @@
     document.getElementById('instTitle').textContent = x ? 'Edit Instrument' : 'Add Instrument';
     document.getElementById('in-name').value    = x ? x.name   : '';
     document.getElementById('in-ticker').value  = x ? (x.ticker||'') : '';
-    document.getElementById('in-product').value = x ? x.product : 'Securities';
-    document.getElementById('in-sector').value  = x ? x.sector  : 'Healthcare';
+    document.getElementById('in-code').value    = x ? (x.code||'')   : '';
+    document.getElementById('in-product').value = x ? (x.product||'Securities') : '';
+    document.getElementById('in-sector').value  = x ? (x.sector||'')  : '';
     document.getElementById('in-ccy').value     = x ? (x.currency||x.ccy||'MYR') : 'MYR';
     document.getElementById('in-delete').style.display = x ? 'inline-flex' : 'none';
     zyModalOpen('instModal');
@@ -88,7 +90,8 @@
     var sector   = document.getElementById('in-sector').value;
     var currency = document.getElementById('in-ccy').value;
     if(!name){ if(window.zyToast) zyToast('Enter instrument name'); return; }
-    var payload = {name:name, ticker:ticker, product:product, sector:sector, currency:currency};
+    var code     = document.getElementById('in-code').value.trim()||null;
+    var payload = {name:name, ticker:ticker, code:code, product:product, sector:sector, currency:currency};
     var res = inEditId
       ? await sb.from('instruments').update(payload).eq('id',inEditId)
       : await sb.from('instruments').insert(payload);
@@ -115,6 +118,36 @@
   document.getElementById('inProdFilter').addEventListener('change', function(){
     inFilter = this.value; render();
   });
+
+  // ── product/sector combobox helpers ──────────────────────
+  function makeCombo(inputId, listId, getValues){
+    var input = document.getElementById(inputId);
+    var list  = document.getElementById(listId);
+    if(!input || !list) return;
+
+    function show(q){
+      var vals = getValues();
+      var filtered = vals.filter(function(v){ return !q || v.toLowerCase().indexOf(q.toLowerCase()) > -1; });
+      list.innerHTML = '';
+      if(!filtered.length){ list.classList.remove('open'); return; }
+      filtered.forEach(function(v){
+        var div = document.createElement('div'); div.className = 'cb-opt'; div.textContent = v;
+        div.addEventListener('mousedown', function(e){ e.preventDefault(); input.value = v; list.classList.remove('open'); });
+        list.appendChild(div);
+      });
+      list.classList.add('open');
+    }
+
+    input.addEventListener('focus', function(){ show(this.value); });
+    input.addEventListener('input', function(){ show(this.value); });
+    input.addEventListener('blur',  function(){ setTimeout(function(){ list.classList.remove('open'); }, 150); });
+  }
+
+  function uniqueProducts(){ return [...new Set(ALL.map(function(x){ return x.product; }).filter(Boolean))].sort(); }
+  function uniqueSectors(){  return [...new Set(ALL.map(function(x){ return x.sector; }).filter(Boolean))].sort(); }
+
+  makeCombo('in-product', 'cb-product-list', uniqueProducts);
+  makeCombo('in-sector',  'cb-sector-list',  uniqueSectors);
 
   // ── init ─────────────────────────────────────────────────
   window.addEventListener('DOMContentLoaded',function(){

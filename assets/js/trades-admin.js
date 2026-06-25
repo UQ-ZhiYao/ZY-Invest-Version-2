@@ -19,19 +19,81 @@
   var trDateEl = document.getElementById('tr-date');
   if(trDateEl) trDateEl.value = new Date().toISOString().slice(0,10);
 
-  // ── populate instrument <select> ──────────────────────────
-  function populateInstSelect(){
-    var sel = document.getElementById('tr-inst-sel');
-    if(!sel) return;
-    var current = sel.value;
-    sel.innerHTML = '<option value="">— Select instrument —</option>';
-    INSTRUMENTS.forEach(function(x){
-      var o = document.createElement('option');
-      o.value = x.name;
-      o.textContent = x.name + (x.ticker ? ' (' + x.ticker + ')' : '') + (x.code ? ' · ' + x.code : '');
-      sel.appendChild(o);
+  // ── custom instrument dropdown ────────────────────────────
+  var instDdOpen = false;
+  var instDdFilter = '';
+
+  function renderInstOptions(){
+    var wrap = document.getElementById('tr-inst-options');
+    if(!wrap) return;
+    var q = instDdFilter.toLowerCase();
+    var matches = INSTRUMENTS.filter(function(x){
+      return !q || x.name.toLowerCase().indexOf(q) > -1
+                || (x.ticker||'').toLowerCase().indexOf(q) > -1
+                || (x.code||'').toLowerCase().indexOf(q) > -1;
     });
-    if(current) sel.value = current;
+    wrap.innerHTML = '';
+    if(!matches.length){
+      wrap.innerHTML = '<div class="inst-dd-empty">No instruments found</div>';
+      return;
+    }
+    matches.forEach(function(x){
+      var div = document.createElement('div');
+      div.className = 'inst-dd-option';
+      var codeStr = [x.ticker, x.code].filter(Boolean).join(' · ');
+      div.innerHTML = '<span class="inst-opt-name">' + x.name + '</span>'
+                    + (codeStr ? '<span class="inst-opt-code">' + codeStr + '</span>' : '');
+      div.addEventListener('mousedown', function(e){
+        e.preventDefault();
+        selectInst(x);
+      });
+      wrap.appendChild(div);
+    });
+  }
+
+  function selectInst(x){
+    document.getElementById('tr-inst-sel').value = x.name;
+    document.getElementById('tr-inst-label').textContent = x.name;
+    document.getElementById('tr-inst-label').classList.remove('inst-placeholder');
+    var codeStr = [x.ticker, x.code].filter(Boolean).join(' · ');
+    if(codeStr){
+      document.getElementById('tr-inst-label').textContent = x.name;
+    }
+    closeInstDd();
+  }
+
+  function openInstDd(){
+    document.getElementById('tr-inst-list').classList.add('open');
+    instDdFilter = '';
+    document.getElementById('tr-inst-search').value = '';
+    renderInstOptions();
+    setTimeout(function(){ document.getElementById('tr-inst-search').focus(); }, 50);
+    instDdOpen = true;
+  }
+
+  function closeInstDd(){
+    document.getElementById('tr-inst-list').classList.remove('open');
+    instDdOpen = false;
+  }
+
+  function populateInstSelect(){
+    renderInstOptions(); // initial render
+    var display = document.getElementById('tr-inst-display');
+    var search  = document.getElementById('tr-inst-search');
+    var listEl  = document.getElementById('tr-inst-list');
+    if(!display) return;
+    display.addEventListener('click', function(){ instDdOpen ? closeInstDd() : openInstDd(); });
+    display.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openInstDd(); } });
+    if(search){
+      search.addEventListener('input', function(){ instDdFilter = this.value; renderInstOptions(); });
+      search.addEventListener('keydown', function(e){
+        if(e.key==='Escape'){ closeInstDd(); display.focus(); }
+      });
+    }
+    document.addEventListener('click', function(e){
+      var wrap = document.getElementById('tr-inst-wrap');
+      if(wrap && !wrap.contains(e.target)) closeInstDd();
+    });
   }
 
   // ── multi-lot rows ────────────────────────────────────────
@@ -188,9 +250,12 @@
   // ── open trade modal ──────────────────────────────────────
   document.getElementById('btnTrade').addEventListener('click', function(){
     document.getElementById('tr-inst-sel').value = '';
+    var lbl = document.getElementById('tr-inst-label');
+    if(lbl){ lbl.textContent = '— Select instrument —'; lbl.classList.add('inst-placeholder'); }
     ordersWrap.innerHTML = ''; addLotRow();
     document.getElementById('tr-fee').value = '';
     document.getElementById('tr-date').value = new Date().toISOString().slice(0,10);
+    instDdFilter = ''; closeInstDd();
     setAction('Buy');
     updateConsideration();
     zyModalOpen('tradeModal');
