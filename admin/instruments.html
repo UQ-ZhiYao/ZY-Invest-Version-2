@@ -135,29 +135,35 @@
 </div>
 
 <!-- ADD / EDIT INSTRUMENT MODAL -->
-<div class="modal" id="instModal">
+<div class="modal trade-modal-new" id="instModal">
   <div class="modal-head"><div><h3 id="instTitle">Add Instrument</h3><div class="sub">Define a tradable instrument or asset.</div></div><button class="modal-x" data-close>✕</button></div>
-  <div class="modal-body" style="max-width:420px;margin:0 auto;">
-    <div style="display:flex;flex-direction:column;gap:13px;">
-      <div class="field"><label>Instrument Name</label><input type="text" id="in-name" placeholder="e.g. Tenaga Nasional" style="width:100%;box-sizing:border-box;"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div class="field"><label>Ticker</label><input type="text" id="in-ticker" placeholder="e.g. 5347.KL"></div>
-        <div class="field"><label>Code</label><input type="text" id="in-code" placeholder="e.g. BCHB"></div>
+  <div class="modal-body">
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="field" style="margin:0;">
+        <label>Instrument Name</label>
+        <input type="text" id="in-name" placeholder="e.g. Tenaga Nasional" style="width:100%;box-sizing:border-box;">
       </div>
-      <div class="field"><label>Product Type</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="field" style="margin:0;"><label>Ticker</label><input type="text" id="in-ticker" placeholder="e.g. 5347.KL" style="width:100%;box-sizing:border-box;"></div>
+        <div class="field" style="margin:0;"><label>Code</label><input type="text" id="in-code" placeholder="e.g. BCHB" style="width:100%;box-sizing:border-box;"></div>
+      </div>
+      <div class="field" style="margin:0;">
+        <label>Product Type</label>
         <div class="cb-wrap" id="cb-product-wrap">
           <input type="text" id="in-product" placeholder="Type or select…" autocomplete="off" style="width:100%;box-sizing:border-box;">
           <div class="cb-list" id="cb-product-list"></div>
         </div>
       </div>
-      <div class="field"><label>Sector</label>
+      <div class="field" style="margin:0;">
+        <label>Sector</label>
         <div class="cb-wrap" id="cb-sector-wrap">
           <input type="text" id="in-sector" placeholder="Type or select…" autocomplete="off" style="width:100%;box-sizing:border-box;">
           <div class="cb-list" id="cb-sector-list"></div>
         </div>
       </div>
-      <div class="field"><label>Currency</label>
-        <select id="in-ccy" style="width:100%;box-sizing:border-box;"><option>MYR</option><option>USD</option><option>SGD</option><option>HKD</option><option>JPY</option></select>
+      <div class="field" style="margin:0;">
+        <label>Currency</label>
+        <select id="in-ccy" style="width:100%;box-sizing:border-box;font:inherit;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-md);"><option>MYR</option><option>USD</option><option>SGD</option><option>HKD</option><option>JPY</option></select>
       </div>
     </div>
   </div>

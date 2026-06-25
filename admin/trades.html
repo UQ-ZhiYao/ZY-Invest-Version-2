@@ -31,21 +31,26 @@
 .btn-fill.sell:hover { background:#C62828 !important; }
 
 /* ── custom select dropdown (keyboard-jumpable) ── */
-/* ── custom instrument dropdown — input IS the filter box ── */
+/* ── filterable instrument dropdown ── */
 .inst-dd-wrap { position:relative; }
-.inst-dd-wrap input[type="text"] {
-  width:100%; box-sizing:border-box; padding:9px 32px 9px 12px;
+.inst-dd-box {
+  display:flex; align-items:center;
   border:1.5px solid var(--border); border-radius:var(--radius-md);
-  font:inherit; font-size:0.88rem; color:var(--fg-1); background:#fff;
+  background:#fff; overflow:hidden;
 }
-.inst-dd-wrap input[type="text"]:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px var(--blue-bg); }
+.inst-dd-box:focus-within { border-color:var(--blue); box-shadow:0 0 0 3px var(--blue-bg); }
+.inst-dd-box input[type="text"] {
+  flex:1; border:none; outline:none; padding:9px 4px 9px 12px;
+  font:inherit; font-size:0.88rem; color:var(--fg-1); background:transparent;
+  min-width:0;
+}
 .inst-dd-caret {
-  position:absolute; right:11px; top:50%; transform:translateY(-50%);
-  color:var(--fg-3); font-size:0.72rem; pointer-events:none;
+  padding:0 11px; color:var(--fg-3); font-size:0.72rem; cursor:pointer;
+  user-select:none; flex:none;
 }
 .inst-dd-list {
   position:absolute; top:calc(100% + 3px); left:0; right:0; z-index:400;
-  background:#fff; border:1.5px solid var(--border); border-radius:var(--radius-md);
+  background:#fff; border:1.5px solid var(--blue); border-radius:var(--radius-md);
   box-shadow:var(--shadow-md); max-height:240px; overflow-y:auto; display:none;
 }
 .inst-dd-list.open { display:block; }
@@ -222,13 +227,15 @@
       <button class="tt-sell" data-act="Sell">Sell</button>
     </div>
 
-    <!-- Symbol / Instrument — input IS the filter, dropdown below -->
+    <!-- Symbol / Instrument — filterable dropdown -->
     <div class="tm-row one">
       <div class="field">
         <label>Symbol</label>
         <div class="inst-dd-wrap" id="tr-inst-wrap">
-          <input type="text" id="tr-inst-search" placeholder="— Select instrument —" autocomplete="off">
-          <span class="inst-dd-caret">▾</span>
+          <div class="inst-dd-box" id="tr-inst-box">
+            <input type="text" id="tr-inst-search" placeholder="Search or select instrument…" autocomplete="off" autocorrect="off" spellcheck="false">
+            <span class="inst-dd-caret" id="tr-inst-caret">▾</span>
+          </div>
           <input type="hidden" id="tr-inst-sel">
           <div class="inst-dd-list" id="tr-inst-list">
             <div id="tr-inst-options"></div>
