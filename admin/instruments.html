@@ -13,6 +13,18 @@
 <link rel="stylesheet" href="../assets/css/admin.css">
 <style>
 .tbl.in-tbl thead th, .tbl.in-tbl tbody td { text-align:left; padding-left:18px; }
+
+/* ── per-product colour pills ── */
+.prod-pill {
+  display:inline-block; padding:3px 10px; border-radius:99px;
+  font-size:0.74rem; font-weight:700; white-space:nowrap;
+}
+.prod-securities   { background:#DBEAFE; color:#1D4ED8; }   /* blue */
+.prod-derivatives  { background:#FEF9C3; color:#854D0E; }   /* yellow */
+.prod-cash-funds   { background:#D1FAE5; color:#065F46; }   /* green */
+.prod-collectibles { background:#F3E8FF; color:#6B21A8; }   /* purple */
+.prod-private-eq   { background:#FFE4E6; color:#9F1239; }   /* rose */
+.prod-cash-hand    { background:#F1F5F9; color:#475569; }   /* slate */
 </style>
 </head>
 <body>
@@ -69,6 +81,7 @@
   <main class="adm-main">
 
 <div class="ph"><h1>Instruments &amp; Products</h1><p>Maintain the master list of tradable instruments and assets across all product types.</p></div>
+
 <div class="metric-row">
   <div class="mc"><div class="label">Instruments</div><div class="value blue" id="inCount">—</div><div class="sub">all products</div></div>
   <div class="mc"><div class="label">Securities</div><div class="value" id="inSec">—</div><div class="sub">listed equities</div></div>
@@ -76,15 +89,18 @@
   <div class="mc"><div class="label">Cash &amp; Funds</div><div class="value" id="inCash">—</div><div class="sub">cash funds, cash on hand</div></div>
 </div>
 
+<!-- filter bar: search + product dropdown + add button -->
 <div class="filter-bar mt16">
   <div class="search"><span class="ic">⌕</span><input placeholder="Search instruments…" id="inSearch" autocomplete="off"></div>
-  <button class="chip active" data-prod="">All</button>
-  <button class="chip" data-prod="Securities">Securities</button>
-  <button class="chip" data-prod="Derivatives">Derivatives</button>
-  <button class="chip" data-prod="Cash Funds">Cash Funds</button>
-  <button class="chip" data-prod="Collectibles">Collectibles</button>
-  <button class="chip" data-prod="Private Equity">Private Equity</button>
-  <button class="chip" data-prod="Cash on Hand">Cash on Hand</button>
+  <select id="inProdFilter" style="font:inherit;font-size:0.84rem;border:1.5px solid var(--border);border-radius:var(--radius-md);padding:7px 12px;color:var(--fg-1);background:#fff;min-width:160px;">
+    <option value="">All Products</option>
+    <option value="Securities">Securities</option>
+    <option value="Derivatives">Derivatives</option>
+    <option value="Cash Funds">Cash Funds</option>
+    <option value="Collectibles">Collectibles</option>
+    <option value="Private Equity">Private Equity</option>
+    <option value="Cash on Hand">Cash on Hand</option>
+  </select>
   <button class="btn-mini" id="openInstModal">+ Add Instrument</button>
 </div>
 
@@ -129,9 +145,7 @@
     </div>
   </div>
   <div class="modal-foot">
-    <div style="display:flex;gap:10px;align-items:center;">
-      <button class="btn-line btn-sm" id="in-delete" style="color:var(--red);border-color:var(--red);display:none;">Delete</button>
-    </div>
+    <div><button class="btn-line btn-sm" id="in-delete" style="color:var(--red);border-color:var(--red);display:none;">Delete</button></div>
     <div style="display:flex;gap:10px;">
       <button class="btn-line btn-sm" data-close>Cancel</button>
       <button class="btn-fill btn-sm" id="in-save">Save Instrument</button>
