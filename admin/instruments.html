@@ -40,6 +40,9 @@
   padding:8px 13px; cursor:pointer; font-size:0.87rem; color:var(--fg-1);
 }
 .cb-opt:hover { background:var(--blue-bg); }
+/* instruments modal: narrower, taller */
+#instModal { width:340px !important; }
+#instModal .modal-body { padding:22px 22px 0 22px; }
 </style>
 </head>
 <body>
@@ -165,6 +168,8 @@
         <label>Currency</label>
         <select id="in-ccy" style="width:100%;box-sizing:border-box;font:inherit;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-md);"><option>MYR</option><option>USD</option><option>SGD</option><option>HKD</option><option>JPY</option></select>
       </div>
+      <!-- spacer — ~2 field heights -->
+      <div style="height:56px;"></div>
     </div>
   </div>
   <div class="modal-foot">
