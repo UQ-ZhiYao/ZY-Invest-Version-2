@@ -19,80 +19,71 @@
   var trDateEl = document.getElementById('tr-date');
   if(trDateEl) trDateEl.value = new Date().toISOString().slice(0,10);
 
-  // ── custom instrument dropdown ────────────────────────────
-  var instDdOpen = false;
-  var instDdFilter = '';
-
-  function renderInstOptions(){
-    var wrap = document.getElementById('tr-inst-options');
-    if(!wrap) return;
-    var q = instDdFilter.toLowerCase();
+  // ── filterable instrument dropdown ─────────────────────────
+  function renderInstOptions(q){
+    var optWrap = document.getElementById('tr-inst-options');
+    var list    = document.getElementById('tr-inst-list');
+    if(!optWrap||!list) return;
+    var query = (q||'').toLowerCase();
     var matches = INSTRUMENTS.filter(function(x){
-      return !q || x.name.toLowerCase().indexOf(q) > -1
-                || (x.ticker||'').toLowerCase().indexOf(q) > -1
-                || (x.code||'').toLowerCase().indexOf(q) > -1;
+      if(!query) return true;
+      return x.name.toLowerCase().indexOf(query) > -1
+          || (x.ticker||'').toLowerCase().indexOf(query) > -1
+          || (x.code||'').toLowerCase().indexOf(query) > -1;
     });
-    wrap.innerHTML = '';
+    optWrap.innerHTML = '';
     if(!matches.length){
-      wrap.innerHTML = '<div class="inst-dd-empty">No instruments found</div>';
-      return;
-    }
-    matches.forEach(function(x){
-      var div = document.createElement('div');
-      div.className = 'inst-dd-option';
-      var codeStr = [x.ticker, x.code].filter(Boolean).join(' · ');
-      div.innerHTML = '<span class="inst-opt-name">' + x.name + '</span>'
-                    + (codeStr ? '<span class="inst-opt-code">' + codeStr + '</span>' : '');
-      div.addEventListener('mousedown', function(e){
-        e.preventDefault();
-        selectInst(x);
+      optWrap.innerHTML = '<div class="inst-dd-empty">No instruments found</div>';
+    } else {
+      matches.forEach(function(x){
+        var div = document.createElement('div'); div.className = 'inst-dd-option';
+        var codeStr = [x.ticker, x.code].filter(Boolean).join(' · ');
+        div.innerHTML = '<span class="inst-opt-name">'+x.name+'</span>'
+                      + (codeStr ? '<span class="inst-opt-code">'+codeStr+'</span>' : '');
+        div.addEventListener('mousedown', function(e){
+          e.preventDefault();
+          document.getElementById('tr-inst-sel').value = x.name;
+          document.getElementById('tr-inst-search').value = x.name;
+          list.classList.remove('open');
+        });
+        optWrap.appendChild(div);
       });
-      wrap.appendChild(div);
-    });
-  }
-
-  function selectInst(x){
-    document.getElementById('tr-inst-sel').value = x.name;
-    document.getElementById('tr-inst-label').textContent = x.name;
-    document.getElementById('tr-inst-label').classList.remove('inst-placeholder');
-    var codeStr = [x.ticker, x.code].filter(Boolean).join(' · ');
-    if(codeStr){
-      document.getElementById('tr-inst-label').textContent = x.name;
     }
-    closeInstDd();
-  }
-
-  function openInstDd(){
-    document.getElementById('tr-inst-list').classList.add('open');
-    instDdFilter = '';
-    document.getElementById('tr-inst-search').value = '';
-    renderInstOptions();
-    setTimeout(function(){ document.getElementById('tr-inst-search').focus(); }, 50);
-    instDdOpen = true;
-  }
-
-  function closeInstDd(){
-    document.getElementById('tr-inst-list').classList.remove('open');
-    instDdOpen = false;
+    list.classList.add('open');
   }
 
   function populateInstSelect(){
-    renderInstOptions(); // initial render
-    var display = document.getElementById('tr-inst-display');
-    var search  = document.getElementById('tr-inst-search');
-    var listEl  = document.getElementById('tr-inst-list');
-    if(!display) return;
-    display.addEventListener('click', function(){ instDdOpen ? closeInstDd() : openInstDd(); });
-    display.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openInstDd(); } });
-    if(search){
-      search.addEventListener('input', function(){ instDdFilter = this.value; renderInstOptions(); });
-      search.addEventListener('keydown', function(e){
-        if(e.key==='Escape'){ closeInstDd(); display.focus(); }
+    var search = document.getElementById('tr-inst-search');
+    var list   = document.getElementById('tr-inst-list');
+    var caret  = document.getElementById('tr-inst-caret');
+    var ddwrap = document.getElementById('tr-inst-wrap');
+    if(!search) return;
+    // Show all on focus
+    search.addEventListener('focus', function(){ renderInstOptions(this.value); });
+    // Filter as you type
+    search.addEventListener('input', function(){
+      document.getElementById('tr-inst-sel').value = '';
+      renderInstOptions(this.value);
+    });
+    // Close on blur after short delay so mousedown on option fires first
+    search.addEventListener('blur', function(){
+      setTimeout(function(){ if(list) list.classList.remove('open'); }, 180);
+    });
+    // Caret click toggles dropdown
+    if(caret){
+      caret.addEventListener('mousedown', function(e){
+        e.preventDefault();
+        if(list.classList.contains('open')){ list.classList.remove('open'); }
+        else { renderInstOptions(search.value); search.focus(); }
       });
     }
+    // Escape closes
+    search.addEventListener('keydown', function(e){
+      if(e.key==='Escape'){ list.classList.remove('open'); search.blur(); }
+    });
+    // Outside click closes
     document.addEventListener('click', function(e){
-      var wrap = document.getElementById('tr-inst-wrap');
-      if(wrap && !wrap.contains(e.target)) closeInstDd();
+      if(ddwrap && !ddwrap.contains(e.target) && list) list.classList.remove('open');
     });
   }
 
@@ -250,10 +241,10 @@
   // ── open trade modal ──────────────────────────────────────
   document.getElementById('btnTrade').addEventListener('click', function(){
     document.getElementById('tr-inst-sel').value = '';
-    var search = document.getElementById('tr-inst-search');
-    if(search){ search.value = ''; }
-    var list = document.getElementById('tr-inst-list');
-    if(list){ list.classList.remove('open'); }
+    var srch = document.getElementById('tr-inst-search');
+    if(srch){ srch.value = ''; }
+    var ddlist = document.getElementById('tr-inst-list');
+    if(ddlist){ ddlist.classList.remove('open'); }
     ordersWrap.innerHTML = ''; addLotRow();
     document.getElementById('tr-fee').value = '';
     document.getElementById('tr-date').value = new Date().toISOString().slice(0,10);
