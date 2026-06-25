@@ -16,6 +16,57 @@
 .tbl.tt-tbl tbody td { text-align:left; padding-left:18px; }
 .tbl.tt-tbl thead th.r,.tbl.tt-tbl tbody td.r { text-align:right; padding-right:18px; padding-left:0; }
 
+/* ── single-column trade modal ── */
+.trade-modal-new { width:460px !important; max-width:96vw !important; }
+.trade-modal-new .modal-body { padding:20px 22px; }
+
+/* lighter Buy/Sell toggle */
+.tt-buy.active  { background:#34A853 !important; color:#fff !important; }
+.tt-sell.active { background:#E53935 !important; color:#fff !important; }
+
+/* lighter confirm button */
+.btn-fill.buy  { background:#34A853 !important; }
+.btn-fill.buy:hover  { background:#2E7D32 !important; }
+.btn-fill.sell { background:#E53935 !important; }
+.btn-fill.sell:hover { background:#C62828 !important; }
+
+/* ── custom select dropdown (keyboard-jumpable) ── */
+.inst-select-wrap { position:relative; }
+.inst-select-wrap select {
+  width:100%; box-sizing:border-box;
+  padding:9px 34px 9px 12px;
+  border:1.5px solid var(--border); border-radius:var(--radius-md);
+  font:inherit; font-size:0.88rem; color:var(--fg-1);
+  background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 12px center;
+  -webkit-appearance:none; appearance:none; cursor:pointer;
+}
+.inst-select-wrap select:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px var(--blue-bg); }
+
+/* ── row fields ── */
+.tm-row { display:grid; gap:14px; margin-bottom:14px; }
+.tm-row.two { grid-template-columns:1fr 1fr; }
+.tm-row.one { grid-template-columns:1fr; }
+.tm-row .field { margin:0; }
+
+/* stepper input (— value +) */
+.stepper-wrap { display:flex; align-items:center; border:1.5px solid var(--border); border-radius:var(--radius-md); overflow:hidden; background:#fff; }
+.stepper-wrap input { flex:1; border:none; text-align:center; font:inherit; font-size:0.9rem; padding:9px 4px; min-width:0; outline:none; }
+.stepper-btn { background:none; border:none; padding:9px 14px; font-size:1.1rem; color:var(--fg-3); cursor:pointer; line-height:1; flex:none; transition:background .15s; }
+.stepper-btn:hover { background:var(--gray-100); color:var(--fg-1); }
+
+/* lot rows */
+.lot-row { display:grid; grid-template-columns:1fr 1fr auto; gap:10px; align-items:end; margin-bottom:10px; }
+.lot-del { background:none; border:1px solid var(--border); border-radius:var(--radius-md); color:var(--fg-3); cursor:pointer; font-size:0.88rem; padding:8px 11px; line-height:1; height:38px; }
+.lot-del:hover { background:var(--red-bg); color:var(--red); border-color:var(--red); }
+.lot-add-btn { display:inline-flex; align-items:center; gap:5px; font-size:0.81rem; font-weight:600; color:var(--blue); background:none; border:1px dashed var(--blue); border-radius:var(--radius-md); cursor:pointer; padding:6px 13px; margin-top:2px; }
+.lot-add-btn:hover { background:var(--blue-bg); }
+
+/* summary row */
+.tm-summary { background:var(--gray-50); border-radius:var(--radius-md); padding:13px 16px; margin-top:16px; display:flex; justify-content:space-between; align-items:center; }
+.tm-summary .k { font-size:0.78rem; color:var(--fg-3); }
+.tm-summary .v { font-size:1.1rem; font-weight:700; color:var(--fg-1); font-variant-numeric:tabular-nums; }
+.tm-vwap { font-size:0.72rem; color:var(--fg-3); margin-top:4px; font-style:italic; }
+
 /* ── searchable combobox ── */
 .combo-wrap { position:relative; }
 .combo-wrap input { width:100%; box-sizing:border-box; }
@@ -141,53 +192,68 @@
   </table>
 </div>
 
-<!-- TRADE MODAL -->
-<div class="modal trade-modal" id="tradeModal">
+<!-- TRADE MODAL — single column, keyboard-jumpable dropdown -->
+<div class="modal trade-modal-new" id="tradeModal">
   <div class="modal-head">
-    <div><h3>New Trade</h3><div class="sub">Record a buy or sell. Add multiple lots for the same instrument.</div></div>
+    <div><h3>New Trade</h3><div class="sub">Record a buy or sell order.</div></div>
     <button class="modal-x" data-close>✕</button>
   </div>
   <div class="modal-body">
-    <div class="trade-toggle">
+
+    <!-- Buy / Sell toggle -->
+    <div class="trade-toggle" style="margin-bottom:18px;">
       <button class="tt-buy active" data-act="Buy">Buy</button>
       <button class="tt-sell" data-act="Sell">Sell</button>
     </div>
-    <div class="trade-cols">
-      <div class="trade-col">
-        <!-- Searchable instrument combobox -->
-        <div class="field">
-          <label>Instrument</label>
-          <div class="combo-wrap">
-            <input type="text" id="tr-inst-input" placeholder="Type to search or select…" autocomplete="off">
-            <input type="hidden" id="tr-inst-hidden">
-            <div class="combo-list" id="tr-inst-list"></div>
-          </div>
-        </div>
-        <div class="field">
-          <label>Trade Date</label>
-          <input type="date" id="tr-date">
-        </div>
-        <div class="field">
-          <label>Total Fee / Commission (RM)</label>
-          <input type="text" id="tr-fee" placeholder="0.00">
-        </div>
-      </div>
-      <div class="trade-col">
-        <!-- Multi-order rows -->
-        <div style="font-size:0.78rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--fg-3);margin-bottom:8px;">Order Lots</div>
-        <div id="tr-orders"></div>
-        <button type="button" class="ord-add" id="tr-add-order">+ Add lot</button>
-        <div class="vwap-hint" id="tr-vwap"></div>
-        <div class="est-box" style="margin-top:14px;">
-          <span class="k">Total Consideration <span id="tr-cons-lbl"></span></span>
-          <span class="v" id="tr-cons">RM —</span>
+
+    <!-- Symbol / Instrument -->
+    <div class="tm-row one">
+      <div class="field">
+        <label>Symbol</label>
+        <div class="inst-select-wrap">
+          <select id="tr-inst-sel">
+            <option value="">— Select instrument —</option>
+          </select>
         </div>
       </div>
     </div>
+
+    <!-- Trade Date -->
+    <div class="tm-row one">
+      <div class="field">
+        <label>Trade Date</label>
+        <input type="date" id="tr-date" style="width:100%;box-sizing:border-box;">
+      </div>
+    </div>
+
+    <!-- Order Lots (units + price per lot) -->
+    <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--fg-3);margin-bottom:8px;">Order Lots</div>
+    <div id="tr-orders"></div>
+    <button type="button" class="lot-add-btn" id="tr-add-order">+ Add lot</button>
+    <div class="tm-vwap" id="tr-vwap"></div>
+
+    <!-- Fee -->
+    <div class="tm-row one" style="margin-top:14px;">
+      <div class="field">
+        <label>Fee / Commission (RM)</label>
+        <input type="text" id="tr-fee" placeholder="0.00" style="width:100%;box-sizing:border-box;">
+      </div>
+    </div>
+
+    <!-- Estimated total -->
+    <div class="tm-summary">
+      <div>
+        <div class="k">Estimated Amount (with fees)</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="v" id="tr-cons">MYR —</div>
+      </div>
+    </div>
+
   </div>
-  <div class="modal-foot">
+  <div class="modal-foot" style="justify-content:space-between;">
     <button class="btn-line btn-sm" data-close>Cancel</button>
-    <button class="btn-fill btn-sm" id="tr-confirm">Confirm Buy</button>
+    <button class="btn-fill btn-sm buy" id="tr-confirm" style="min-width:140px;">Confirm Buy</button>
   </div>
 </div>
 
