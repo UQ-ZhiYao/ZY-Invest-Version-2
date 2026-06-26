@@ -6,32 +6,53 @@
 <title>Portfolio — ZY-Invest Admin</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0D2A52">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="ZY Admin">
-<meta name="application-name" content="ZY Admin">
 <link rel="icon" type="image/png" href="../assets/img/favicon.png">
 <link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
 <link rel="stylesheet" href="../assets/css/dashboard.css">
 <link rel="stylesheet" href="../assets/css/dashboard-portfolio.css">
 <link rel="stylesheet" href="../assets/css/admin.css">
+<style>
+.tbl.pf-tbl thead th   { text-align:left;  padding-left:18px; }
+.tbl.pf-tbl tbody td   { text-align:left;  padding-left:18px; }
+.tbl.pf-tbl thead th.r,
+.tbl.pf-tbl tbody td.r { text-align:right; padding-right:18px; padding-left:0; }
 
+/* product colour pills */
+.prod-pill { display:inline-block; padding:2px 9px; border-radius:99px; font-size:0.75rem; font-weight:500; white-space:nowrap; letter-spacing:0.01em; }
+.prod-securities   { background:#DBEAFE; color:#1D4ED8; }
+.prod-derivatives  { background:#FEF9C3; color:#854D0E; }
+.prod-cash-funds   { background:#D1FAE5; color:#065F46; }
+.prod-collectibles { background:#F3E8FF; color:#6B21A8; }
+.prod-private-eq   { background:#FFE4E6; color:#9F1239; }
+.prod-cash-hand    { background:#F1F5F9; color:#475569; }
+
+/* 2-line cell sub-text */
+.cell-sub { font-size:0.74rem; color:var(--fg-3); display:block; margin-top:2px; }
+
+/* weight bar — relative to max weight */
+.wt-wrap { display:flex; align-items:center; gap:8px; justify-content:flex-end; }
+.wt-bar  { width:80px; height:6px; border-radius:99px; background:var(--gray-100); flex:none; }
+.wt-fill { height:6px; border-radius:99px; background:var(--blue); display:block; }
+
+/* P&L colours */
+.pos { color:var(--green); font-weight:600; }
+.neg { color:var(--red);   font-weight:600; }
+
+/* cash row highlight */
+.cash-row td { background:var(--gray-50); color:var(--fg-2); }
+</style>
 </head>
 <body>
 <script>
 (function(){
-  if('serviceWorker' in navigator){ window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
+  if('serviceWorker' in navigator){ window.addEventListener('load',function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
   try{ var s=JSON.parse(localStorage.getItem('zy_admin_session')||'null'); if(!s||s.role!=='admin'){ location.replace('admin-login.html'); } }
   catch(e){ location.replace('admin-login.html'); }
 })();
 </script>
 
 <header class="adm-top">
-  <a href="overview.html" class="brand">
-    <img src="../assets/img/logo.png" alt="ZY-Invest">
-    <span class="bt"><b>ZY-Invest</b><span>Admin Console</span></span>
-  </a>
+  <a href="overview.html" class="brand"><img src="../assets/img/logo.png" alt="ZY-Invest"><span class="bt"><b>ZY-Invest</b><span>Admin Console</span></span></a>
   <span class="adm-badge">🔒 Restricted</span>
   <div class="adm-right">
     <span class="adm-clock" id="clock">—</span>
@@ -42,28 +63,9 @@
 
 <div class="adm-subbar">
   <span class="sb-lab">FUND PAGES</span>
-  <div class="sub-group">
-    <button class="sub-top">Fund <span class="caret">▾</span></button>
-    <div class="sub-dd"><div class="sub-dd-card">
-      <a href="fund-overview.html"><b>Fund Overview</b><span>Mandate, objective &amp; key facts</span></a>
-      <a href="fund-view.html?src=factsheet.html"><b>Factsheet</b><span>Holdings allocation each financial year</span></a>
-      <a href="fund-view.html?src=shareholder-list.html"><b>Shareholder List</b><span>Unitholders, units held &amp; ownership</span></a>
-    </div></div>
-  </div>
-  <div class="sub-group">
-    <button class="sub-top">Performance <span class="caret">▾</span></button>
-    <div class="sub-dd"><div class="sub-dd-card">
-      <a href="fund-view.html?src=financial-result.html"><b>Financial Result</b><span>Income statement, balance sheet &amp; cash flow</span></a>
-      <a href="fund-view.html?src=performance-analysis.html"><b>Performance Analysis</b><span>Returns &amp; benchmark comparison (FBM KLCI)</span></a>
-      <a href="fund-view.html?src=nta-history.html"><b>NTA History</b><span>Chart &amp; daily NTA / NAV history</span></a>
-    </div></div>
-  </div>
-  <div class="sub-group">
-    <button class="sub-top">Documents <span class="caret">▾</span></button>
-    <div class="sub-dd"><div class="sub-dd-card">
-      <a href="fund-view.html?src=statement-download.html"><b>Statement Download</b><span>Factsheets &amp; annual reports</span></a>
-    </div></div>
-  </div>
+  <div class="sub-group"><button class="sub-top">Fund <span class="caret">▾</span></button><div class="sub-dd"><div class="sub-dd-card"><a href="fund-overview.html"><b>Fund Overview</b><span>Mandate, objective &amp; key facts</span></a><a href="fund-view.html?src=factsheet.html"><b>Factsheet</b></a><a href="fund-view.html?src=shareholder-list.html"><b>Shareholder List</b></a></div></div></div>
+  <div class="sub-group"><button class="sub-top">Performance <span class="caret">▾</span></button><div class="sub-dd"><div class="sub-dd-card"><a href="fund-view.html?src=financial-result.html"><b>Financial Result</b></a><a href="fund-view.html?src=performance-analysis.html"><b>Performance Analysis</b></a><a href="fund-view.html?src=nta-history.html"><b>NTA History</b></a></div></div></div>
+  <div class="sub-group"><button class="sub-top">Documents <span class="caret">▾</span></button><div class="sub-dd"><div class="sub-dd-card"><a href="fund-view.html?src=statement-download.html"><b>Statement Download</b></a></div></div></div>
 </div>
 
 <div class="adm-shell" id="admShell">
@@ -91,43 +93,33 @@
     <a class="adm-nav adm-signout" id="admSignout" href="#"><span class="ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>Sign out</a>
   </aside>
   <main class="adm-main">
-<div class="ph"><h1>Portfolio</h1><p>Manage the fund's holdings, weights and latest prices. Mark-to-market drives the daily NTA.</p></div>
+
+<div class="ph"><h1>Portfolio</h1><p>Current holdings, mark-to-market values and unrealised P&amp;L.</p></div>
+
 <div class="metric-row">
-  <div class="mc"><div class="label">Holdings</div><div class="value blue" id="pfCount">7</div><div class="sub">across 6 sectors</div></div>
-  <div class="mc"><div class="label">Equity Exposure</div><div class="value">92.4%</div><div class="sub">of NAV</div></div>
-  <div class="mc"><div class="label">Cash &amp; MMF</div><div class="value">7.6%</div><div class="sub">RM 74,610</div></div>
-  <div class="mc"><div class="label">Last Priced</div><div class="value">17:00 MYT</div><div class="sub">Bursa close · today</div></div>
-</div>
-<div class="panel mt16"><div class="panel-head"><h3>Holdings</h3><button class="btn-mini" id="btnTrade">+ New Trade</button></div>
-  <table class="tbl"><thead><tr><th>Instrument</th><th>Product</th><th>Sector</th><th class="td-right">Units</th><th class="td-right">Last Price</th><th class="td-right">Market Value (RM)</th><th class="td-right">Weight</th></tr></thead>
-  <tbody id="pfBody"></tbody></table>
+  <div class="mc"><div class="label">Holdings</div><div class="value blue" id="pfCount">—</div><div class="sub">open positions</div></div>
+  <div class="mc"><div class="label">Total Market Value</div><div class="value" id="pfMV">RM —</div><div class="sub">excl. cash</div></div>
+  <div class="mc"><div class="label">Unrealised P&amp;L</div><div class="value" id="pfPnl">RM —</div><div class="sub" id="pfPnlPct">—</div></div>
+  <div class="mc"><div class="label">Last Updated</div><div class="value" id="pfUpdated" style="font-size:0.9rem;">—</div><div class="sub"><button class="btn-line btn-sm" id="btnRefreshPrices" style="font-size:0.75rem;padding:3px 10px;">↻ Refresh Prices</button></div></div>
 </div>
 
-<!-- trade modal -->
-<div class="modal trade-modal" id="tradeModal">
-  <div class="modal-head"><div><h3 id="tradeTitle">Buy</h3><div class="sub" id="tradeSub">Add to or open a position.</div></div><button class="modal-x" data-close>✕</button></div>
-  <div class="modal-body">
-    <div class="trade-toggle"><button class="tt-buy active" data-act="Buy">Buy</button><button class="tt-sell" data-act="Sell">Sell</button></div>
-    <div class="trade-cols">
-      <div class="trade-col">
-        <div class="field"><label>Instrument</label><select id="tr-inst"></select></div>
-        <div class="two-up">
-          <div class="field"><label>Trade Date</label><input type="date" id="tr-date" value="2026-03-19"></div>
-          <div class="field"><label>Fee / Commission (RM)</label><input type="text" id="tr-fee" placeholder="0.00"></div>
-        </div>
-        <div class="field"><label>Note</label><input type="text" id="tr-note" placeholder="Optional"></div>
-      </div>
-      <div class="trade-col">
-        <div class="two-up">
-          <div class="field"><label>Units / Quantity</label><input type="text" id="tr-units" placeholder="1,000"></div>
-          <div class="field"><label>Price (RM)</label><input type="text" id="tr-price" placeholder="4.32"></div>
-        </div>
-        <div class="est-box"><span class="k">Consideration <span id="tr-cons-lbl"></span></span><span class="v" id="tr-cons">RM —</span></div>
-      </div>
-    </div>
-  </div>
-  <div class="modal-foot"><button class="btn-line btn-sm" data-close>Cancel</button><button class="btn-fill btn-sm" id="tr-confirm">Confirm</button></div>
+<div class="panel mt16">
+  <div class="panel-head"><h3>Holdings</h3><span class="td-sub" id="pfListCount"></span></div>
+  <table class="tbl pf-tbl">
+    <thead><tr>
+      <th>Instrument</th>
+      <th>Product</th>
+      <th class="r">Units</th>
+      <th class="r">Total Cost<br><span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.68rem;">Cost / Unit</span></th>
+      <th class="r">Market Value<br><span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.68rem;">Latest Price</span></th>
+      <th class="r">Unrealised P&amp;L</th>
+      <th class="r">Return %</th>
+      <th class="r">Weight</th>
+    </tr></thead>
+    <tbody id="pfBody"><tr><td colspan="8" style="padding:24px;color:var(--fg-3);">Loading…</td></tr></tbody>
+  </table>
 </div>
+
   </main>
 </div>
 <div class="modal-scrim" id="modalScrim"></div>
@@ -137,64 +129,6 @@
 <script src="../assets/js/auth-logout.js"></script>
 <script src="../assets/js/admin-shell.js"></script>
 <script src="../assets/js/admin-supabase.js"></script>
-<script>
-(function(){
-  var INSTRUMENTS=[
-    {name:'Hartalega Holdings',ticker:'5168.KL',product:'Securities',sector:'Healthcare'},
-    {name:'Public Bank Berhad',ticker:'1295.KL',product:'Securities',sector:'Financials'},
-    {name:'IHH Healthcare',ticker:'5225.KL',product:'Securities',sector:'Healthcare'},
-    {name:'DiGi.Com',ticker:'6947.KL',product:'Securities',sector:'Telcos'},
-    {name:'Apple Inc',ticker:'AAPL',product:'Securities',sector:'Technology'},
-    {name:'AirAsia',ticker:'5099.KL',product:'Securities',sector:'Consumer'}
-  ];
-  var PF=[
-    {name:'Hartalega Holdings',tk:'5168.KL',product:'Securities',sec:'Healthcare',units:55000,price:2.45},
-    {name:'Public Bank Berhad',tk:'1295.KL',product:'Securities',sec:'Financials',units:28500,price:4.32},
-    {name:'IHH Healthcare',tk:'5225.KL',product:'Securities',sec:'Healthcare',units:18200,price:6.14},
-    {name:'DiGi.Com',tk:'6947.KL',product:'Securities',sec:'Telcos',units:23800,price:3.81},
-    {name:'Apple Inc',tk:'AAPL',product:'Securities',sec:'Technology',units:300,price:998.18},
-    {name:'AirAsia',tk:'5099.KL',product:'Securities',sec:'Consumer',units:42000,price:0.72},
-    {name:'Affin Money Market Fund',tk:'AMMF',product:'Cash Funds',sec:'Cash',units:60000,price:1.00},
-    {name:'MYR Cash Account',tk:'—',product:'Cash on Hand',sec:'Cash',units:74610,price:1.00}
-  ];
-  function prodPill(p){ return '<span class="tag-blue">'+p+'</span>'; }
-  var pfBody=document.getElementById('pfBody');
-  function renderPF(){
-    var total=0; PF.forEach(function(h){ total+=h.units*h.price; });
-    pfBody.innerHTML='';
-    PF.forEach(function(h){
-      var mv=h.units*h.price, w=total?mv/total*100:0;
-      var tr=document.createElement('tr');
-      if((h.product||'')==='Cash on Hand'){ tr.dataset.pin='last'; }
-      tr.innerHTML='<td class="hold-name"><b>'+h.name+'</b><span>'+h.tk+'</span></td><td>'+prodPill(h.product)+'</td><td class="td-sub">'+h.sec+'</td>'
-        +'<td class="td-right">'+h.units.toLocaleString('en-MY')+'</td>'
-        +'<td class="td-right">'+h.price.toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2})+'</td>'
-        +'<td class="td-right">'+mv.toLocaleString('en-MY',{maximumFractionDigits:0})+'</td>'
-        +'<td class="td-right"><div class="alloc-cell" style="justify-content:flex-end;"><div class="alloc-bar" style="max-width:80px;"><span style="width:'+Math.min(100,w).toFixed(0)+'%"></span></div><span class="alloc-pct">'+w.toFixed(1)+'%</span></div></td>';
-      pfBody.appendChild(tr);
-    });
-    document.getElementById('pfCount').textContent=PF.length;
-  }
-  renderPF();
-  var tradeAction='Buy';
-  function trTotals(){ var u=zyParseNum(document.getElementById('tr-units').value), p=zyParseNum(document.getElementById('tr-price').value); return {units:u,cost:u*p,price:p}; }
-  function recalcCons(){ var t=trTotals(), f=zyParseNum(document.getElementById('tr-fee').value); var cons=tradeAction==='Buy'?t.cost+f:t.cost-f; document.getElementById('tr-cons-lbl').textContent=tradeAction==='Buy'?'(units × price + fee)':'(units × price − fee)'; document.getElementById('tr-cons').textContent=(t.units>0&&t.price>0)?'RM '+cons.toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2}):'RM —'; }
-  ['tr-fee','tr-units','tr-price'].forEach(function(id){ document.getElementById(id).addEventListener('input',recalcCons); });
-  function populateInst(){ var sel=document.getElementById('tr-inst'); sel.innerHTML=''; var src=tradeAction==='Buy'?INSTRUMENTS:PF; src.forEach(function(x){ var o=document.createElement('option'); o.value=x.name; var code=x.ticker||x.tk||''; o.textContent=x.name+(code&&code!=='—'?' ('+code+')':''); sel.appendChild(o); }); }
-  function setAction(a){ tradeAction=a; document.querySelector('.tt-buy').classList.toggle('active',a==='Buy'); document.querySelector('.tt-sell').classList.toggle('active',a==='Sell'); var cf=document.getElementById('tr-confirm'); cf.textContent=a==='Buy'?'Confirm Buy':'Confirm Sell'; cf.classList.toggle('sell',a==='Sell'); cf.classList.toggle('buy',a==='Buy'); populateInst(); recalcCons(); }
-  [].forEach.call(document.querySelectorAll('.trade-toggle button'),function(b){ b.addEventListener('click',function(){ setAction(b.dataset.act); }); });
-  document.getElementById('btnTrade').addEventListener('click',function(){ document.getElementById('tr-units').value=''; document.getElementById('tr-price').value=''; document.getElementById('tr-fee').value=''; document.getElementById('tr-note').value=''; setAction('Buy'); zyModalOpen('tradeModal'); });
-  document.getElementById('tr-confirm').addEventListener('click',function(){
-    var t=trTotals(); if(t.units<=0||t.price<=0){ zyToast('Enter units and price'); return; }
-    var name=document.getElementById('tr-inst').value;
-    var inst=INSTRUMENTS.filter(function(x){return x.name===name;})[0]||{};
-    var h=PF.filter(function(x){return x.name===name;})[0];
-    if(tradeAction==='Buy'){ if(h){ var tc=h.units*h.price+t.cost; h.units+=t.units; h.price=h.units?tc/h.units:t.price; } else { PF.unshift({name:name,tk:inst.ticker||'—',product:inst.product||'Securities',sec:inst.sector||'—',units:t.units,price:t.price}); } }
-    else { if(!h){ zyToast('No holding to sell'); return; } if(t.units>h.units){ zyToast('Cannot sell more than held'); return; } h.units-=t.units; if(h.units<=0.0001){ PF=PF.filter(function(x){return x!==h;}); } }
-    renderPF(); zyModalClose(); zyToast(tradeAction+' '+zyFmt(t.units)+' · '+name+' @ RM '+t.price.toFixed(2));
-  });
-})();
-</script>
-
+<script src="../assets/js/portfolio-admin.js"></script>
 </body>
 </html>
