@@ -167,9 +167,8 @@
       }
 
       var position = r.isDir ? 'Director' : 'Shareholder';
-      if(isAdminPage && r.isDir) position='<span class="dir-badge" style="margin-left:0;">Director</span>';
 
-      var avClass=r.isMe||r.isDir?'sh-av':'sh-av hidden-av';
+      var avClass=(isAdminPage||r.isMe||r.isDir)?'sh-av':'sh-av hidden-av';
       var avContent=(!isAdminPage&&!r.isMe&&!r.isDir)?'?':initials(r.name);
 
       var tr=document.createElement('tr');
