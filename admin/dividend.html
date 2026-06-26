@@ -162,10 +162,10 @@
       <th>Pay Date</th>
       <th>Instrument</th>
       <th>Type</th>
-      <th class="r">DPS (RM)</th>
+      <th class="r">DPS (sen)</th>
       <th class="r">Units Held</th>
-      <th class="r">Gross (RM)</th>
-      <th>Status</th>
+      <th class="r">Amount (RM)</th>
+      <th class="r">Status</th>
     </tr></thead>
     <tbody id="dvBody"><tr><td colspan="8" style="padding:24px;color:var(--fg-3);">Loading…</td></tr></tbody>
   </table>
@@ -209,7 +209,7 @@
 
       <!-- DPS -->
       <div class="field">
-        <label>DPS — per unit (RM)</label>
+        <label>DPS — per unit (sen)</label>
         <input type="text" id="dv-dps" placeholder="0.12" style="width:100%;box-sizing:border-box;">
       </div>
 
@@ -232,7 +232,7 @@
 
       <!-- Gross dividend summary -->
       <div class="dv-summary">
-        <div class="k">Gross Dividend <span style="font-weight:400;">(DPS × units)</span></div>
+        <div class="k">Amount (RM) <span style="font-weight:400;">(DPS ÷ 100 × units)</span></div>
         <div class="v" id="dv-gross">RM —</div>
       </div>
 
