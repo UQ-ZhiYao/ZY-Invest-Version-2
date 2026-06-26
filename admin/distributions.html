@@ -6,32 +6,47 @@
 <title>Distributions — ZY-Invest Admin</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0D2A52">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="ZY Admin">
-<meta name="application-name" content="ZY Admin">
 <link rel="icon" type="image/png" href="../assets/img/favicon.png">
 <link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
 <link rel="stylesheet" href="../assets/css/dashboard.css">
 <link rel="stylesheet" href="../assets/css/dashboard-portfolio.css">
 <link rel="stylesheet" href="../assets/css/admin.css">
+<style>
+.tbl.dist-tbl thead th   { text-align:left; padding-left:18px; }
+.tbl.dist-tbl tbody td   { text-align:left; padding-left:18px; }
+.tbl.dist-tbl thead th.r,
+.tbl.dist-tbl tbody td.r { text-align:right; padding-right:18px; padding-left:0; }
 
+/* match trade modal sizing */
+.dist-modal { width:460px !important; max-width:96vw !important; }
+.dist-modal .modal-body { padding:20px 22px; }
+
+/* single-column rows */
+.dist-field-col { display:flex; flex-direction:column; gap:14px; }
+.dist-field-col .field { margin:0; }
+
+/* summary box */
+.dist-summary {
+  background:var(--gray-50); border-radius:var(--radius-md);
+  padding:13px 16px; display:flex; justify-content:space-between; align-items:center;
+}
+.dist-summary .k { font-size:0.78rem; color:var(--fg-3); }
+.dist-summary .v { font-size:1.05rem; font-weight:700; color:var(--blue); }
+
+.units-hint { font-size:0.74rem; color:var(--fg-3); margin-top:4px; }
+</style>
 </head>
 <body>
 <script>
 (function(){
-  if('serviceWorker' in navigator){ window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
+  if('serviceWorker' in navigator){ window.addEventListener('load',function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
   try{ var s=JSON.parse(localStorage.getItem('zy_admin_session')||'null'); if(!s||s.role!=='admin'){ location.replace('admin-login.html'); } }
   catch(e){ location.replace('admin-login.html'); }
 })();
 </script>
 
 <header class="adm-top">
-  <a href="overview.html" class="brand">
-    <img src="../assets/img/logo.png" alt="ZY-Invest">
-    <span class="bt"><b>ZY-Invest</b><span>Admin Console</span></span>
-  </a>
+  <a href="overview.html" class="brand"><img src="../assets/img/logo.png" alt="ZY-Invest"><span class="bt"><b>ZY-Invest</b><span>Admin Console</span></span></a>
   <span class="adm-badge">🔒 Restricted</span>
   <div class="adm-right">
     <span class="adm-clock" id="clock">—</span>
@@ -42,28 +57,9 @@
 
 <div class="adm-subbar">
   <span class="sb-lab">FUND PAGES</span>
-  <div class="sub-group">
-    <button class="sub-top">Fund <span class="caret">▾</span></button>
-    <div class="sub-dd"><div class="sub-dd-card">
-      <a href="fund-overview.html"><b>Fund Overview</b><span>Mandate, objective &amp; key facts</span></a>
-      <a href="fund-view.html?src=factsheet.html"><b>Factsheet</b><span>Holdings allocation each financial year</span></a>
-      <a href="fund-view.html?src=shareholder-list.html"><b>Shareholder List</b><span>Unitholders, units held &amp; ownership</span></a>
-    </div></div>
-  </div>
-  <div class="sub-group">
-    <button class="sub-top">Performance <span class="caret">▾</span></button>
-    <div class="sub-dd"><div class="sub-dd-card">
-      <a href="fund-view.html?src=financial-result.html"><b>Financial Result</b><span>Income statement, balance sheet &amp; cash flow</span></a>
-      <a href="fund-view.html?src=performance-analysis.html"><b>Performance Analysis</b><span>Returns &amp; benchmark comparison (FBM KLCI)</span></a>
-      <a href="fund-view.html?src=nta-history.html"><b>NTA History</b><span>Chart &amp; daily NTA / NAV history</span></a>
-    </div></div>
-  </div>
-  <div class="sub-group">
-    <button class="sub-top">Documents <span class="caret">▾</span></button>
-    <div class="sub-dd"><div class="sub-dd-card">
-      <a href="fund-view.html?src=statement-download.html"><b>Statement Download</b><span>Factsheets &amp; annual reports</span></a>
-    </div></div>
-  </div>
+  <div class="sub-group"><button class="sub-top">Fund <span class="caret">▾</span></button><div class="sub-dd"><div class="sub-dd-card"><a href="fund-overview.html"><b>Fund Overview</b><span>Mandate, objective &amp; key facts</span></a><a href="fund-view.html?src=factsheet.html"><b>Factsheet</b></a><a href="fund-view.html?src=shareholder-list.html"><b>Shareholder List</b></a></div></div></div>
+  <div class="sub-group"><button class="sub-top">Performance <span class="caret">▾</span></button><div class="sub-dd"><div class="sub-dd-card"><a href="fund-view.html?src=financial-result.html"><b>Financial Result</b></a><a href="fund-view.html?src=performance-analysis.html"><b>Performance Analysis</b></a><a href="fund-view.html?src=nta-history.html"><b>NTA History</b></a></div></div></div>
+  <div class="sub-group"><button class="sub-top">Documents <span class="caret">▾</span></button><div class="sub-dd"><div class="sub-dd-card"><a href="fund-view.html?src=statement-download.html"><b>Statement Download</b></a></div></div></div>
 </div>
 
 <div class="adm-shell" id="admShell">
@@ -91,27 +87,97 @@
     <a class="adm-nav adm-signout" id="admSignout" href="#"><span class="ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>Sign out</a>
   </aside>
   <main class="adm-main">
-<div class="ph"><h1>Distributions</h1><p>Declared interim, final and special distributions for the fund.</p></div>
-<div class="panel"><div class="panel-head"><h3>Distribution History</h3><button class="btn-mini" id="openDistModal">+ Declare Distribution</button></div>
-  <table class="tbl"><thead><tr><th>FY</th><th>Type</th><th class="td-right">DPS (sen)</th><th class="td-right">Ex-Date</th><th class="td-right">Payment</th><th class="td-right">Gross (RM)</th><th>Status</th></tr></thead>
-  <tbody id="dBody"></tbody></table>
+
+<div class="ph"><h1>Distributions</h1><p>Declared interim, final and special distributions paid to fund unitholders.</p></div>
+
+<div class="metric-row">
+  <div class="mc"><div class="label">Declarations</div><div class="value blue" id="distCount">—</div><div class="sub">total records</div></div>
+  <div class="mc"><div class="label">Total Paid</div><div class="value" id="distPaid">RM —</div><div class="sub">confirmed distributions</div></div>
+  <div class="mc"><div class="label">Pending</div><div class="value" id="distPending" style="color:var(--orange);">—</div><div class="sub">awaiting payment</div></div>
+  <div class="mc"><div class="label">Latest DPS</div><div class="value" id="distLatestDps">— sen</div><div class="sub" id="distLatestFy">—</div></div>
 </div>
-<div class="modal" id="distModal">
-  <div class="modal-head"><div><h3 id="distTitle">Declare Distribution</h3><div class="sub">Lodge an interim, final or special distribution.</div></div><button class="modal-x" data-close>✕</button></div>
-  <div class="modal-body">
-    <div class="form-grid">
-      <div class="field"><label>Financial Year</label><select id="d-fy"><option>FY2026</option><option>FY2025</option></select></div>
-      <div class="field"><label>Type</label><select id="d-type"><option>Interim</option><option>Final</option><option>Special</option></select></div>
-      <div class="field"><label>Ex-Date</label><input type="date" id="d-ex" value="2026-11-30"></div>
-      <div class="field"><label>Payment Date</label><input type="date" id="d-pay" value="2026-12-15"></div>
-      <div class="field"><label>DPS (sen)</label><input type="text" id="d-dps" placeholder="4.25"></div>
-      <div class="field"><label>Source of Funds</label><select id="d-src"><option>Revenue income</option><option>Realised gains</option><option>Other</option></select></div>
-      <div class="field fg-full"><label>Notes</label><input type="text" id="d-note" placeholder="e.g. FY26 interim — 80% of net revenue income"></div>
-    </div>
-    <div class="est-box"><span class="k">Estimated gross payout · <span id="d-dps-echo">— sen</span> × 958,300 units</span><span class="v" id="d-payout">RM —</span></div>
+
+<div class="panel" style="margin-top:16px;">
+  <div class="panel-head"><h3>Distribution History</h3><button class="btn-mini" id="openDistModal">+ Declare Distribution</button></div>
+  <table class="tbl dist-tbl">
+    <thead><tr>
+      <th>FY</th>
+      <th>Type</th>
+      <th>Ex-Date</th>
+      <th>Pay Date</th>
+      <th class="r">DPS (sen)</th>
+      <th class="r">Units</th>
+      <th class="r">Gross (RM)</th>
+      <th class="r">Status</th>
+    </tr></thead>
+    <tbody id="dBody"><tr><td colspan="8" style="padding:24px;color:var(--fg-3);">Loading…</td></tr></tbody>
+  </table>
+</div>
+
+<!-- DECLARE / EDIT DISTRIBUTION MODAL -->
+<div class="modal dist-modal" id="distModal">
+  <div class="modal-head">
+    <div><h3 id="distTitle">Declare Distribution</h3><div class="sub">Lodge an interim, final or special distribution.</div></div>
+    <button class="modal-x" data-close>✕</button>
   </div>
-  <div class="modal-foot"><button class="btn-line btn-sm" id="d-draft">Save Draft</button><button class="btn-fill btn-sm" id="d-declare">Declare →</button></div>
+  <div class="modal-body">
+    <div class="dist-field-col">
+
+      <!-- Type — free text -->
+      <div class="field"><label>Type</label>
+        <input type="text" id="d-type" placeholder="e.g. Interim, Final, Special" style="width:100%;box-sizing:border-box;">
+      </div>
+
+      <!-- Ex-Date + Pay Date side by side -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="field" style="margin:0;"><label>Ex-Date</label><input type="date" id="d-ex" style="width:100%;box-sizing:border-box;"></div>
+        <div class="field" style="margin:0;"><label>Pay Date</label><input type="date" id="d-pay" style="width:100%;box-sizing:border-box;"></div>
+      </div>
+
+      <!-- FY — auto-computed, read-only -->
+      <div class="field"><label>Financial Year</label>
+        <input type="text" id="d-fy" readonly placeholder="Auto from ex-date" style="width:100%;box-sizing:border-box;background:var(--gray-50);cursor:default;">
+        <div class="units-hint" id="d-fy-hint">Set ex-date to auto-detect FY.</div>
+      </div>
+
+      <!-- DPS -->
+      <div class="field"><label>DPS (sen)</label>
+        <input type="text" id="d-dps" placeholder="4.25" style="width:100%;box-sizing:border-box;">
+      </div>
+
+      <!-- Units — auto-computed from capital_injection on ex-date -->
+      <div class="field"><label>Units in Issue on Ex-Date</label>
+        <input type="text" id="d-units" readonly placeholder="—" style="width:100%;box-sizing:border-box;background:var(--gray-50);cursor:default;">
+        <div class="units-hint" id="d-units-hint">Auto-computed from capital injection records up to ex-date.</div>
+      </div>
+
+      <!-- Status -->
+      <div class="field"><label>Status</label>
+        <select id="d-status" style="width:100%;box-sizing:border-box;font:inherit;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-md);">
+          <option value="Pending">Pending</option>
+          <option value="Paid">Paid</option>
+        </select>
+      </div>
+
+      <!-- Gross payout summary -->
+      <div class="dist-summary">
+        <div class="k">Gross Payout <span style="font-weight:400;">(DPS ÷ 100 × units)</span></div>
+        <div class="v" id="d-payout">RM —</div>
+      </div>
+
+    </div>
+  </div>
+  <div class="modal-foot" style="justify-content:space-between;">
+    <div>
+      <button class="btn-line btn-sm" id="d-delete" style="color:var(--red);border-color:var(--red);display:none;">Delete</button>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-line btn-sm" data-close>Cancel</button>
+      <button class="btn-fill btn-sm" id="d-save">Save</button>
+    </div>
+  </div>
 </div>
+
   </main>
 </div>
 <div class="modal-scrim" id="modalScrim"></div>
@@ -121,29 +187,6 @@
 <script src="../assets/js/auth-logout.js"></script>
 <script src="../assets/js/admin-shell.js"></script>
 <script src="../assets/js/admin-supabase.js"></script>
-<script>
-(function(){
-  var UNITS=958300;
-  var DIST=[
-    {fy:'FY2025',type:'Interim',dps:3.20,ex:'30 Jun 2025',pay:'15 Jul 2025',status:'Paid'},
-    {fy:'FY2025',type:'Final',dps:2.10,ex:'15 Dec 2025',pay:'15 Jan 2026',status:'Paid'},
-    {fy:'FY2024',type:'Interim',dps:3.80,ex:'30 Jun 2024',pay:'15 Jul 2024',status:'Paid'}
-  ];
-  var dDps=document.getElementById('d-dps'), dBody=document.getElementById('dBody'), distEdit=-1;
-  function sPill(s){ if(s==='Paid')return '<span class="pill-ok">Paid</span>'; if(s==='Declared')return '<span class="pill-ok">Declared</span>'; return '<span class="pill-warn">'+s+'</span>'; }
-  function setDate(id,h){ var d=new Date(h); if(!isNaN(d)){ document.getElementById(id).value=d.toISOString().slice(0,10); } }
-  function fdate(id){ var v=document.getElementById(id).value; var d=new Date(v); return isNaN(d)?'—':d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
-  function render(){ dBody.innerHTML=''; DIST.forEach(function(r,i){ var g=Math.round(r.dps/100*UNITS); var tr=document.createElement('tr'); tr.className='clickable'; tr.innerHTML='<td>'+r.fy+'</td><td><span class="tag-blue">'+r.type+'</span></td><td class="td-right">'+r.dps.toFixed(2)+'</td><td class="td-right">'+r.ex+'</td><td class="td-right">'+r.pay+'</td><td class="td-right">'+g.toLocaleString('en-MY')+'</td><td>'+sPill(r.status)+'</td>'; tr.addEventListener('click',function(){ open(i); }); dBody.appendChild(tr); }); }
-  render();
-  function recalc(){ var d=zyParseNum(dDps.value); document.getElementById('d-dps-echo').textContent=(d?d.toFixed(2):'—')+' sen'; document.getElementById('d-payout').textContent=d?'RM '+Math.round(d/100*UNITS).toLocaleString('en-MY'):'RM —'; }
-  dDps.addEventListener('input',recalc);
-  function open(i){ distEdit=i; var dec=document.getElementById('d-declare'),draft=document.getElementById('d-draft'),head=document.getElementById('distTitle'); if(i>=0){ var r=DIST[i]; document.getElementById('d-fy').value=r.fy; document.getElementById('d-type').value=r.type; setDate('d-ex',r.ex); setDate('d-pay',r.pay); dDps.value=r.dps; head.textContent='Edit Distribution'; dec.textContent='Save Changes'; draft.style.display='none'; } else { dDps.value=''; document.getElementById('d-note').value=''; head.textContent='Declare Distribution'; dec.textContent='Declare →'; draft.style.display=''; } recalc(); zyModalOpen('distModal'); }
-  function declare(asDraft){ var fy=document.getElementById('d-fy').value,type=document.getElementById('d-type').value,dps=zyParseNum(dDps.value); if(dps<=0){ zyToast('Enter DPS in sen'); return; } if(distEdit>=0){ var r=DIST[distEdit]; r.fy=fy; r.type=type; r.dps=dps; r.ex=fdate('d-ex'); r.pay=fdate('d-pay'); render(); zyModalClose(); zyToast('Distribution updated — '+fy+' '+type); return; } DIST.unshift({fy:fy,type:type,dps:dps,ex:fdate('d-ex'),pay:fdate('d-pay'),status:asDraft?'Draft':'Declared'}); render(); zyModalClose(); zyToast(asDraft?'Draft saved — '+fy+' '+type:fy+' '+type+' distribution declared'); }
-  document.getElementById('d-declare').addEventListener('click',function(){ declare(false); });
-  document.getElementById('d-draft').addEventListener('click',function(){ declare(true); });
-  document.getElementById('openDistModal').addEventListener('click',function(){ open(-1); });
-})();
-</script>
-
+<script src="../assets/js/distributions-admin.js"></script>
 </body>
 </html>
