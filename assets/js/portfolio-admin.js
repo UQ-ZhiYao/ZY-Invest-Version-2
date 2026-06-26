@@ -291,67 +291,54 @@
     if(!ALL.length){ if(window.zyToast) zyToast('No holdings loaded — reload page first'); return; }
     var btn=this; btn.disabled=true; btn.textContent='Fetching…';
 
-    var updates = [];
-    var skipped = 0;
-    for(var i=0;i<ALL.length;i++){
-      var r=ALL[i];
-      var sym=(r.code||'').trim();
-      if(!sym||isCash(r)){ skipped++; continue; }
-      var price=null;
-      try{
-        // Attempt 1: direct Yahoo Finance v8 chart (works from HTTPS pages)
-        var url1='https://query2.finance.yahoo.com/v8/finance/chart/'+encodeURIComponent(sym)+'?interval=1d&range=5d';
-        var res1=await fetch(url1,{headers:{'Accept':'application/json'}});
-        if(res1.ok){
-          var d1=await res1.json();
-          price=d1.chart&&d1.chart.result&&d1.chart.result[0]
-            ?d1.chart.result[0].meta.regularMarketPrice:null;
-        }
-      }catch(e1){ console.warn('Attempt 1 failed for',sym,e1.message); }
-
-      if(!price){
-        try{
-          // Attempt 2: corsproxy.io + v11
-          var url2='https://query2.finance.yahoo.com/v11/finance/quoteSummary/'+encodeURIComponent(sym)+'?modules=price';
-          var proxy='https://corsproxy.io/?'+encodeURIComponent(url2);
-          var res2=await fetch(proxy);
-          if(res2.ok){
-            var d2=await res2.json();
-            price=d2.quoteSummary&&d2.quoteSummary.result&&d2.quoteSummary.result[0]
-              ?d2.quoteSummary.result[0].price.regularMarketPrice.raw:null;
-          }
-        }catch(e2){ console.warn('Attempt 2 failed for',sym,e2.message); }
-      }
-
-      if(!price){
-        try{
-          // Attempt 3: allorigins proxy + v8
-          var url3='https://query1.finance.yahoo.com/v8/finance/chart/'+encodeURIComponent(sym)+'?interval=1d&range=5d';
-          var proxy3='https://api.allorigins.win/raw?url='+encodeURIComponent(url3);
-          var res3=await fetch(proxy3);
-          if(res3.ok){
-            var d3=await res3.json();
-            price=d3.chart&&d3.chart.result&&d3.chart.result[0]
-              ?d3.chart.result[0].meta.regularMarketPrice:null;
-          }
-        }catch(e3){ console.warn('Attempt 3 failed for',sym,e3.message); }
-      }
-
-      console.log(sym,'→ price:',price);
-      if(price){
-        var units=parseFloat(r.units)||0;
-        var mv=price*units;
-        var upnl=mv-(parseFloat(r.total_cost)||0);
-        updates.push({id:r.id, latest_price:price, market_value:mv, unrealised_pnl:upnl});
-      }
-    }
-
-    if(!updates.length){
-      if(window.zyToast) zyToast('No prices fetched ('+ALL.length+' rows, '+skipped+' skipped). Check console for details.');
+    // Collect codes for non-cash holdings
+    var toFetch=ALL.filter(function(r){ return !isCash(r)&&(r.code||'').trim(); });
+    if(!toFetch.length){
+      if(window.zyToast) zyToast('No symbols to fetch — ensure portfolio rows have a code');
       btn.disabled=false; btn.textContent='↻ Refresh Prices'; return;
     }
 
-    // Batch update
+    var symbols=toFetch.map(function(r){ return r.code.trim(); });
+    var updates=[];
+
+    try{
+      // Call Supabase Edge Function (server-side — no CORS)
+      var fnUrl=SUPABASE_URL.replace(/\/$/,'')+'/functions/v1/fetch-prices';
+      var res=await fetch(fnUrl,{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'Authorization':'Bearer '+SUPABASE_ANON,
+          'apikey':SUPABASE_ANON
+        },
+        body:JSON.stringify({symbols:symbols})
+      });
+      if(!res.ok) throw new Error('Edge function HTTP '+res.status);
+      var data=await res.json();
+      var prices=data.prices||{};
+
+      toFetch.forEach(function(r){
+        var sym=r.code.trim();
+        var price=prices[sym];
+        console.log(sym,'→',price);
+        if(price){
+          var units=parseFloat(r.units)||0;
+          var mv=price*units;
+          var upnl=mv-(parseFloat(r.total_cost)||0);
+          updates.push({id:r.id, latest_price:price, market_value:mv, unrealised_pnl:upnl});
+        }
+      });
+    }catch(ex){
+      if(window.zyToast) zyToast('Fetch error: '+ex.message);
+      btn.disabled=false; btn.textContent='↻ Refresh Prices'; return;
+    }
+
+    if(!updates.length){
+      if(window.zyToast) zyToast('No prices returned — check console (F12) for symbol details');
+      btn.disabled=false; btn.textContent='↻ Refresh Prices'; return;
+    }
+
+    // Save to Supabase
     for(var j=0;j<updates.length;j++){
       var u=updates[j];
       await sb.from('portfolio').update({
@@ -359,7 +346,8 @@
       }).eq('id',u.id);
     }
 
-    var now=new Date(); document.getElementById('pfUpdated').textContent=now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    var now=new Date();
+    document.getElementById('pfUpdated').textContent=now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
     if(window.zyToast) zyToast('Prices updated — '+updates.length+' holdings');
     await load();
     btn.disabled=false; btn.textContent='↻ Refresh Prices';
