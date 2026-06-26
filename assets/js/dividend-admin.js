@@ -67,7 +67,10 @@
     }
     tbody.innerHTML='';
     rows.forEach(function(r){
-      var gross=(parseFloat(r.dps)||0)*(parseFloat(r.units_held)||0);
+      // DPS stored in cents; amount = (dps/100)*units or read from db
+      var dpsCents=(parseFloat(r.dps)||0);
+      var units=(parseFloat(r.units_held)||0);
+      var amount=r.amount!=null?parseFloat(r.amount):(dpsCents/100)*units;
       // 2-line instrument: name + ticker|code
       var tk=(r.ticker||'').trim(), co=(r.code||'').trim();
       var subLine=tk&&co&&tk!==co?tk+' | '+co:(tk||co||'—');
@@ -77,10 +80,10 @@
         '<td>'+fmtDate(r.pay_date)+'</td>'+
         '<td class="hold-name"><b>'+(r.instrument_name||'—')+'</b><span>'+subLine+'</span></td>'+
         '<td>'+(r.type||'—')+'</td>'+
-        '<td class="r">'+fmt(r.dps,4)+'</td>'+
-        '<td class="r">'+fmt(r.units_held,0)+'</td>'+
-        '<td class="r">'+fmt(gross)+'</td>'+
-        '<td>'+sPill(r.status)+'</td>';
+        '<td class="r">'+fmt(dpsCents,2)+'</td>'+
+        '<td class="r">'+fmt(units,0)+'</td>'+
+        '<td class="r">'+fmt(amount)+'</td>'+
+        '<td class="r">'+sPill(r.status)+'</td>';
       tr.addEventListener('click',function(){ openEdit(r); });
       tbody.appendChild(tr);
     });
@@ -92,7 +95,7 @@
     var fyRows=ALL.filter(inFY);
     var total=0, pending=0, totalDps=0, dpsCount=0;
     fyRows.forEach(function(r){
-      var gross=(parseFloat(r.dps)||0)*(parseFloat(r.units_held)||0);
+      var gross=r.amount!=null?parseFloat(r.amount):((parseFloat(r.dps)||0)/100)*(parseFloat(r.units_held)||0);
       var s=(r.status||'').toLowerCase();
       if(s==='received') total+=gross;
       if(s==='pending') pending++;
@@ -184,9 +187,10 @@
   }
 
   function updateGross(){
-    var dps=parseNum(document.getElementById('dv-dps').value);
+    var dps=parseNum(document.getElementById('dv-dps').value);  // in cents
     var units=parseNum(document.getElementById('dv-units').value);
-    document.getElementById('dv-gross').textContent=(dps>0&&units>0)?'RM '+fmt(dps*units):'RM —';
+    var amount=(dps>0&&units>0)?(dps/100)*units:0;
+    document.getElementById('dv-gross').textContent=amount>0?'RM '+fmt(amount):'RM —';
   }
 
   // ── ex-date + dps listeners ───────────────────────────────
@@ -231,11 +235,12 @@
     var exDate=document.getElementById('dv-exdate').value;
     var payDate=document.getElementById('dv-paydate').value;
     var type=document.getElementById('dv-type').value.trim();
-    var dps=parseNum(document.getElementById('dv-dps').value);
+    var dps=parseNum(document.getElementById('dv-dps').value);   // in cents
     var units=parseNum(document.getElementById('dv-units').value);
+    var amount=(dps/100)*units;  // RM
     if(!instName){ if(window.zyToast) zyToast('Select an instrument'); return; }
     if(!exDate)  { if(window.zyToast) zyToast('Enter the ex-date'); return; }
-    if(dps<=0)   { if(window.zyToast) zyToast('Enter DPS'); return; }
+    if(dps<=0)   { if(window.zyToast) zyToast('Enter DPS (in cents)'); return; }
 
     var inst=INSTRUMENTS.filter(function(x){return x.name===instName;})[0]||{};
     // status: editing uses selector, new record defaults to Not entitled or Pending
@@ -253,7 +258,8 @@
       ex_date:exDate,
       pay_date:payDate||null,
       dps:dps,
-      units_held:units||0
+      units_held:units||0,
+      amount:amount||null
     };
 
     var btn=document.getElementById('dv-confirm'); btn.disabled=true; btn.textContent='Saving…';
