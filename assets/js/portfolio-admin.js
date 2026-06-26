@@ -288,36 +288,68 @@
 
   // ── refresh prices via Yahoo Finance ──────────────────────
   document.getElementById('btnRefreshPrices').addEventListener('click', async function(){
-    if(!ALL.length){ if(window.zyToast) zyToast('No holdings to refresh'); return; }
+    if(!ALL.length){ if(window.zyToast) zyToast('No holdings loaded — reload page first'); return; }
     var btn=this; btn.disabled=true; btn.textContent='Fetching…';
 
     var updates = [];
+    var skipped = 0;
     for(var i=0;i<ALL.length;i++){
       var r=ALL[i];
-      var sym=r.code||null;  // use code column for Yahoo Finance symbol (e.g. 1155.KL, AAPL)
-      if(!sym||isCash(r)){ continue; }
+      var sym=(r.code||'').trim();
+      if(!sym||isCash(r)){ skipped++; continue; }
+      var price=null;
       try{
-        // Try Yahoo Finance v11 quoteSummary endpoint via corsproxy.io
-        var url='https://query2.finance.yahoo.com/v11/finance/quoteSummary/'+encodeURIComponent(sym)+'?modules=price';
-        var proxy='https://corsproxy.io/?'+encodeURIComponent(url);
-        var res=await fetch(proxy,{headers:{'User-Agent':'Mozilla/5.0'}});
-        var data=await res.json();
-        var price=null;
-        try{
-          price=data.quoteSummary&&data.quoteSummary.result&&data.quoteSummary.result[0]
-            ?data.quoteSummary.result[0].price.regularMarketPrice.raw
-            :null;
-        }catch(e){ price=null; }
-        if(price){
-          var units=parseFloat(r.units)||0;
-          var mv=price*units;
-          var upnl=mv-(parseFloat(r.total_cost)||0);
-          updates.push({id:r.id, latest_price:price, market_value:mv, unrealised_pnl:upnl});
+        // Attempt 1: direct Yahoo Finance v8 chart (works from HTTPS pages)
+        var url1='https://query2.finance.yahoo.com/v8/finance/chart/'+encodeURIComponent(sym)+'?interval=1d&range=5d';
+        var res1=await fetch(url1,{headers:{'Accept':'application/json'}});
+        if(res1.ok){
+          var d1=await res1.json();
+          price=d1.chart&&d1.chart.result&&d1.chart.result[0]
+            ?d1.chart.result[0].meta.regularMarketPrice:null;
         }
-      }catch(e){ console.warn('Price fetch failed for',sym,e); }
+      }catch(e1){ console.warn('Attempt 1 failed for',sym,e1.message); }
+
+      if(!price){
+        try{
+          // Attempt 2: corsproxy.io + v11
+          var url2='https://query2.finance.yahoo.com/v11/finance/quoteSummary/'+encodeURIComponent(sym)+'?modules=price';
+          var proxy='https://corsproxy.io/?'+encodeURIComponent(url2);
+          var res2=await fetch(proxy);
+          if(res2.ok){
+            var d2=await res2.json();
+            price=d2.quoteSummary&&d2.quoteSummary.result&&d2.quoteSummary.result[0]
+              ?d2.quoteSummary.result[0].price.regularMarketPrice.raw:null;
+          }
+        }catch(e2){ console.warn('Attempt 2 failed for',sym,e2.message); }
+      }
+
+      if(!price){
+        try{
+          // Attempt 3: allorigins proxy + v8
+          var url3='https://query1.finance.yahoo.com/v8/finance/chart/'+encodeURIComponent(sym)+'?interval=1d&range=5d';
+          var proxy3='https://api.allorigins.win/raw?url='+encodeURIComponent(url3);
+          var res3=await fetch(proxy3);
+          if(res3.ok){
+            var d3=await res3.json();
+            price=d3.chart&&d3.chart.result&&d3.chart.result[0]
+              ?d3.chart.result[0].meta.regularMarketPrice:null;
+          }
+        }catch(e3){ console.warn('Attempt 3 failed for',sym,e3.message); }
+      }
+
+      console.log(sym,'→ price:',price);
+      if(price){
+        var units=parseFloat(r.units)||0;
+        var mv=price*units;
+        var upnl=mv-(parseFloat(r.total_cost)||0);
+        updates.push({id:r.id, latest_price:price, market_value:mv, unrealised_pnl:upnl});
+      }
     }
 
-    if(!updates.length){ if(window.zyToast) zyToast('No prices fetched'); btn.disabled=false; btn.textContent='↻ Refresh Prices'; return; }
+    if(!updates.length){
+      if(window.zyToast) zyToast('No prices fetched ('+ALL.length+' rows, '+skipped+' skipped). Check console for details.');
+      btn.disabled=false; btn.textContent='↻ Refresh Prices'; return;
+    }
 
     // Batch update
     for(var j=0;j<updates.length;j++){
