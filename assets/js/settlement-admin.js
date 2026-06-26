@@ -265,35 +265,41 @@
 
       trades.forEach(function(t){
         var name=t.instrument_name;
-        var units=parseFloat(t.units)||0;
-        // effective price per unit = abs(cashflow)/units — includes all fees
-        var cf=parseFloat(t.cashflow)||0;
+        // DB convention: Buy = positive units, negative cashflow
+        //                Sell = negative units, positive cashflow
+        // Use abs() throughout so arithmetic is always positive
+        var units=Math.abs(parseFloat(t.units)||0);
+        var cf   =parseFloat(t.cashflow)||0;
+        // effective price per unit including fees:
+        //   Buy:  abs(cashflow_neg) / units = cost per unit
+        //   Sell: abs(cashflow_pos) / units = proceeds per unit
         var effectivePrice=units>0?Math.abs(cf)/units:0;
 
         if(!portfolio[name]){
           portfolio[name]={totalUnits:0,totalCost:0,ticker:t.ticker||'',code:t.code||'',product:t.product||'Securities'};
         }
         var pos=portfolio[name];
+        // sync instrument metadata
+        if(t.ticker) pos.ticker=t.ticker;
+        if(t.code)   pos.code=t.code;
+        if(t.product)pos.product=t.product;
 
         if(t.action==='Buy'){
-          // Update AVCO pool — NO rounding
-          pos.totalCost +=Math.abs(cf);
+          // AVCO: expand cost pool — NO rounding
+          pos.totalCost +=Math.abs(cf);   // add total cost incl fees
           pos.totalUnits+=units;
-          // keep ticker/code/product from latest trade
-          if(t.ticker) pos.ticker=t.ticker;
-          if(t.code)   pos.code=t.code;
-          if(t.product)pos.product=t.product;
 
-        } else { // SELL → generate settlement
+        } else { // SELL → generate settlement record
           if(pos.totalUnits<=0){
             console.warn('AVCO: sell without position for',name,'on',t.trade_date);
             return;
           }
           var avgCost  =pos.totalCost/pos.totalUnits;  // NO rounding
-          var proceeds =Math.abs(cf);                   // abs(cashflow_sell)
+          var salePrice=effectivePrice;                 // proceeds per unit incl fees
+          var proceeds =salePrice*units;                // total sale proceeds
           var costBasis=avgCost*units;                  // NO rounding
-          var pnl      =Math.round((proceeds-costBasis)*100)/100; // 2dp
-          var retPct   =avgCost>0?(effectivePrice-avgCost)/avgCost*100:0;
+          var pnl      =Math.round((proceeds-costBasis)*100)/100; // 2dp only here
+          var retPct   =avgCost>0?(salePrice-avgCost)/avgCost*100:0;
 
           settlements.push({
             date:            t.trade_date,
@@ -301,14 +307,14 @@
             ticker:          pos.ticker||null,
             code:            pos.code||null,
             product:         pos.product||'Securities',
-            units:           units,
+            units:           units,          // always positive
             vwap_cost:       avgCost,
-            sale_price:      effectivePrice,
+            sale_price:      salePrice,
             pnl:             pnl,
             return_pct:      retPct
           });
 
-          // Reduce pool — AVCO avg stays same, just shrink
+          // Shrink AVCO pool — avg cost unchanged, just reduce size
           pos.totalUnits-=units;
           pos.totalCost =pos.totalUnits>0?avgCost*pos.totalUnits:0;
         }
