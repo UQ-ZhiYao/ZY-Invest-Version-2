@@ -186,18 +186,27 @@
     tbody.innerHTML = '';
     rows.forEach(function(r){
       var isBuy = r.action === 'Buy';
-      var value = (r.units||0) * (r.price||0);
-      var flow = (isBuy ? '−' : '+') + fmt(value);
+      var tradeVal = (r.units||0) * (r.price||0);
+      var fee = parseFloat(r.fee)||0;
+      // cashflow = consideration (units*price) ± fee
+      var cashflow = isBuy ? (tradeVal + fee) : (tradeVal - fee);
+      // colour pill matching settlement style
+      var flowPill = isBuy
+        ? '<span class="tag-red">− RM '+fmt(cashflow)+'</span>'
+        : '<span class="tag-green">+ RM '+fmt(cashflow)+'</span>';
+      // second line: ticker | code (deduplicate if same)
+      var tk = (r.ticker||'').trim(), co = (r.code||'').trim();
+      var subLine = tk && co && tk !== co ? tk+' | '+co : (tk||co||'—');
       var tr = document.createElement('tr');
       tr.innerHTML =
         '<td>'+fmtDate(r.trade_date)+'</td>'+
         '<td>'+tag(r.action)+'</td>'+
-        '<td class="hold-name"><b>'+(r.instrument_name||'—')+'</b><span>'+(r.ticker||'—')+'</span></td>'+
+        '<td class="hold-name"><b>'+(r.instrument_name||'—')+'</b><span>'+subLine+'</span></td>'+
         '<td>'+prodPill(r.product)+'</td>'+
         '<td class="r">'+fmt(r.units,0)+'</td>'+
         '<td class="r">'+fmt(r.price,4)+'</td>'+
-        '<td class="r">'+(r.fee ? fmt(r.fee) : '—')+'</td>'+
-        '<td class="r '+(isBuy?'cf-out':'cf-in')+'">'+flow+'</td>';
+        '<td class="r">'+(fee ? fmt(fee) : '—')+'</td>'+
+        '<td class="r">'+flowPill+'</td>';
       tbody.appendChild(tr);
     });
     document.getElementById('ttListCount').textContent = rows.length+' of '+ALL_TX.length;
@@ -272,14 +281,14 @@
         return {
           action: tradeAction,
           instrument_name: instName,
-          ticker: inst.ticker||null,
-          code: inst.code||null,
-          product: inst.product||'Securities',
-          sector: inst.sector||null,
+          ticker: inst.ticker || null,
+          code:   inst.code   || null,
+          product: inst.product || 'Securities',
+          sector:  inst.sector  || null,
           trade_date: date,
           units: o.units,
           price: o.price,
-          fee: lots.length===1 ? fee : (i===0 ? fee : 0)
+          fee:   lots.length === 1 ? fee : (i === 0 ? fee : 0)
         };
       });
 
