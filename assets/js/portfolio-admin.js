@@ -268,10 +268,10 @@
         r.weight = totalMV>0?base/totalMV*100:0;
       });
 
-      // Delete all existing non-cash portfolio rows then insert new ones
+      // Clear entire portfolio table then insert fresh computed positions
       var del = await sb.from('portfolio')
         .delete()
-        .not('product','in','("Cash on Hand","Cash Funds")');
+        .neq('id','00000000-0000-0000-0000-000000000000');
       if(del.error) throw del.error;
 
       var ins = await sb.from('portfolio').insert(computedPortfolio);
