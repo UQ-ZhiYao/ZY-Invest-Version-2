@@ -97,10 +97,12 @@
     });
 
     // 4. Build shareholder rows, filter out zero/negative
+    // Build rows — include ALL holders with positive net units
+    // (fully redeemed holders with units<=0 are excluded as they are no longer shareholders)
     var rows=[];
     Object.keys(holders).forEach(function(uid){
       var h=holders[uid];
-      if(h.units<=0) return;
+      if(h.units<=0.0001) return; // skip fully redeemed
       var prof=profiles[uid]||{name:'Unknown',role:'member'};
       rows.push({
         uid:uid,
