@@ -294,7 +294,7 @@
     var updates = [];
     for(var i=0;i<ALL.length;i++){
       var r=ALL[i];
-      var sym=r.ticker||(r.code&&r.code.indexOf('.')>-1?r.code:null);
+      var sym=r.code||null;  // use code column for Yahoo Finance symbol (e.g. 1155.KL, AAPL)
       if(!sym||isCash(r)){ continue; }
       try{
         var url='https://query1.finance.yahoo.com/v8/finance/chart/'+encodeURIComponent(sym)+'?interval=1d&range=5d';
