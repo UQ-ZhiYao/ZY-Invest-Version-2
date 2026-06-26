@@ -14,15 +14,17 @@
    - All others: name masked as "****"
    ============================================================ */
 (function(){
+  // Detect admin mode: URL path contains /admin/ OR admin session exists in localStorage
   var IS_ADMIN = window.location.pathname.toLowerCase().indexOf('/admin/') > -1;
+  var HAS_ADMIN_SESSION = (function(){
+    try{ var s=JSON.parse(localStorage.getItem('zy_admin_session')||'null'); return !!(s&&s.role==='admin'); }catch(e){ return false; }
+  })();
+  var isAdminPage = IS_ADMIN || HAS_ADMIN_SESSION;
 
   function fmt(n,dp){ var d=dp===undefined?0:dp; return parseFloat(n||0).toLocaleString('en-MY',{minimumFractionDigits:d,maximumFractionDigits:d}); }
   function fmtDate(d){ if(!d) return '—'; return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
   function initials(n){ return (n||'?').split(' ').filter(Boolean).slice(0,2).map(function(w){return w[0];}).join('').toUpperCase(); }
   function pct(u,total){ return total>0?((u/total)*100).toFixed(2)+'%':'—'; }
-
-  // ── detect context ──────────────────────────────────────────
-  var isAdminPage = IS_ADMIN;
 
   // ── wire nav dropdowns (member pages) ──────────────────────
   if(!isAdminPage){
