@@ -96,6 +96,7 @@
   <div class="search"><span class="ic">⌕</span><input placeholder="Search instrument…" id="stlSearch" autocomplete="off"></div>
   <select id="stl-fy" style="font:inherit;font-size:0.84rem;border:1.5px solid var(--border);border-radius:var(--radius-md);padding:7px 12px;color:var(--fg-1);background:#fff;"><option value="">All FY</option></select>
   <button class="btn-mini" id="openStlModal">+ Add Settlement</button>
+  <button class="btn-fill btn-sm" id="btnCompute" style="background:var(--blue);">⟳ Compute from Trades</button>
 </div>
 
 <div class="panel">
@@ -155,6 +156,37 @@
 
   </main>
 </div>
+
+<!-- COMPUTE PREVIEW MODAL -->
+<div class="modal" id="computeModal" style="max-width:900px !important;width:96vw !important;">
+  <div class="modal-head">
+    <div><h3>Settlement Preview</h3><div class="sub">Computed via AVCO method from trade history. Review before saving.</div></div>
+    <button class="modal-x" data-close>✕</button>
+  </div>
+  <div class="modal-body" style="padding:0;max-height:60vh;overflow-y:auto;">
+    <table class="tbl stl-tbl" style="margin:0;">
+      <thead style="position:sticky;top:0;background:#fff;z-index:1;"><tr>
+        <th>Date</th>
+        <th>Instrument</th>
+        <th>Product</th>
+        <th class="r">Units Sold</th>
+        <th class="r">VWAP Cost</th>
+        <th class="r">Sale Price</th>
+        <th class="r">Realised P&amp;L</th>
+        <th class="r">Return %</th>
+      </tr></thead>
+      <tbody id="computeBody"></tbody>
+    </table>
+  </div>
+  <div class="modal-foot" style="justify-content:space-between;">
+    <span class="td-sub" id="computeNote"></span>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-line btn-sm" data-close>Cancel</button>
+      <button class="btn-fill btn-sm" id="btnConfirmCompute">Save All to Settlement</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-scrim" id="modalScrim"></div>
 <div class="toast" id="toast"><span class="ok">✓</span><span id="toastMsg">Saved</span></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

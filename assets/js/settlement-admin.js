@@ -237,6 +237,133 @@
     if(window.zyToast) zyToast('Deleted — '+name);
   });
 
+
+  // ══════════════════════════════════════════════════════════════
+  //  AVCO SETTLEMENT COMPUTATION
+  // ══════════════════════════════════════════════════════════════
+
+  var computedRows = [];
+
+  document.getElementById('btnCompute').addEventListener('click', async function(){
+    if(typeof sb==='undefined'||!sb) return;
+    var btn=this; btn.disabled=true; btn.textContent='Computing…';
+    try{
+      // 1. Fetch all trades
+      var res=await sb.from('transaction_trading').select('*').order('trade_date',{ascending:true});
+      if(res.error) throw res.error;
+
+      // 2. Stable sort: same date → Buy before Sell
+      var trades=(res.data||[]).slice().sort(function(a,b){
+        if(a.trade_date<b.trade_date) return -1;
+        if(a.trade_date>b.trade_date) return 1;
+        return (a.action==='Buy'?0:1)-(b.action==='Buy'?0:1);
+      });
+
+      // 3. AVCO loop — portfolio[instrument] = {totalUnits, totalCost, ticker, code, product}
+      var portfolio={};
+      var settlements=[];
+
+      trades.forEach(function(t){
+        var name=t.instrument_name;
+        var units=parseFloat(t.units)||0;
+        // effective price per unit = abs(cashflow)/units — includes all fees
+        var cf=parseFloat(t.cashflow)||0;
+        var effectivePrice=units>0?Math.abs(cf)/units:0;
+
+        if(!portfolio[name]){
+          portfolio[name]={totalUnits:0,totalCost:0,ticker:t.ticker||'',code:t.code||'',product:t.product||'Securities'};
+        }
+        var pos=portfolio[name];
+
+        if(t.action==='Buy'){
+          // Update AVCO pool — NO rounding
+          pos.totalCost +=Math.abs(cf);
+          pos.totalUnits+=units;
+          // keep ticker/code/product from latest trade
+          if(t.ticker) pos.ticker=t.ticker;
+          if(t.code)   pos.code=t.code;
+          if(t.product)pos.product=t.product;
+
+        } else { // SELL → generate settlement
+          if(pos.totalUnits<=0){
+            console.warn('AVCO: sell without position for',name,'on',t.trade_date);
+            return;
+          }
+          var avgCost  =pos.totalCost/pos.totalUnits;  // NO rounding
+          var proceeds =Math.abs(cf);                   // abs(cashflow_sell)
+          var costBasis=avgCost*units;                  // NO rounding
+          var pnl      =Math.round((proceeds-costBasis)*100)/100; // 2dp
+          var retPct   =avgCost>0?(effectivePrice-avgCost)/avgCost*100:0;
+
+          settlements.push({
+            date:            t.trade_date,
+            instrument_name: name,
+            ticker:          pos.ticker||null,
+            code:            pos.code||null,
+            product:         pos.product||'Securities',
+            units:           units,
+            vwap_cost:       avgCost,
+            sale_price:      effectivePrice,
+            pnl:             pnl,
+            return_pct:      retPct
+          });
+
+          // Reduce pool — AVCO avg stays same, just shrink
+          pos.totalUnits-=units;
+          pos.totalCost =pos.totalUnits>0?avgCost*pos.totalUnits:0;
+        }
+      });
+
+      if(!settlements.length){
+        if(window.zyToast) zyToast('No sell trades found — nothing to settle');
+        btn.disabled=false; btn.textContent='⟳ Compute from Trades'; return;
+      }
+
+      // 4. Populate preview modal
+      computedRows=settlements;
+      var tbody=document.getElementById('computeBody');
+      tbody.innerHTML='';
+      settlements.forEach(function(r){
+        var rc=r.return_pct>=0?'pnl-pos':'pnl-neg';
+        var tk=(r.ticker||'').trim(), co=(r.code||'').trim();
+        var sub=tk&&co&&tk!==co?tk+' | '+co:(tk||co||'');
+        var tr=document.createElement('tr');
+        tr.innerHTML=
+          '<td>'+r.date+'</td>'+
+          '<td class="hold-name"><b>'+r.instrument_name+'</b>'+(sub?'<span>'+sub+'</span>':'')+'</td>'+
+          '<td>'+prodPill(r.product)+'</td>'+
+          '<td class="r">'+fmt(r.units,4)+'</td>'+
+          '<td class="r">'+fmt(r.vwap_cost,6)+'</td>'+
+          '<td class="r">'+fmt(r.sale_price,6)+'</td>'+
+          '<td class="r"><span class="'+(r.pnl>=0?'pnl-pos':'pnl-neg')+'">'+fmt(r.pnl,2)+'</span></td>'+
+          '<td class="r"><span class="'+rc+'">'+r.return_pct.toFixed(2)+'%</span></td>';
+        tbody.appendChild(tr);
+      });
+      document.getElementById('computeNote').textContent=
+        settlements.length+' settlement record'+(settlements.length===1?'':'s');
+      zyModalOpen('computeModal');
+
+    }catch(ex){ if(window.zyToast) zyToast('Error: '+(ex.message||'Unknown')); }
+    btn.disabled=false; btn.textContent='⟳ Compute from Trades';
+  });
+
+  // 5. Confirm: wipe and replace settlement table
+  document.getElementById('btnConfirmCompute').addEventListener('click', async function(){
+    if(!computedRows.length) return;
+    var btn=this; btn.disabled=true; btn.textContent='Saving…';
+    try{
+      // Delete all existing rows then insert fresh
+      var del=await sb.from('settlement').delete().neq('id','00000000-0000-0000-0000-000000000000');
+      if(del.error) throw del.error;
+      var ins=await sb.from('settlement').insert(computedRows);
+      if(ins.error) throw ins.error;
+      zyModalClose(); await load();
+      if(window.zyToast) zyToast('Settlement updated — '+computedRows.length+' records saved');
+      computedRows=[];
+    }catch(ex){ if(window.zyToast) zyToast('Save error: '+(ex.message||'Unknown')); }
+    btn.disabled=false; btn.textContent='Save All to Settlement';
+  });
+
   // ── search ────────────────────────────────────────────────────
   document.getElementById('stlSearch').addEventListener('input',function(){ stlQ=this.value.toLowerCase(); render(); });
 
