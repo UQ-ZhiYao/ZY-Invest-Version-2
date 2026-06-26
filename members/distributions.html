@@ -124,7 +124,7 @@
 
       <!-- distribution history table -->
       <div class="panel" style="margin-top:16px;">
-        <div class="panel-head"><h3>Distribution History</h3><span class="td-sub" id="dtNote">Your entitlement computed from units held on each ex-date</span></div>
+        <div class="panel-head"><h3>Distribution History</h3></div>
         <table class="tbl dt-tbl">
           <thead><tr>
             <th>FY</th>
@@ -242,7 +242,7 @@
         '<td>'+fmtDate(d.ex_date)+'</td>'+
         '<td>'+fmtDate(d.pay_date)+'</td>'+
         '<td class="r">'+fmt(parseFloat(d.dps),2)+'</td>'+
-        '<td class="r">'+fmt(r.myUnits,0)+'</td>'+
+        '<td class="r">'+fmt(r.myUnits,4)+'</td>'+
         '<td class="r">'+(r.myAmount>0?fmt(r.myAmount):'—')+'</td>'+
         '<td class="r">'+sPill(d.status)+'</td>';
       tbody.appendChild(tr);
