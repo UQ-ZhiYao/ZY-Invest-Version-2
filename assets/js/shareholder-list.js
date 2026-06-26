@@ -88,11 +88,11 @@
       if(!r.uid) return;
       var u=parseFloat(r.units)||0;
       if(!holders[r.uid]){ holders[r.uid]={units:0, since:null}; }
+      // units column already signed: Subscription = positive, Redemption = negative
+      holders[r.uid].units += u;
+      // holding since = first subscription date
       if(r.type==='Subscription'){
-        holders[r.uid].units+=u;
         if(!holders[r.uid].since||r.date<holders[r.uid].since) holders[r.uid].since=r.date;
-      } else {
-        holders[r.uid].units-=u;
       }
     });
 
