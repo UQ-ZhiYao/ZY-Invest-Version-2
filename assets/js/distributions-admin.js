@@ -63,6 +63,7 @@
     var units=parseNum(document.getElementById('d-units').value);
     var gross=dps>0&&units>0?(dps/100)*units:0;
     document.getElementById('d-payout').textContent=gross>0?'RM '+fmt(gross):'RM —';
+    return gross;
   }
 
   // ── load FY list ─────────────────────────────────────────
@@ -93,7 +94,7 @@
     ALL.forEach(function(r){
       var dps=parseFloat(r.dps)||0;
       var units=parseFloat(r.units)||0;
-      var gross=units>0?(dps/100)*units:0;
+      var gross=r.amount!=null?parseFloat(r.amount):(units>0?(dps/100)*units:0);
       var tr=document.createElement('tr'); tr.className='clickable';
       tr.innerHTML=
         '<td>'+(r.fy||'—')+'</td>'+
@@ -113,7 +114,7 @@
   function updateMetrics(){
     var totalPaid=0, pending=0;
     ALL.forEach(function(r){
-      var g=(parseFloat(r.dps)||0)/100*(parseFloat(r.units)||0);
+      var g=r.amount!=null?parseFloat(r.amount):(parseFloat(r.dps)||0)/100*(parseFloat(r.units)||0);
       if(r.status==='Paid') totalPaid+=g; else pending++;
     });
     var latest=ALL[0]||{};
@@ -174,9 +175,11 @@
     if(!exDate){ if(window.zyToast) zyToast('Enter the ex-date'); return; }
     if(dps<=0) { if(window.zyToast) zyToast('Enter DPS in sen'); return; }
 
+    var amount=dps>0&&units>0?(dps/100)*units:null;
     var payload={
       type:type, ex_date:exDate, pay_date:payDate||null,
-      fy:fy||null, dps:dps, units:units||0, status:status
+      fy:fy||null, dps:dps, units:units||0, status:status,
+      amount:amount
     };
 
     var btn=document.getElementById('d-save'); btn.disabled=true; btn.textContent='Saving…';
