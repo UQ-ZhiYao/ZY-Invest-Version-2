@@ -13,7 +13,8 @@
   function parseNum(s){ return parseFloat((s||'').toString().replace(/,/g,''))||0; }
   function fmtDate(d){ if(!d) return '—'; return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
   function tag(a){ return a==='Buy'?'<span class="tag-green">Buy</span>':'<span class="tag-red">Sell</span>'; }
-  function prodPill(p){ return '<span class="tag-blue">'+(p||'Securities')+'</span>'; }
+  var PROD_CLASS={'Securities':'prod-securities','Derivatives':'prod-derivatives','Cash Funds':'prod-cash-funds','Collectibles':'prod-collectibles','Private Equity':'prod-private-eq','Cash on Hand':'prod-cash-hand'};
+  function prodPill(p){ var cls=PROD_CLASS[p]||'prod-securities'; return '<span class="prod-pill '+cls+'">'+(p||'Securities')+'</span>'; }
 
   // ── default date ──────────────────────────────────────────
   var trDateEl = document.getElementById('tr-date');
