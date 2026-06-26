@@ -126,7 +126,7 @@
         role:prof.role,
         units:h.units,
         since:h.since,
-        isMe:uid===myUid,
+        isMe:uid.trim()===myUid.trim(),
         isDir:prof.role==='admin'
       });
     });
@@ -150,8 +150,8 @@
       var shTopName=document.getElementById('shTopName'); if(shTopName) shTopName.textContent=top.name||'—';
       var shDC=document.getElementById('shDirCount'); if(shDC) shDC.textContent=dirCount;
     } else {
-      var shMyU=document.getElementById('shMyUnits'); if(shMyU) shMyU.textContent=myUnits>0?fmt(myUnits):'—';
-      var shMyP=document.getElementById('shMyPct'); if(shMyP) shMyP.textContent=myUnits>0?pct(myUnits,totalUnits)+' of fund':'Not a unitholder';
+      var shMyU=document.getElementById('shMyUnits'); if(shMyU) shMyU.textContent=myRow?fmt(myUnits):'—';
+      var shMyP=document.getElementById('shMyPct'); if(shMyP) shMyP.textContent=myRow?pct(myUnits,totalUnits)+' of fund':'Not a unitholder';
       var shMyR=document.getElementById('shMyRank'); if(shMyR) shMyR.textContent=myRank?'#'+myRank+' of '+rows.length:'—';
     }
     var shLC=document.getElementById('shListCount'); if(shLC) shLC.textContent=rows.length+' unitholders';
