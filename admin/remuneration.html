@@ -6,32 +6,45 @@
 <title>Remuneration — ZY-Invest Admin</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0D2A52">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="ZY Admin">
-<meta name="application-name" content="ZY Admin">
 <link rel="icon" type="image/png" href="../assets/img/favicon.png">
 <link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
 <link rel="stylesheet" href="../assets/css/dashboard.css">
 <link rel="stylesheet" href="../assets/css/dashboard-portfolio.css">
 <link rel="stylesheet" href="../assets/css/admin.css">
+<style>
+.tbl.rem-tbl thead th   { text-align:left; padding-left:18px; }
+.tbl.rem-tbl tbody td   { text-align:left; padding-left:18px; }
+.tbl.rem-tbl thead th.r,
+.tbl.rem-tbl tbody td.r { text-align:right; padding-right:18px; padding-left:0; }
 
+/* match trade modal sizing */
+.rem-modal { width:460px !important; max-width:96vw !important; }
+.rem-modal .modal-body { padding:20px 22px; }
+
+/* category combobox */
+.rem-cb-wrap { position:relative; }
+.rem-cb-wrap input[type="text"] { width:100%; box-sizing:border-box; }
+.rem-cb-list {
+  position:absolute; top:calc(100% + 3px); left:0; right:0; z-index:400;
+  background:#fff; border:1.5px solid var(--blue); border-radius:var(--radius-md);
+  box-shadow:var(--shadow-md); max-height:200px; overflow-y:auto; display:none;
+}
+.rem-cb-list.open { display:block; }
+.rem-cb-opt { padding:9px 13px; cursor:pointer; font-size:0.87rem; color:var(--fg-1); }
+.rem-cb-opt:hover { background:var(--blue-bg); }
+</style>
 </head>
 <body>
 <script>
 (function(){
-  if('serviceWorker' in navigator){ window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
+  if('serviceWorker' in navigator){ window.addEventListener('load',function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
   try{ var s=JSON.parse(localStorage.getItem('zy_admin_session')||'null'); if(!s||s.role!=='admin'){ location.replace('admin-login.html'); } }
   catch(e){ location.replace('admin-login.html'); }
 })();
 </script>
 
 <header class="adm-top">
-  <a href="overview.html" class="brand">
-    <img src="../assets/img/logo.png" alt="ZY-Invest">
-    <span class="bt"><b>ZY-Invest</b><span>Admin Console</span></span>
-  </a>
+  <a href="overview.html" class="brand"><img src="../assets/img/logo.png" alt="ZY-Invest"><span class="bt"><b>ZY-Invest</b><span>Admin Console</span></span></a>
   <span class="adm-badge">🔒 Restricted</span>
   <div class="adm-right">
     <span class="adm-clock" id="clock">—</span>
@@ -42,28 +55,9 @@
 
 <div class="adm-subbar">
   <span class="sb-lab">FUND PAGES</span>
-  <div class="sub-group">
-    <button class="sub-top">Fund <span class="caret">▾</span></button>
-    <div class="sub-dd"><div class="sub-dd-card">
-      <a href="fund-overview.html"><b>Fund Overview</b><span>Mandate, objective &amp; key facts</span></a>
-      <a href="fund-view.html?src=factsheet.html"><b>Factsheet</b><span>Holdings allocation each financial year</span></a>
-      <a href="fund-view.html?src=shareholder-list.html"><b>Shareholder List</b><span>Unitholders, units held &amp; ownership</span></a>
-    </div></div>
-  </div>
-  <div class="sub-group">
-    <button class="sub-top">Performance <span class="caret">▾</span></button>
-    <div class="sub-dd"><div class="sub-dd-card">
-      <a href="fund-view.html?src=financial-result.html"><b>Financial Result</b><span>Income statement, balance sheet &amp; cash flow</span></a>
-      <a href="fund-view.html?src=performance-analysis.html"><b>Performance Analysis</b><span>Returns &amp; benchmark comparison (FBM KLCI)</span></a>
-      <a href="fund-view.html?src=nta-history.html"><b>NTA History</b><span>Chart &amp; daily NTA / NAV history</span></a>
-    </div></div>
-  </div>
-  <div class="sub-group">
-    <button class="sub-top">Documents <span class="caret">▾</span></button>
-    <div class="sub-dd"><div class="sub-dd-card">
-      <a href="fund-view.html?src=statement-download.html"><b>Statement Download</b><span>Factsheets &amp; annual reports</span></a>
-    </div></div>
-  </div>
+  <div class="sub-group"><button class="sub-top">Fund <span class="caret">▾</span></button><div class="sub-dd"><div class="sub-dd-card"><a href="fund-overview.html"><b>Fund Overview</b><span>Mandate, objective &amp; key facts</span></a><a href="fund-view.html?src=factsheet.html"><b>Factsheet</b></a><a href="fund-view.html?src=shareholder-list.html"><b>Shareholder List</b></a></div></div></div>
+  <div class="sub-group"><button class="sub-top">Performance <span class="caret">▾</span></button><div class="sub-dd"><div class="sub-dd-card"><a href="fund-view.html?src=financial-result.html"><b>Financial Result</b></a><a href="fund-view.html?src=performance-analysis.html"><b>Performance Analysis</b></a><a href="fund-view.html?src=nta-history.html"><b>NTA History</b></a></div></div></div>
+  <div class="sub-group"><button class="sub-top">Documents <span class="caret">▾</span></button><div class="sub-dd"><div class="sub-dd-card"><a href="fund-view.html?src=statement-download.html"><b>Statement Download</b></a></div></div></div>
 </div>
 
 <div class="adm-shell" id="admShell">
@@ -91,30 +85,82 @@
     <a class="adm-nav adm-signout" id="admSignout" href="#"><span class="ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>Sign out</a>
   </aside>
   <main class="adm-main">
+
 <div class="ph"><h1>Remuneration</h1><p>Management, performance and director fees payable by the fund.</p></div>
+
 <div class="metric-row">
-  <div class="mc"><div class="label">Management Fee YTD</div><div class="value blue">RM 13,500</div><div class="sub">1.5% p.a. of NAV</div></div>
-  <div class="mc"><div class="label">Performance Fee</div><div class="value">RM 8,200</div><div class="sub">10% over hurdle</div></div>
-  <div class="mc"><div class="label">Director Fees</div><div class="value">RM 6,000</div><div class="sub">FY26</div></div>
-  <div class="mc"><div class="label">Total Remuneration</div><div class="value">RM 27,700</div><div class="sub">FY26 to date</div></div>
+  <div class="mc"><div class="label">Entries</div><div class="value blue" id="remCount">—</div><div class="sub">total records</div></div>
+  <div class="mc"><div class="label">Total Amount</div><div class="value" id="remTotal">RM —</div><div class="sub">all entries</div></div>
+  <div class="mc"><div class="label">Pending</div><div class="value" id="remPending" style="color:var(--orange);">—</div><div class="sub">awaiting payment</div></div>
+  <div class="mc"><div class="label">Paid</div><div class="value" id="remPaid">RM —</div><div class="sub">confirmed payments</div></div>
 </div>
-<div class="panel mt16"><div class="panel-head"><h3>Remuneration Schedule</h3><button class="btn-mini" id="openRemModal">+ Add Entry</button></div>
-  <table class="tbl"><thead><tr><th>Date</th><th>Recipient</th><th>Type</th><th class="td-right">Amount (RM)</th><th>Period</th><th>Status</th></tr></thead>
-  <tbody id="remBody"></tbody></table>
+
+<div class="filter-bar mt16">
+  <div class="search"><span class="ic">⌕</span><input placeholder="Search fee type…" id="remSearch" autocomplete="off"></div>
+  <button class="btn-mini" id="openRemModal">+ Add Entry</button>
 </div>
-<div class="modal" id="remModal">
-  <div class="modal-head"><div><h3 id="remTitle">Add Remuneration Entry</h3><div class="sub">Schedule a fee or remuneration payment.</div></div><button class="modal-x" data-close>✕</button></div>
+
+<div class="panel">
+  <div class="panel-head"><h3>Remuneration Schedule</h3><span class="td-sub" id="remListCount"></span></div>
+  <table class="tbl rem-tbl">
+    <thead><tr>
+      <th>Date</th>
+      <th>Fee Type</th>
+      <th class="r">Amount (RM)</th>
+      <th class="r">Status</th>
+    </tr></thead>
+    <tbody id="remBody"><tr><td colspan="4" style="padding:24px;color:var(--fg-3);">Loading…</td></tr></tbody>
+  </table>
+</div>
+
+<!-- ADD / EDIT MODAL -->
+<div class="modal rem-modal" id="remModal">
+  <div class="modal-head">
+    <div><h3 id="remTitle">Add Remuneration Entry</h3><div class="sub">Record a fee or remuneration payment.</div></div>
+    <button class="modal-x" data-close>✕</button>
+  </div>
   <div class="modal-body">
-    <div class="form-grid">
-      <div class="field"><label>Date</label><input type="date" id="rem-date" value="2026-03-31"></div>
-      <div class="field"><label>Recipient</label><input type="text" id="rem-who" placeholder="e.g. Fund Manager"></div>
-      <div class="field"><label>Type</label><select id="rem-type"><option>Management Fee</option><option>Performance Fee</option><option>Director Fee</option><option>Salary</option><option>Bonus</option></select></div>
-      <div class="field"><label>Amount (RM)</label><input type="text" id="rem-amt" placeholder="4,500.00"></div>
-      <div class="field fg-full"><label>Period</label><input type="text" id="rem-period" placeholder="e.g. Q1 FY26"></div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+
+      <div class="field" style="margin:0;">
+        <label>Date</label>
+        <input type="date" id="rem-date" style="width:100%;box-sizing:border-box;">
+      </div>
+
+      <div class="field" style="margin:0;">
+        <label>Fee Type</label>
+        <div class="rem-cb-wrap">
+          <input type="text" id="rem-type" placeholder="Type or select…" autocomplete="off" style="width:100%;box-sizing:border-box;">
+          <div class="rem-cb-list" id="rem-type-list"></div>
+        </div>
+      </div>
+
+      <div class="field" style="margin:0;">
+        <label>Amount (RM)</label>
+        <input type="text" id="rem-amt" placeholder="4,500.00" style="width:100%;box-sizing:border-box;">
+      </div>
+
+      <div class="field" style="margin:0;">
+        <label>Status</label>
+        <select id="rem-status" style="width:100%;box-sizing:border-box;font:inherit;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-md);">
+          <option value="Pending">Pending</option>
+          <option value="Paid">Paid</option>
+        </select>
+      </div>
+
     </div>
   </div>
-  <div class="modal-foot"><button class="btn-line btn-sm" data-close>Cancel</button><button class="btn-fill btn-sm" id="rem-add">Add Entry</button></div>
+  <div class="modal-foot" style="justify-content:space-between;">
+    <div>
+      <button class="btn-line btn-sm" id="rem-delete" style="color:var(--red);border-color:var(--red);display:none;">Delete</button>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-line btn-sm" data-close>Cancel</button>
+      <button class="btn-fill btn-sm" id="rem-save">Save</button>
+    </div>
+  </div>
 </div>
+
   </main>
 </div>
 <div class="modal-scrim" id="modalScrim"></div>
@@ -124,24 +170,6 @@
 <script src="../assets/js/auth-logout.js"></script>
 <script src="../assets/js/admin-shell.js"></script>
 <script src="../assets/js/admin-supabase.js"></script>
-<script>
-(function(){
-  var REM=[
-    {date:'31 Mar 2026',who:'Fund Manager',type:'Management Fee',amt:4500,period:'Q1 FY26',status:'Approved'},
-    {date:'31 Mar 2026',who:'Ng Zhi Yao',type:'Performance Fee',amt:8200,period:'FY25 over hurdle',status:'Pending'},
-    {date:'31 Dec 2025',who:'Board of Directors',type:'Director Fee',amt:6000,period:'FY25',status:'Approved'},
-    {date:'30 Nov 2025',who:'Fund Manager',type:'Management Fee',amt:4250,period:'Q4 FY25',status:'Approved'}
-  ];
-  function sPill(s){ if(s==='Approved')return '<span class="pill-ok">Approved</span>'; if(s==='Rejected')return '<span class="pill-rej">Rejected</span>'; return '<span class="pill-pending">Pending</span>'; }
-  var remBody=document.getElementById('remBody'), remEdit=-1;
-  function setDate(id,h){ var d=new Date(h); if(!isNaN(d)){ document.getElementById(id).value=d.toISOString().slice(0,10); } }
-  function render(){ remBody.innerHTML=''; REM.forEach(function(r,i){ var tr=document.createElement('tr'); tr.className='clickable'; tr.innerHTML='<td>'+r.date+'</td><td class="hold-name"><b>'+r.who+'</b></td><td><span class="tag-blue">'+r.type+'</span></td><td class="td-right">'+zyFmt(r.amt)+'</td><td class="td-sub">'+r.period+'</td><td>'+sPill(r.status)+'</td>'; tr.addEventListener('click',function(){ open(i); }); remBody.appendChild(tr); }); }
-  render();
-  function open(i){ remEdit=i; var btn=document.getElementById('rem-add'),head=document.getElementById('remTitle'); if(i>=0){ var r=REM[i]; setDate('rem-date',r.date); document.getElementById('rem-who').value=r.who; document.getElementById('rem-type').value=r.type; document.getElementById('rem-amt').value=r.amt; document.getElementById('rem-period').value=r.period==='—'?'':r.period; head.textContent='Edit Remuneration'; btn.textContent='Save Changes'; } else { document.getElementById('rem-amt').value=''; document.getElementById('rem-who').value=''; document.getElementById('rem-period').value=''; head.textContent='Add Remuneration Entry'; btn.textContent='Add Entry'; } zyModalOpen('remModal'); }
-  document.getElementById('openRemModal').addEventListener('click',function(){ open(-1); });
-  document.getElementById('rem-add').addEventListener('click',function(){ var amt=zyParseNum(document.getElementById('rem-amt').value),who=document.getElementById('rem-who').value.trim(); if(!who||amt<=0){ zyToast('Enter recipient and amount'); return; } var d=new Date(document.getElementById('rem-date').value); var ds=isNaN(d)?'31 Mar 2026':d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); var type=document.getElementById('rem-type').value,period=document.getElementById('rem-period').value||'—'; if(remEdit>=0){ var r=REM[remEdit]; r.date=ds; r.who=who; r.type=type; r.amt=amt; r.period=period; zyToast('Remuneration updated — '+who); } else { REM.unshift({date:ds,who:who,type:type,amt:amt,period:period,status:'Pending'}); zyToast('Remuneration entry added — '+who); } render(); zyModalClose(); });
-})();
-</script>
-
+<script src="../assets/js/remuneration-admin.js"></script>
 </body>
 </html>
