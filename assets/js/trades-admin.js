@@ -192,8 +192,8 @@
       var cashflow = isBuy ? (tradeVal + fee) : (tradeVal - fee);
       // colour pill matching settlement style
       var flowPill = isBuy
-        ? '<span class="tag-red">− RM '+fmt(cashflow)+'</span>'
-        : '<span class="tag-green">+ RM '+fmt(cashflow)+'</span>';
+        ? '<span class="tag-red">− '+fmt(cashflow)+'</span>'
+        : '<span class="tag-green">+ '+fmt(cashflow)+'</span>';
       // second line: ticker | code (deduplicate if same)
       var tk = (r.ticker||'').trim(), co = (r.code||'').trim();
       var subLine = tk && co && tk !== co ? tk+' | '+co : (tk||co||'—');
@@ -277,28 +277,33 @@
     var btn = document.getElementById('tr-confirm'); btn.disabled=true; btn.textContent='Saving…';
 
     try{
-      var rows = lots.map(function(o, i){
-        return {
-          action: tradeAction,
-          instrument_name: instName,
-          ticker: inst.ticker || null,
-          code:   inst.code   || null,
-          product: inst.product || 'Securities',
-          sector:  inst.sector  || null,
-          trade_date: date,
-          units: o.units,
-          price: o.price,
-          fee:   lots.length === 1 ? fee : (i === 0 ? fee : 0)
-        };
-      });
+      // Merge all lots into a single row:
+      // output units  = Σ units
+      // output price  = Σ(price × units) / Σ units  (VWAP)
+      // output fee    = total fee entered
+      var totalUnits = lots.reduce(function(s,o){ return s + o.units; }, 0);
+      var totalAmt   = lots.reduce(function(s,o){ return s + o.units * o.price; }, 0);
+      var vwapPrice  = totalUnits > 0 ? totalAmt / totalUnits : 0;
 
-      var res = await sb.from('transaction_trading').insert(rows);
+      var row = {
+        action:          tradeAction,
+        instrument_name: instName,
+        ticker:          inst.ticker || null,
+        code:            inst.code   || null,
+        product:         inst.product || 'Securities',
+        sector:          inst.sector  || null,
+        trade_date:      date,
+        units:           totalUnits,
+        price:           vwapPrice,
+        fee:             fee || null
+      };
+
+      var res = await sb.from('transaction_trading').insert(row);
       if(res.error) throw res.error;
 
       await loadTrades();
       zyModalClose();
-      var totalUnits = lots.reduce(function(s,o){ return s+o.units; }, 0);
-      if(window.zyToast) zyToast(tradeAction+' '+fmt(totalUnits,0)+' '+instName+(lots.length>1?' ('+lots.length+' lots)':''));
+      if(window.zyToast) zyToast(tradeAction+' '+fmt(totalUnits,0)+' '+instName+(lots.length>1?' @ VWAP RM '+fmt(vwapPrice,4):''));
     }catch(ex){
       if(window.zyToast) zyToast('Error: '+((ex&&ex.message)||'Unknown'));
     }
