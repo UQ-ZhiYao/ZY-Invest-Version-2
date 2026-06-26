@@ -109,6 +109,183 @@
     document.getElementById('pfListCount').textContent=rows.length+' holdings';
   }
 
+
+  // ══════════════════════════════════════════════════════════
+  //  COMPUTE PORTFOLIO FROM TRADES (AVCO)
+  //  - Same algorithm as settlement but outputs CURRENT positions
+  //  - Every buy/sell updates the running portfolio state
+  //  - Result = all instruments with net units > 0
+  //  - Cash rows (product='Cash on Hand'/'Cash Funds') preserved
+  //    from existing portfolio table — not touched by this compute
+  // ══════════════════════════════════════════════════════════
+
+  var computedPortfolio = [];
+
+  document.getElementById('btnComputePortfolio').addEventListener('click', async function(){
+    if(typeof sb==='undefined'||!sb) return;
+    var btn=this; btn.disabled=true; btn.textContent='Computing…';
+
+    try{
+      // 1. Fetch all trades, sort by date then Buy before Sell on same day
+      var res = await sb.from('transaction_trading').select('*').order('trade_date',{ascending:true});
+      if(res.error) throw res.error;
+
+      var trades = (res.data||[]).slice().sort(function(a,b){
+        if(a.trade_date < b.trade_date) return -1;
+        if(a.trade_date > b.trade_date) return 1;
+        return (a.action==='Buy'?0:1)-(b.action==='Buy'?0:1);
+      });
+
+      // 2. AVCO loop — track running portfolio per instrument
+      // portfolio[name] = {totalUnits, totalCost, ticker, code, product}
+      var port = {};
+
+      trades.forEach(function(t){
+        var name  = t.instrument_name;
+        var units = Math.abs(parseFloat(t.units)||0);
+        var cf    = parseFloat(t.cashflow)||0;
+
+        if(!port[name]){
+          port[name] = {totalUnits:0, totalCost:0,
+            ticker:t.ticker||'', code:t.code||'', product:t.product||'Securities'};
+        }
+        var pos = port[name];
+        // always keep latest metadata
+        if(t.ticker)  pos.ticker  = t.ticker;
+        if(t.code)    pos.code    = t.code;
+        if(t.product) pos.product = t.product;
+
+        if(t.action === 'Buy'){
+          // Expand AVCO pool — NO rounding
+          pos.totalCost  += Math.abs(cf);
+          pos.totalUnits += units;
+
+        } else { // Sell — reduce pool
+          if(pos.totalUnits > 0){
+            var avgCost = pos.totalCost / pos.totalUnits;  // NO rounding
+            pos.totalUnits -= units;
+            pos.totalCost   = pos.totalUnits > 0 ? avgCost * pos.totalUnits : 0;
+          }
+        }
+      });
+
+      // 3. Build result — only positions with units remaining
+      var positions = [];
+      Object.keys(port).forEach(function(name){
+        var pos = port[name];
+        if(pos.totalUnits < 0.0001) return; // fully sold
+        var vwap = pos.totalUnits > 0 ? pos.totalCost / pos.totalUnits : 0;
+        positions.push({
+          instrument_name: name,
+          ticker:          pos.ticker || null,
+          code:            pos.code   || null,
+          product:         pos.product || 'Securities',
+          units:           pos.totalUnits,
+          total_cost:      pos.totalCost,
+          vwap_cost:       vwap,
+          latest_price:    0,
+          market_value:    0,
+          unrealised_pnl:  0,
+          return_pct:      0,
+          weight:          0
+        });
+      });
+
+      // Sort: non-cash by name, cash last
+      positions.sort(function(a,b){
+        var ac = a.product==='Cash on Hand'||a.product==='Cash Funds';
+        var bc = b.product==='Cash on Hand'||b.product==='Cash Funds';
+        if(ac && !bc) return 1;
+        if(!ac && bc) return -1;
+        return a.instrument_name.localeCompare(b.instrument_name);
+      });
+
+      if(!positions.length){
+        if(window.zyToast) zyToast('No open positions found in trade history');
+        btn.disabled=false; btn.textContent='⟳ Compute from Trades'; return;
+      }
+
+      computedPortfolio = positions;
+
+      // 4. Show preview
+      var tbody = document.getElementById('pfComputeBody');
+      tbody.innerHTML = '';
+      positions.forEach(function(r){
+        var tk=(r.ticker||'').trim(), co=(r.code||'').trim();
+        var sub=tk&&co&&tk!==co?tk+' | '+co:(tk||co||'—');
+        var tr=document.createElement('tr');
+        tr.innerHTML=
+          '<td class="hold-name"><b>'+r.instrument_name+'</b><span>'+sub+'</span></td>'+
+          '<td>'+prodPill(r.product)+'</td>'+
+          '<td class="r">'+fmt(r.units,4)+'</td>'+
+          '<td class="r">'+fmt(r.total_cost)+'</td>'+
+          '<td class="r">'+fmt(r.vwap_cost,6)+'</td>';
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('pfComputeNote').textContent =
+        positions.length+' open position'+(positions.length===1?'':'s');
+      zyModalOpen('pfComputeModal');
+
+    }catch(ex){ if(window.zyToast) zyToast('Error: '+(ex.message||'Unknown')); }
+    btn.disabled=false; btn.textContent='⟳ Compute from Trades';
+  });
+
+  // 5. Confirm: preserve existing latest_price for matching instruments,
+  //    wipe non-cash rows, insert fresh computed positions
+  document.getElementById('btnConfirmPortfolio').addEventListener('click', async function(){
+    if(!computedPortfolio.length) return;
+    var btn=this; btn.disabled=true; btn.textContent='Saving…';
+    try{
+      // Preserve prices from existing portfolio rows
+      var existing = {};
+      ALL.forEach(function(r){
+        if(parseFloat(r.latest_price)>0){
+          existing[r.instrument_name] = {
+            latest_price:  parseFloat(r.latest_price)||0,
+            market_value:  0,
+            unrealised_pnl:0
+          };
+        }
+      });
+
+      // Apply existing prices to new positions
+      computedPortfolio.forEach(function(r){
+        var ex = existing[r.instrument_name];
+        if(ex && ex.latest_price>0){
+          r.latest_price   = ex.latest_price;
+          r.market_value   = ex.latest_price * r.units;
+          r.unrealised_pnl = r.market_value - r.total_cost;
+          r.return_pct     = r.vwap_cost>0?(ex.latest_price-r.vwap_cost)/r.vwap_cost*100:0;
+        }
+      });
+
+      // Recompute weights after price application
+      var totalMV = computedPortfolio.reduce(function(s,r){return s+(r.market_value||0);},0)||
+                    computedPortfolio.reduce(function(s,r){return s+r.total_cost;},0);
+      computedPortfolio.forEach(function(r){
+        var base = r.market_value>0?r.market_value:r.total_cost;
+        r.weight = totalMV>0?base/totalMV*100:0;
+      });
+
+      // Delete all existing non-cash portfolio rows then insert new ones
+      var del = await sb.from('portfolio')
+        .delete()
+        .not('product','in','("Cash on Hand","Cash Funds")');
+      if(del.error) throw del.error;
+
+      var ins = await sb.from('portfolio').insert(computedPortfolio);
+      if(ins.error) throw ins.error;
+
+      zyModalClose();
+      await load();
+      if(window.zyToast) zyToast('Portfolio updated — '+computedPortfolio.length+' positions saved');
+      computedPortfolio = [];
+    }catch(ex){ if(window.zyToast) zyToast('Save error: '+(ex.message||'Unknown')); }
+    btn.disabled=false; btn.textContent='Save to Portfolio';
+  });
+  // ══════════════════════════════════════════════════════════
+
   // ── refresh prices via Yahoo Finance ──────────────────────
   document.getElementById('btnRefreshPrices').addEventListener('click', async function(){
     if(!ALL.length){ if(window.zyToast) zyToast('No holdings to refresh'); return; }
