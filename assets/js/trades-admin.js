@@ -211,17 +211,28 @@
   }
 
   function updateMetrics(){
-    var allInFY = ALL_TX.filter(inFY);
-    var totalTrades=allInFY.length, buys=0, sells=0, totalAmt=0, totalUnits=0, totalFees=0, buyAmt=0;
-    allInFY.forEach(function(r){
-      if(r.action==='Buy') buys++; else sells++;
-      var v=(r.units||0)*(r.price||0);
-      totalAmt+=v; totalUnits+=parseFloat(r.units)||0; totalFees+=parseFloat(r.fee)||0;
-      if(r.action==='Buy') buyAmt+=v;
+    // Use filtered() so FY + Buy/Sell chip both apply
+    var rows = filtered();
+    // Trade count + Buy:Sell always from full FY (unaffected by action chip)
+    var fyRows = ALL_TX.filter(inFY);
+    var buys=0, sells=0;
+    fyRows.forEach(function(r){ if(r.action==='Buy') buys++; else sells++; });
+
+    // Turnover amount, units, fees — from filtered rows, all values absoluted
+    var totalAmt=0, totalUnits=0, totalFees=0;
+    rows.forEach(function(r){
+      totalAmt   += Math.abs((r.units||0) * (r.price||0));
+      totalUnits += Math.abs(parseFloat(r.units)||0);
+      totalFees  += Math.abs(parseFloat(r.fee)||0);
     });
-    var ratio = buyAmt > 0 ? fmt(totalAmt/buyAmt,2) : '—';
+
     var density = totalUnits > 0 ? fmt(totalAmt/totalUnits,4) : '—';
-    document.getElementById('ttCount').textContent = totalTrades;
+    // Ratio: turnover amount / buy-side amount (from filtered rows)
+    var buyAmt = 0;
+    rows.forEach(function(r){ if(r.action==='Buy') buyAmt += Math.abs((r.units||0)*(r.price||0)); });
+    var ratio = buyAmt > 0 ? fmt(totalAmt/buyAmt,2) : '—';
+
+    document.getElementById('ttCount').textContent = fyRows.length;
     document.getElementById('ttBuySell').textContent = buys+' : '+sells;
     document.getElementById('ttTurnover').textContent = 'RM '+fmt(totalAmt,0);
     document.getElementById('ttRatio').textContent = ratio;
