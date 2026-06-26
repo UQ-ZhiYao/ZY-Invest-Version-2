@@ -186,17 +186,15 @@
     tbody.innerHTML = '';
     rows.forEach(function(r){
       var isBuy = r.action === 'Buy';
-      var tradeVal = (r.units||0) * (r.price||0);
-      var fee = parseFloat(r.fee)||0;
-      // cashflow = consideration (units*price) ± fee
-      var cashflow = isBuy ? (tradeVal + fee) : (tradeVal - fee);
-      // colour pill matching settlement style
+      // Read cashflow directly from DB column
+      var cashflow = parseFloat(r.cashflow)||0;
       var flowPill = isBuy
-        ? '<span class="tag-red">− '+fmt(cashflow)+'</span>'
-        : '<span class="tag-green">+ '+fmt(cashflow)+'</span>';
+        ? '<span class="tag-red">− '+fmt(Math.abs(cashflow))+'</span>'
+        : '<span class="tag-green">+ '+fmt(Math.abs(cashflow))+'</span>';
       // second line: ticker | code (deduplicate if same)
       var tk = (r.ticker||'').trim(), co = (r.code||'').trim();
       var subLine = tk && co && tk !== co ? tk+' | '+co : (tk||co||'—');
+      var fee = parseFloat(r.fee)||0;
       var tr = document.createElement('tr');
       tr.innerHTML =
         '<td>'+fmtDate(r.trade_date)+'</td>'+
@@ -285,6 +283,11 @@
       var totalAmt   = lots.reduce(function(s,o){ return s + o.units * o.price; }, 0);
       var vwapPrice  = totalUnits > 0 ? totalAmt / totalUnits : 0;
 
+      // cashflow: Buy = -(units*vwap + fee), Sell = +(units*vwap - fee)
+      var cashflowVal = tradeAction === 'Buy'
+        ? -((totalUnits * vwapPrice) + (fee||0))
+        :  ((totalUnits * vwapPrice) - (fee||0));
+
       var row = {
         action:          tradeAction,
         instrument_name: instName,
@@ -295,7 +298,8 @@
         trade_date:      date,
         units:           totalUnits,
         price:           vwapPrice,
-        fee:             fee || null
+        fee:             fee || null,
+        cashflow:        cashflowVal
       };
 
       var res = await sb.from('transaction_trading').insert(row);
