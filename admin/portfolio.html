@@ -63,9 +63,9 @@
 
 <div class="adm-subbar">
   <span class="sb-lab">FUND PAGES</span>
-  <div class="sub-group"><button class="sub-top">Fund <span class="caret">▾</span></button><div class="sub-dd"><div class="sub-dd-card"><a href="fund-overview.html"><b>Fund Overview</b><span>Mandate, objective &amp; key facts</span></a><a href="fund-view.html?src=factsheet.html"><b>Factsheet</b></a><a href="fund-view.html?src=shareholder-list.html"><b>Shareholder List</b></a></div></div></div>
-  <div class="sub-group"><button class="sub-top">Performance <span class="caret">▾</span></button><div class="sub-dd"><div class="sub-dd-card"><a href="fund-view.html?src=financial-result.html"><b>Financial Result</b></a><a href="fund-view.html?src=performance-analysis.html"><b>Performance Analysis</b></a><a href="fund-view.html?src=nta-history.html"><b>NTA History</b></a></div></div></div>
-  <div class="sub-group"><button class="sub-top">Documents <span class="caret">▾</span></button><div class="sub-dd"><div class="sub-dd-card"><a href="fund-view.html?src=statement-download.html"><b>Statement Download</b></a></div></div></div>
+  <div class="sub-group"><button class="sub-top">Fund <span class="caret">▾</span></button><div class="sub-dd"><div class="sub-dd-card"><a href="fund-overview.html"><b>Fund Overview</b><span>Mandate, objective &amp; key facts</span></a><a href="fund-view.html?src=factsheet.html"><b>Factsheet</b><span>Holdings allocation each financial year</span></a><a href="fund-view.html?src=shareholder-list.html"><b>Shareholder List</b><span>Unitholders, units held &amp; ownership</span></a></div></div></div>
+  <div class="sub-group"><button class="sub-top">Performance <span class="caret">▾</span></button><div class="sub-dd"><div class="sub-dd-card"><a href="fund-view.html?src=financial-result.html"><b>Financial Result</b><span>Income statement, balance sheet &amp; cash flow</span></a><a href="fund-view.html?src=performance-analysis.html"><b>Performance Analysis</b><span>Returns &amp; benchmark comparison (FBM KLCI)</span></a><a href="fund-view.html?src=nta-history.html"><b>NTA History</b><span>Chart &amp; daily NTA / NAV history</span></a></div></div></div>
+  <div class="sub-group"><button class="sub-top">Documents <span class="caret">▾</span></button><div class="sub-dd"><div class="sub-dd-card"><a href="fund-view.html?src=statement-download.html"><b>Statement Download</b><span>Factsheets &amp; annual reports</span></a></div></div></div>
 </div>
 
 <div class="adm-shell" id="admShell">
@@ -100,11 +100,11 @@
   <div class="mc"><div class="label">Holdings</div><div class="value blue" id="pfCount">—</div><div class="sub">open positions</div></div>
   <div class="mc"><div class="label">Total Market Value</div><div class="value" id="pfMV">RM —</div><div class="sub">excl. cash</div></div>
   <div class="mc"><div class="label">Unrealised P&amp;L</div><div class="value" id="pfPnl">RM —</div><div class="sub" id="pfPnlPct">—</div></div>
-  <div class="mc"><div class="label">Last Updated</div><div class="value" id="pfUpdated" style="font-size:0.9rem;">—</div><div class="sub"><button class="btn-line btn-sm" id="btnRefreshPrices" style="font-size:0.75rem;padding:3px 10px;">↻ Refresh Prices</button></div></div>
+  <div class="mc"><div class="label">Last Updated</div><div class="value" id="pfUpdated" style="font-size:0.9rem;">—</div><div class="sub">prices last fetched</div></div>
 </div>
 
 <div class="panel mt16">
-  <div class="panel-head"><h3>Holdings</h3><div style="display:flex;align-items:center;gap:10px;"><span class="td-sub" id="pfListCount"></span><button class="btn-fill btn-sm" id="btnComputePortfolio" style="background:var(--blue);">⟳ Compute from Trades</button></div></div>
+  <div class="panel-head"><h3>Holdings</h3><div style="display:flex;align-items:center;gap:10px;"><span class="td-sub" id="pfListCount"></span><button class="btn-line btn-sm" id="btnRefreshPrices">↻ Refresh Prices</button><button class="btn-fill btn-sm" id="btnComputePortfolio">⟳ Compute from Trades</button></div></div>
   <table class="tbl pf-tbl">
     <thead><tr>
       <th>Instrument</th>
