@@ -26,22 +26,37 @@
   function initials(n){ return (n||'?').split(' ').filter(Boolean).slice(0,2).map(function(w){return w[0];}).join('').toUpperCase(); }
   function pct(u,total){ return total>0?((u/total)*100).toFixed(2)+'%':'—'; }
 
-  // ── wire nav dropdowns (member pages) ──────────────────────
-  if(!isAdminPage){
+  // ── wire nav/sidebar/avatar on DOMContentLoaded (runs immediately, no async wait) ──
+  document.addEventListener('DOMContentLoaded', function(){
+    if(isAdminPage) return;
+    // fund nav dropdowns
     document.querySelectorAll('.nav-group').forEach(function(g){
       var btn=g.querySelector('.nav-top'); if(!btn) return;
-      btn.addEventListener('click',function(e){ e.stopPropagation(); g.classList.toggle('open'); document.querySelectorAll('.nav-group').forEach(function(x){ if(x!==g) x.classList.remove('open'); }); });
+      btn.addEventListener('click',function(e){
+        e.stopPropagation();
+        g.classList.toggle('open');
+        document.querySelectorAll('.nav-group').forEach(function(x){ if(x!==g) x.classList.remove('open'); });
+      });
     });
     document.addEventListener('click',function(){ document.querySelectorAll('.nav-group').forEach(function(g){ g.classList.remove('open'); }); });
     // sidebar
     var shell=document.getElementById('shell'), scrim=document.getElementById('scrim'), sbToggle=document.getElementById('sbToggle');
-    if(sbToggle){ sbToggle.addEventListener('click',function(){ var c=shell.classList.toggle('collapsed'); try{localStorage.setItem('zy-sb-collapsed',c?'1':'0');}catch(e){} }); }
+    if(sbToggle){ sbToggle.addEventListener('click',function(){ var col=shell.classList.toggle('collapsed'); try{localStorage.setItem('zy-sb-collapsed',col?'1':'0');}catch(e){} }); }
     if(scrim){ scrim.addEventListener('click',function(){ shell.classList.remove('collapsed'); }); }
-    // avatar dropdown
-    var userBtn=document.getElementById('userBtn'), userMenu=document.getElementById('userMenu');
-    if(userBtn){ userBtn.addEventListener('click',function(e){ e.stopPropagation(); var wrap=document.querySelector('.nav-user-wrap'); if(wrap) wrap.classList.toggle('open'); }); }
-    document.addEventListener('click',function(e){ var wrap=document.querySelector('.nav-user-wrap'); if(wrap&&!wrap.contains(e.target)) wrap.classList.remove('open'); });
-  }
+    // avatar dropdown — toggle .open on .nav-user-wrap (matches dashboard CSS)
+    var userBtn=document.getElementById('userBtn');
+    if(userBtn){
+      userBtn.addEventListener('click',function(e){
+        e.stopPropagation();
+        var wrap=document.querySelector('.nav-user-wrap');
+        if(wrap) wrap.classList.toggle('open');
+      });
+    }
+    document.addEventListener('click',function(e){
+      var wrap=document.querySelector('.nav-user-wrap');
+      if(wrap&&!wrap.contains(e.target)) wrap.classList.remove('open');
+    });
+  });
 
   // ── load data ───────────────────────────────────────────────
   window.addEventListener('DOMContentLoaded', async function(){
@@ -59,16 +74,15 @@
     // populate nav user info (member pages)
     if(!isAdminPage){
       var pres=await sb.from('profiles').select('full_name,preferred_name').eq('id',myUid).single();
-      if(pres.data){
-        var myName=pres.data.preferred_name||pres.data.full_name||myEmail;
-        var av=initials(myName);
-        var nn=document.getElementById('navName'); if(nn) nn.textContent=myName;
-        var nr=document.getElementById('navRole'); if(nr) nr.textContent=myEmail;
-        var na=document.getElementById('navAvatar'); if(na) na.textContent=av;
-        var ma=document.getElementById('menuAvatar'); if(ma) ma.textContent=av;
-        var mn=document.getElementById('menuName'); if(mn) mn.textContent=myName;
-        var me=document.getElementById('menuEmail'); if(me) me.textContent=myEmail;
-      }
+      var myName=myEmail;
+      if(pres.data) myName=pres.data.preferred_name||pres.data.full_name||myEmail;
+      var av=initials(myName);
+      var nn=document.getElementById('navName'); if(nn) nn.textContent=myName;
+      var nr=document.getElementById('navRole'); if(nr) nr.textContent=myEmail;
+      var na=document.getElementById('navAvatar'); if(na) na.textContent=av;
+      var ma=document.getElementById('menuAvatar'); if(ma) ma.textContent=av;
+      var mn=document.getElementById('menuName'); if(mn) mn.textContent=myName;
+      var me=document.getElementById('menuEmail'); if(me) me.textContent=myEmail;
     }
 
     // 1. Load all profiles to get names, roles, UIDs
@@ -170,7 +184,7 @@
       } else if(r.isDir){
         displayName=r.name+'<span class="dir-badge">Director</span>';
       } else {
-        displayName='<span class="masked-name">*</span>';
+        displayName='<span class="masked-name">****</span>';
       }
 
       var position = r.isDir ? 'Director' : 'Shareholder';
