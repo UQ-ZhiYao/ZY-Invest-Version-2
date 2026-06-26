@@ -44,8 +44,8 @@
       list.forEach(function(x){
         var tr=document.createElement('tr'); tr.className='clickable';
         tr.innerHTML=
-          '<td>'+prodPill(x.product)+'</td>'+
           '<td class="hold-name"><b>'+x.name+'</b></td>'+
+          '<td>'+prodPill(x.product)+'</td>'+
           '<td class="td-sub">'+(x.ticker||'—')+'</td>'+
           '<td class="td-sub">'+(x.code||'—')+'</td>'+
           '<td class="td-sub">'+(x.sector||'—')+'</td>'+
