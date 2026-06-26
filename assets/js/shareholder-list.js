@@ -105,7 +105,7 @@
     Object.keys(holders).forEach(function(uid){
       var h=holders[uid];
       if(h.units<=0.0001) return; // skip fully redeemed
-      var prof=profiles[uid]||{name:'Unknown',role:'member'};
+      var prof=profiles[uid]||{name:'*',role:'member'};
       rows.push({
         uid:uid,
         name:prof.name,
@@ -142,6 +142,12 @@
     }
     var shLC=document.getElementById('shListCount'); if(shLC) shLC.textContent=rows.length+' unitholders';
 
+    // 8. Compute max ownership for bar scaling
+    var maxOwnPct = rows.length > 0
+      ? Math.max.apply(null, rows.map(function(r){ return totalUnits>0?(r.units/totalUnits*100):0; }))
+      : 100;
+    if(maxOwnPct <= 0) maxOwnPct = 100;
+
     // 8. Render table
     var tbody=document.getElementById('shBody');
     if(!rows.length){
@@ -152,7 +158,8 @@
     rows.forEach(function(r,i){
       var rank=i+1;
       var ownPct=totalUnits>0?(r.units/totalUnits*100):0;
-      var barWidth=Math.min(100,ownPct).toFixed(1);
+      // bar scaled: max holder fills bar to 100%, others proportional
+      var barWidth=maxOwnPct>0?Math.min(100,(ownPct/maxOwnPct*100)).toFixed(1):'0';
 
       // Privacy masking for member pages
       var displayName;
@@ -163,7 +170,7 @@
       } else if(r.isDir){
         displayName=r.name+'<span class="dir-badge">Director</span>';
       } else {
-        displayName='<span class="masked-name">****</span>';
+        displayName='<span class="masked-name">*</span>';
       }
 
       var position = r.isDir ? 'Director' : 'Shareholder';
