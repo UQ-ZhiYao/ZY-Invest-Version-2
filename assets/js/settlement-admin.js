@@ -83,12 +83,12 @@
       tr.innerHTML=
         '<td>'+fmtDate(r.date)+'</td>'+
         '<td class="hold-name"><b>'+(r.instrument_name||'—')+'</b><span>'+subLine+'</span></td>'+
+        '<td>'+prodPill(r.product)+'</td>'+
         '<td class="r">'+fmt(r.units,4)+'</td>'+
         '<td class="r">'+fmt(r.vwap_cost,4)+'</td>'+
         '<td class="r">'+fmt(r.sale_price,4)+'</td>'+
         '<td class="r">'+pnlCell(r.pnl)+'</td>'+
-        '<td class="r"><span class="'+retClass+'">'+retPct+'</span></td>'+
-        '<td>'+prodPill(r.product)+'</td>';
+        '<td class="r"><span class="'+retClass+'">'+retPct+'</span></td>';
       tr.addEventListener('click',function(){ openEdit(r); });
       tbody.appendChild(tr);
     });
