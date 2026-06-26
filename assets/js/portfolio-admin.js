@@ -297,12 +297,17 @@
       var sym=r.code||null;  // use code column for Yahoo Finance symbol (e.g. 1155.KL, AAPL)
       if(!sym||isCash(r)){ continue; }
       try{
-        var url='https://query1.finance.yahoo.com/v8/finance/chart/'+encodeURIComponent(sym)+'?interval=1d&range=5d';
-        var proxy='https://api.allorigins.win/raw?url='+encodeURIComponent(url);
-        var res=await fetch(proxy);
+        // Try Yahoo Finance v11 quoteSummary endpoint via corsproxy.io
+        var url='https://query2.finance.yahoo.com/v11/finance/quoteSummary/'+encodeURIComponent(sym)+'?modules=price';
+        var proxy='https://corsproxy.io/?'+encodeURIComponent(url);
+        var res=await fetch(proxy,{headers:{'User-Agent':'Mozilla/5.0'}});
         var data=await res.json();
-        var price=data.chart&&data.chart.result&&data.chart.result[0]?
-          data.chart.result[0].meta.regularMarketPrice:null;
+        var price=null;
+        try{
+          price=data.quoteSummary&&data.quoteSummary.result&&data.quoteSummary.result[0]
+            ?data.quoteSummary.result[0].price.regularMarketPrice.raw
+            :null;
+        }catch(e){ price=null; }
         if(price){
           var units=parseFloat(r.units)||0;
           var mv=price*units;
