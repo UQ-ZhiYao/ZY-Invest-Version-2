@@ -36,6 +36,50 @@
 
 /* units hint */
 .units-hint { font-size:0.74rem; color:var(--fg-3); margin-top:5px; }
+
+/* ── match trade modal sizing ── */
+.dv-modal-new { width:460px !important; max-width:96vw !important; }
+.dv-modal-new .modal-body { padding:20px 22px; }
+
+/* ── filterable instrument dropdown (same as trades) ── */
+.dv-dd-wrap { position:relative; }
+.dv-dd-box {
+  display:flex; align-items:center;
+  border:1.5px solid var(--border); border-radius:var(--radius-md);
+  background:#fff; overflow:hidden;
+}
+.dv-dd-box:focus-within { border-color:var(--blue); box-shadow:0 0 0 3px var(--blue-bg); }
+.dv-dd-box input[type="text"] {
+  flex:1; border:none; outline:none; padding:9px 4px 9px 12px;
+  font:inherit; font-size:0.88rem; color:var(--fg-1); background:transparent; min-width:0;
+}
+.dv-dd-caret { padding:0 11px; color:var(--fg-3); font-size:0.72rem; cursor:pointer; user-select:none; flex:none; }
+.dv-dd-list {
+  position:absolute; top:calc(100% + 3px); left:0; right:0; z-index:400;
+  background:#fff; border:1.5px solid var(--blue); border-radius:var(--radius-md);
+  box-shadow:var(--shadow-md); max-height:220px; overflow-y:auto; display:none;
+}
+.dv-dd-list.open { display:block; }
+.dv-dd-option {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:9px 13px; cursor:pointer; font-size:0.87rem; gap:10px;
+}
+.dv-dd-option:hover { background:var(--blue-bg); }
+.dv-opt-name { color:var(--fg-1); font-weight:500; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.dv-opt-code { color:var(--fg-3); font-family:monospace; font-size:0.8rem; flex:none; text-align:right; }
+.dv-dd-empty { padding:12px 13px; font-size:0.84rem; color:var(--fg-3); }
+
+/* ── single-column modal rows ── */
+.dv-row { display:flex; flex-direction:column; gap:14px; }
+.dv-row .field { margin:0; }
+.dv-summary {
+  background:var(--gray-50); border-radius:var(--radius-md);
+  padding:13px 16px; margin-top:4px;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.dv-summary .k { font-size:0.78rem; color:var(--fg-3); }
+.dv-summary .v { font-size:1.1rem; font-weight:700; color:var(--green); }
+.units-hint { font-size:0.74rem; color:var(--fg-3); margin-top:4px; }
 </style>
 </head>
 <body>
@@ -68,22 +112,23 @@
   <script>try{if(localStorage.getItem('zy_admin_sb')==='1'){document.getElementById('admShell').classList.add('collapsed');}}catch(e){}</script>
   <aside class="adm-side">
     <button class="adm-toggle" id="admToggle" title="Collapse menu"><span class="bars"><span></span><span></span><span></span></span><span class="tlbl">Menu</span></button>
+    <div class="grp">Operations</div>
     <a class="adm-nav" href="overview.html"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span>Overview</a>
-    <div class="grp">Portfolio Management</div>
+    <a class="adm-nav" href="investors.html"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5 6-5s6 1.7 6 5"/><path d="M17 6.5a3 3 0 0 1 0 5.5M21 20c0-2.6-1.4-4.2-3.6-4.8"/></svg></span>Investors</a>
     <a class="adm-nav" href="portfolio.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v9l7.5 4.3A9 9 0 1 0 12 3z"/><path d="M12 3a9 9 0 0 1 7.5 13.3L12 12z"/></svg></span>Portfolio</a>
     <a class="adm-nav" href="instruments.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M8 16v-5M12 16V8M16 16v-7"/></svg></span>Instruments</a>
     <a class="adm-nav" href="trades.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 7h13l-3-3M20 17H7l3 3"/></svg></span>Trade Transactions</a>
-    <a class="adm-nav" href="settlement.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 7h18v12H3z"/><path d="M3 11h18"/><path d="M7 15h4"/></svg></span>Settlement</a>
-    <a class="adm-nav on" href="dividend.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M8 7h6a2.5 2.5 0 0 1 0 5H9a2.5 2.5 0 0 0 0 5h7"/></svg></span>Dividend</a>
-    <div class="grp">Operation Management</div>
-    <a class="adm-nav" href="investors.html"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5 6-5s6 1.7 6 5"/><path d="M17 6.5a3 3 0 0 1 0 5.5M21 20c0-2.6-1.4-4.2-3.6-4.8"/></svg></span>Investors</a>
     <a class="adm-nav" href="principal.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 8h14l-3-3"/><path d="M20 16H6l3 3"/></svg></span>Capital Injection</a>
-    <a class="adm-nav" href="distributions.html"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/></svg></span>Distributions</a>
-    <a class="adm-nav" href="others.html"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="16" cy="12" r="1"/></svg></span>Other Transactions</a>
-    <a class="adm-nav" href="remuneration.html"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="16.5" cy="14.5" r="1.3"/></svg></span>Remuneration</a>
+    <a class="adm-nav" href="others.html"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="16" cy="12" r="1"/></svg></span>Others Transaction</a>
+    <a class="adm-nav on" href="dividend.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M8 7h6a2.5 2.5 0 0 1 0 5H9a2.5 2.5 0 0 0 0 5h7"/></svg></span>Dividend</a>
+    <a class="adm-nav" href="settlement.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 7h18v12H3z"/><path d="M3 11h18"/><path d="M7 15h4"/></svg></span>Settlement</a>
     <a class="adm-nav" href="compute-nta.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 17l5-5 4 4 8-8"/><path d="M21 8v5h-5"/></svg></span>Compute NTA</a>
-    <div class="grp">Report Management</div>
+    <div class="grp">Management</div>
+    <a class="adm-nav" href="distributions.html"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/></svg></span>Distributions</a>
+    <a class="adm-nav" href="remuneration.html"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="16.5" cy="14.5" r="1.3"/></svg></span>Remuneration</a>
+    <div class="grp">Documents</div>
     <a class="adm-nav" href="documents.html"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M9 13h6"/></svg></span>Documents</a>
+    <div class="grp">Settings</div>
     <a class="adm-nav" href="fy-settings.html"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>FY Settings</a>
     <div style="flex:1;min-height:12px;"></div>
     <a class="adm-nav adm-signout" id="admSignout" href="#"><span class="ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>Sign out</a>
@@ -127,43 +172,73 @@
 </div>
 
 <!-- RECORD / EDIT DIVIDEND MODAL -->
-<div class="modal" id="dvModal">
+<div class="modal dv-modal-new" id="dvModal">
   <div class="modal-head">
     <div><h3 id="dvTitle">Record Dividend</h3><div class="sub">Log a dividend or coupon received from a holding.</div></div>
     <button class="modal-x" data-close>✕</button>
   </div>
   <div class="modal-body">
-    <div class="form-grid">
-      <!-- Searchable instrument combobox -->
-      <div class="field fg-full">
+    <div class="dv-row">
+
+      <!-- Instrument filterable dropdown -->
+      <div class="field">
         <label>Instrument</label>
-        <div class="combo-wrap">
-          <input type="text" id="dv-inst-input" placeholder="Type to search or select…" autocomplete="off">
+        <div class="dv-dd-wrap" id="dv-inst-wrap">
+          <div class="dv-dd-box">
+            <input type="text" id="dv-inst-input" placeholder="Search or select instrument…" autocomplete="off" autocorrect="off" spellcheck="false">
+            <span class="dv-dd-caret" id="dv-inst-caret">▾</span>
+          </div>
           <input type="hidden" id="dv-inst-hidden">
-          <div class="combo-list" id="dv-inst-list"></div>
+          <div class="dv-dd-list" id="dv-inst-list">
+            <div id="dv-inst-options"></div>
+          </div>
         </div>
       </div>
-      <div class="field"><label>Type</label>
-        <select id="dv-type"><option>Interim</option><option>Final</option><option>Special</option><option>Coupon</option></select>
+
+      <!-- Type — free text input -->
+      <div class="field">
+        <label>Type</label>
+        <input type="text" id="dv-type" placeholder="e.g. Interim, Final, Special, Coupon" style="width:100%;box-sizing:border-box;">
       </div>
-      <div class="field"><label>Status</label>
-        <select id="dv-status"><option>Received</option><option>Pending</option></select>
+
+      <!-- Ex-Date + Pay Date side by side -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="field" style="margin:0;"><label>Ex-Date</label><input type="date" id="dv-exdate" style="width:100%;box-sizing:border-box;"></div>
+        <div class="field" style="margin:0;"><label>Pay Date</label><input type="date" id="dv-paydate" style="width:100%;box-sizing:border-box;"></div>
       </div>
-      <div class="field"><label>Ex-Date</label><input type="date" id="dv-exdate"></div>
-      <div class="field"><label>Pay Date</label><input type="date" id="dv-paydate"></div>
-      <div class="field"><label>DPS — per unit (RM)</label><input type="text" id="dv-dps" placeholder="0.12"></div>
+
+      <!-- DPS -->
+      <div class="field">
+        <label>DPS — per unit (RM)</label>
+        <input type="text" id="dv-dps" placeholder="0.12" style="width:100%;box-sizing:border-box;">
+      </div>
+
+      <!-- Units held (read-only, auto-computed) -->
       <div class="field">
         <label>Units Held on Ex-Date</label>
-        <input type="text" id="dv-units" placeholder="—" readonly style="background:var(--gray-50);cursor:default;">
+        <input type="text" id="dv-units" placeholder="—" readonly style="width:100%;box-sizing:border-box;background:var(--gray-50);cursor:default;">
         <div class="units-hint" id="dv-units-hint">Select instrument and ex-date to auto-compute.</div>
       </div>
-    </div>
-    <div class="est-box">
-      <span class="k">Gross Dividend <span style="color:var(--fg-3);font-weight:400;">(DPS × units)</span></span>
-      <span class="v" id="dv-gross" style="color:var(--green);">RM —</span>
+
+      <!-- Status (visible when editing) -->
+      <div class="field" id="dv-status-row" style="display:none;">
+        <label>Status</label>
+        <select id="dv-status" style="width:100%;box-sizing:border-box;font:inherit;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-md);">
+          <option value="Not entitled">Not Entitled</option>
+          <option value="Pending">Pending</option>
+          <option value="Received">Received</option>
+        </select>
+      </div>
+
+      <!-- Gross dividend summary -->
+      <div class="dv-summary">
+        <div class="k">Gross Dividend <span style="font-weight:400;">(DPS × units)</span></div>
+        <div class="v" id="dv-gross">RM —</div>
+      </div>
+
     </div>
   </div>
-  <div class="modal-foot">
+  <div class="modal-foot" style="justify-content:space-between;">
     <div>
       <button class="btn-line btn-sm" id="dv-delete" style="color:var(--red);border-color:var(--red);display:none;">Delete</button>
     </div>
