@@ -44,7 +44,7 @@
       list.forEach(function(x){
         var tr=document.createElement('tr'); tr.className='clickable';
         tr.innerHTML=
-          '<td class="hold-name"><b>'+x.name+'</b></td>'+
+          '<td class="hold-name"><b>'+x.name+'</b>'+(function(){ var tk=(x.ticker||'').trim(),co=(x.code||'').trim(); var sub=tk&&co&&tk!==co?tk+' | '+co:(tk||co||''); return sub?'<span>'+sub+'</span>':''; })()+'</td>'+
           '<td>'+prodPill(x.product)+'</td>'+
           '<td class="td-sub">'+(x.ticker||'—')+'</td>'+
           '<td class="td-sub">'+(x.code||'—')+'</td>'+
