@@ -8,12 +8,26 @@
 (function(){
   var ALL = [];
 
-  var PROD_CLASS = {
-    'Securities':'prod-securities','Derivatives':'prod-derivatives',
-    'Cash Funds':'prod-cash-funds','Collectibles':'prod-collectibles',
-    'Private Equity':'prod-private-eq','Cash on Hand':'prod-cash-hand'
-  };
-  function prodPill(p){ var c=PROD_CLASS[p]||'prod-securities'; return '<span class="prod-pill '+c+'">'+(p||'Securities')+'</span>'; }
+  // Product colour: each unique product name gets its own colour, stably assigned
+  var PROD_COLORS = [
+    'prod-securities',   // blue
+    'prod-derivatives',  // yellow
+    'prod-cash-funds',   // green
+    'prod-collectibles', // purple
+    'prod-private-eq',   // rose
+    'prod-cash-hand'     // slate
+  ];
+  var _prodMap = {};
+  var _prodIdx = 0;
+  function prodPill(p) {
+    if (!p) return '';
+    if (_prodMap[p] === undefined) {
+      _prodMap[p] = _prodIdx % PROD_COLORS.length;
+      _prodIdx++;
+    }
+    return '<span class="prod-pill ' + PROD_COLORS[_prodMap[p]] + '">' + p + '</span>';
+  }
+  function resetProdMap() { _prodMap = {}; _prodIdx = 0; }
   function fmt(n,dp){ var d=dp===undefined?2:dp; return parseFloat(n||0).toLocaleString('en-MY',{minimumFractionDigits:d,maximumFractionDigits:d}); }
 
   function isCash(r){ return r.product==='Cash on Hand'||r.product==='Cash Funds'; }

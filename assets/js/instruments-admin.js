@@ -5,18 +5,27 @@
   var ALL = [], inFilter = '', inEditId = null;
 
   // ── per-product colour pill ──────────────────────────────
-  var PROD_CLASS = {
-    'Securities':    'prod-securities',
-    'Derivatives':   'prod-derivatives',
-    'Cash Funds':    'prod-cash-funds',
-    'Collectibles':  'prod-collectibles',
-    'Private Equity':'prod-private-eq',
-    'Cash on Hand':  'prod-cash-hand'
-  };
-
-  function prodPill(p){
-    var cls = PROD_CLASS[p] || 'prod-securities';
-    return '<span class="prod-pill '+cls+'">'+(p||'Securities')+'</span>';
+  // Product colour: each unique product name gets its own colour, stably assigned
+  var PROD_COLORS = [
+    'prod-securities',   // blue
+    'prod-derivatives',  // yellow
+    'prod-cash-funds',   // green
+    'prod-collectibles', // purple
+    'prod-private-eq',   // rose
+    'prod-cash-hand'     // slate
+  ];
+  var _prodMap = {};
+  var _prodIdx = 0;
+  function prodPill(p) {
+    if (!p) return '';
+    if (_prodMap[p] === undefined) {
+      _prodMap[p] = _prodIdx % PROD_COLORS.length;
+      _prodIdx++;
+    }
+    return '<span class="prod-pill ' + PROD_COLORS[_prodMap[p]] + '">' + p + '</span>';
+  }
+  function resetProdMap() { _prodMap = {}; _prodIdx = 0; }
+    return '<span class="prod-pill '+cls+'">'+(p||'Unknown')+'</span>';
   }
 
   // ── load from Supabase ───────────────────────────────────
@@ -25,11 +34,22 @@
     var res = await sb.from('instruments').select('*').order('name');
     if(res.error){ if(window.zyToast) zyToast('Load failed: '+res.error.message); return; }
     ALL = res.data||[];
+    // Populate filter dropdown from unique product values in DB
+    var sel = document.getElementById('inProdFilter');
+    var currentVal = sel.value;
+    var unique = [...new Set(ALL.map(function(x){ return x.product; }).filter(Boolean))].sort();
+    // Remove all options except "All Products"
+    while(sel.options.length > 1) sel.remove(1);
+    unique.forEach(function(p){
+      var o = document.createElement('option'); o.value = p; o.textContent = p; sel.appendChild(o);
+    });
+    if(currentVal) sel.value = currentVal;
     render();
   }
 
   // ── render table ─────────────────────────────────────────
   function render(){
+    resetProdMap(); // reassign colours fresh each render for consistency
     var q = (document.getElementById('inSearch').value||'').toLowerCase();
     var list = ALL.filter(function(x){
       return (!inFilter || x.product===inFilter) &&

@@ -13,8 +13,30 @@
   function parseNum(s){ return parseFloat((s||'').toString().replace(/,/g,''))||0; }
   function fmtDate(d){ if(!d) return '—'; return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
   function tag(a){ return a==='Buy'?'<span class="tag-green">Buy</span>':'<span class="tag-red">Sell</span>'; }
-  var PROD_CLASS={'Securities':'prod-securities','Derivatives':'prod-derivatives','Cash Funds':'prod-cash-funds','Collectibles':'prod-collectibles','Private Equity':'prod-private-eq','Cash on Hand':'prod-cash-hand'};
-  function prodPill(p){ var cls=PROD_CLASS[p]||'prod-securities'; return '<span class="prod-pill '+cls+'">'+(p||'Securities')+'</span>'; }
+  // Product colour: each unique product name gets its own colour, stably assigned
+  var PROD_COLORS = [
+    'prod-securities',   // blue
+    'prod-derivatives',  // yellow
+    'prod-cash-funds',   // green
+    'prod-collectibles', // purple
+    'prod-private-eq',   // rose
+    'prod-cash-hand'     // slate
+  ];
+  var _prodMap = {};
+  var _prodIdx = 0;
+  function prodPill(p) {
+    if (!p) return '';
+    if (_prodMap[p] === undefined) {
+      _prodMap[p] = _prodIdx % PROD_COLORS.length;
+      _prodIdx++;
+    }
+    return '<span class="prod-pill ' + PROD_COLORS[_prodMap[p]] + '">' + p + '</span>';
+  }
+  function resetProdMap() { _prodMap = {}; _prodIdx = 0; }
+      cls=_pfCache[p];
+    }
+    return '<span class="prod-pill '+cls+'">'+(p||'Unknown')+'</span>';
+  }
 
   // ── default date ──────────────────────────────────────────
   var trDateEl = document.getElementById('tr-date');
