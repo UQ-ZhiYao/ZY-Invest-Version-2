@@ -1,0 +1,163 @@
+/* ================================================================
+   FIXED COLUMN WIDTHS — all admin tables
+   table-layout:fixed prevents column widths shifting on filter.
+   Each table class gets explicit th widths that sum to 100%.
+   ================================================================ */
+
+/* ── shared: enforce fixed layout on every admin .tbl ────────── */
+.adm-main .tbl {
+  table-layout: fixed;
+  width: 100%;
+}
+
+/* ── Investors (.tbl with no extra class, investors page) ──────
+   Name | Membership | Member Since | Bank | Status
+   40%     15%           15%          20%    10%              */
+.adm-main .panel .tbl:not([class*="-tbl"]) thead th:nth-child(1) { width: 40%; }
+.adm-main .panel .tbl:not([class*="-tbl"]) thead th:nth-child(2) { width: 15%; }
+.adm-main .panel .tbl:not([class*="-tbl"]) thead th:nth-child(3) { width: 15%; }
+.adm-main .panel .tbl:not([class*="-tbl"]) thead th:nth-child(4) { width: 20%; }
+.adm-main .panel .tbl:not([class*="-tbl"]) thead th:nth-child(5) { width: 10%; }
+
+/* ── Portfolio (.pf-tbl) ────────────────────────────────────────
+   Instrument | Product | Units | Total Cost | Mkt Value | uPnL | Return% | Weight
+   26%           13%      9%      12%          12%         10%    9%        9%     */
+.tbl.pf-tbl thead th:nth-child(1) { width: 26%; }
+.tbl.pf-tbl thead th:nth-child(2) { width: 13%; }
+.tbl.pf-tbl thead th:nth-child(3) { width:  9%; }
+.tbl.pf-tbl thead th:nth-child(4) { width: 12%; }
+.tbl.pf-tbl thead th:nth-child(5) { width: 12%; }
+.tbl.pf-tbl thead th:nth-child(6) { width: 10%; }
+.tbl.pf-tbl thead th:nth-child(7) { width:  9%; }
+.tbl.pf-tbl thead th:nth-child(8) { width:  9%; }
+
+/* ── Instruments (.in-tbl) ──────────────────────────────────────
+   Instrument | Product | Ticker | Code | Sector | Currency
+   34%           16%      14%     10%    18%       8%        */
+.tbl.in-tbl thead th:nth-child(1) { width: 34%; }
+.tbl.in-tbl thead th:nth-child(2) { width: 16%; }
+.tbl.in-tbl thead th:nth-child(3) { width: 14%; }
+.tbl.in-tbl thead th:nth-child(4) { width: 10%; }
+.tbl.in-tbl thead th:nth-child(5) { width: 18%; }
+.tbl.in-tbl thead th:nth-child(6) { width:  8%; }
+
+/* ── Trade Transactions (.tt-tbl) ───────────────────────────────
+   Date | Action | Instrument | Product | Units | Price | Fee | Cash Flow
+   10%    8%       26%          12%       9%      10%     9%    16%        */
+.tbl.tt-tbl thead th:nth-child(1) { width: 10%; }
+.tbl.tt-tbl thead th:nth-child(2) { width:  8%; }
+.tbl.tt-tbl thead th:nth-child(3) { width: 26%; }
+.tbl.tt-tbl thead th:nth-child(4) { width: 12%; }
+.tbl.tt-tbl thead th:nth-child(5) { width:  9%; }
+.tbl.tt-tbl thead th:nth-child(6) { width: 10%; }
+.tbl.tt-tbl thead th:nth-child(7) { width:  9%; }
+.tbl.tt-tbl thead th:nth-child(8) { width: 16%; }
+
+/* ── Settlement (.stl-tbl) ──────────────────────────────────────
+   Date | Instrument | Product | Units | VWAP Cost | Sale Price | Realised P&L | Return %
+   10%    26%           12%      9%      11%          11%          13%            8%       */
+.tbl.stl-tbl thead th:nth-child(1) { width: 10%; }
+.tbl.stl-tbl thead th:nth-child(2) { width: 26%; }
+.tbl.stl-tbl thead th:nth-child(3) { width: 12%; }
+.tbl.stl-tbl thead th:nth-child(4) { width:  9%; }
+.tbl.stl-tbl thead th:nth-child(5) { width: 11%; }
+.tbl.stl-tbl thead th:nth-child(6) { width: 11%; }
+.tbl.stl-tbl thead th:nth-child(7) { width: 13%; }
+.tbl.stl-tbl thead th:nth-child(8) { width:  8%; }
+
+/* ── Dividend (.dv-tbl) ─────────────────────────────────────────
+   Ex-Date | Pay Date | Instrument | Type | DPS | Units Held | Amount | Status
+   11%       11%        26%          10%    9%    11%          12%      10%    */
+.tbl.dv-tbl thead th:nth-child(1) { width: 11%; }
+.tbl.dv-tbl thead th:nth-child(2) { width: 11%; }
+.tbl.dv-tbl thead th:nth-child(3) { width: 26%; }
+.tbl.dv-tbl thead th:nth-child(4) { width: 10%; }
+.tbl.dv-tbl thead th:nth-child(5) { width:  9%; }
+.tbl.dv-tbl thead th:nth-child(6) { width: 11%; }
+.tbl.dv-tbl thead th:nth-child(7) { width: 12%; }
+.tbl.dv-tbl thead th:nth-child(8) { width: 10%; }
+
+/* ── Capital Injection (.pt-tbl) ────────────────────────────────
+   Date | Investor | Type | Reference ID | Amount | NTA | Units | Status
+   10%    22%        10%    16%            11%      9%    9%      13%    */
+.tbl.pt-tbl thead th:nth-child(1) { width: 10%; }
+.tbl.pt-tbl thead th:nth-child(2) { width: 22%; }
+.tbl.pt-tbl thead th:nth-child(3) { width: 10%; }
+.tbl.pt-tbl thead th:nth-child(4) { width: 16%; }
+.tbl.pt-tbl thead th:nth-child(5) { width: 11%; }
+.tbl.pt-tbl thead th:nth-child(6) { width:  9%; }
+.tbl.pt-tbl thead th:nth-child(7) { width:  9%; }
+.tbl.pt-tbl thead th:nth-child(8) { width: 13%; }
+
+/* ── Distributions (.dist-tbl) ──────────────────────────────────
+   FY | Type | Ex-Date | Pay Date | DPS (sen) | Units | Gross (RM) | Status
+   9%   12%    12%       12%        12%          12%     16%          15%   */
+.tbl.dist-tbl thead th:nth-child(1) { width:  9%; }
+.tbl.dist-tbl thead th:nth-child(2) { width: 12%; }
+.tbl.dist-tbl thead th:nth-child(3) { width: 12%; }
+.tbl.dist-tbl thead th:nth-child(4) { width: 12%; }
+.tbl.dist-tbl thead th:nth-child(5) { width: 12%; }
+.tbl.dist-tbl thead th:nth-child(6) { width: 12%; }
+.tbl.dist-tbl thead th:nth-child(7) { width: 16%; }
+.tbl.dist-tbl thead th:nth-child(8) { width: 15%; }
+
+/* ── Shareholder List (.sh-tbl) ─────────────────────────────────
+   # | Name | Position | Holding Since | Units | Ownership %
+   6%   34%    16%        16%            14%     14%          */
+.tbl.sh-tbl thead th:nth-child(1) { width:  6%; }
+.tbl.sh-tbl thead th:nth-child(2) { width: 34%; }
+.tbl.sh-tbl thead th:nth-child(3) { width: 16%; }
+.tbl.sh-tbl thead th:nth-child(4) { width: 16%; }
+.tbl.sh-tbl thead th:nth-child(5) { width: 14%; }
+.tbl.sh-tbl thead th:nth-child(6) { width: 14%; }
+
+/* ── Others (.ot-tbl) ───────────────────────────────────────────
+   Date | Category | Description | Amount (RM)
+   12%    20%         52%           16%         */
+.tbl.ot-tbl thead th:nth-child(1) { width: 12%; }
+.tbl.ot-tbl thead th:nth-child(2) { width: 20%; }
+.tbl.ot-tbl thead th:nth-child(3) { width: 52%; }
+.tbl.ot-tbl thead th:nth-child(4) { width: 16%; }
+
+/* ── Remuneration (.rem-tbl) ────────────────────────────────────
+   Date | Fee Type | Amount (RM) | Status
+   16%    48%         20%           16%   */
+.tbl.rem-tbl thead th:nth-child(1) { width: 16%; }
+.tbl.rem-tbl thead th:nth-child(2) { width: 48%; }
+.tbl.rem-tbl thead th:nth-child(3) { width: 20%; }
+.tbl.rem-tbl thead th:nth-child(4) { width: 16%; }
+
+/* ── Documents (.dm-tbl) ────────────────────────────────────────
+   ☐  | Document | Type | Investor | FY | Visibility | Date | Actions
+   4%    24%        12%    18%       8%    10%          10%    14%     */
+.tbl.dm-tbl thead th:nth-child(1) { width:  4%; }
+.tbl.dm-tbl thead th:nth-child(2) { width: 24%; }
+.tbl.dm-tbl thead th:nth-child(3) { width: 12%; }
+.tbl.dm-tbl thead th:nth-child(4) { width: 18%; }
+.tbl.dm-tbl thead th:nth-child(5) { width:  8%; }
+.tbl.dm-tbl thead th:nth-child(6) { width: 10%; }
+.tbl.dm-tbl thead th:nth-child(7) { width: 10%; }
+.tbl.dm-tbl thead th:nth-child(8) { width: 14%; }
+
+/* ── FY Settings (.fy-tbl) ─────────────────────────────────────
+   (label + date cols — generous label, equal date cols)
+   Cell content may overflow: clip with ellipsis              */
+.tbl.fy-tbl thead th:nth-child(1) { width: 20%; }
+.tbl.fy-tbl thead th:nth-child(2) { width: 20%; }
+.tbl.fy-tbl thead th:nth-child(3) { width: 20%; }
+.tbl.fy-tbl thead th:nth-child(4) { width: 20%; }
+.tbl.fy-tbl thead th:nth-child(5) { width: 20%; }
+
+/* ── Prevent text overflow in fixed cells ───────────────────── */
+.adm-main .tbl thead th,
+.adm-main .tbl tbody td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Exception: instrument name cells use 2-line layout — allow wrap */
+.adm-main .tbl tbody td.hold-name {
+  white-space: normal;
+  overflow: visible;
+}
