@@ -51,6 +51,14 @@
 .tbl.fee-tbl thead th,
 .tbl.fee-tbl tbody td { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+/* ── fee modal — matches trade modal sizing ─── */
+.fee-modal { width: 460px !important; max-width: 96vw !important; }
+.fee-modal .modal-body { padding: 20px 22px; }
+.fee-col { display: flex; flex-direction: column; gap: 14px; }
+.fee-col .field { margin: 0; }
+.fee-col .field input,
+.fee-col .field select { width: 100%; box-sizing: border-box; }
+
 /* ── FY filter bar for fee schedule ─────────── */
 .fee-bar {
   display: flex;
@@ -213,14 +221,14 @@ If Annualised &gt; Hurdle Rate:
     </div>
 
     <!-- ── Add / Edit Fee Schedule Modal ─────────────────────── -->
-    <div class="modal" id="feeModal">
+    <div class="modal fee-modal" id="feeModal">
       <div class="modal-head">
         <div><h3 id="fsTitle">Add Fee Schedule</h3><div class="sub">Define a management or performance fee that accrues into the daily NTA.</div></div>
         <button class="modal-x" data-close>✕</button>
       </div>
       <div class="modal-body">
         <div class="callout" style="margin:0 0 16px;"><span>⚠</span><div>Each FY should have at most one Base Fee and one Performance Fee schedule.</div></div>
-        <div class="form-grid">
+        <div class="fee-col">
           <div class="field">
             <label>Fee Type</label>
             <select id="fs-type">
@@ -248,7 +256,7 @@ If Annualised &gt; Hurdle Rate:
             <label>Hurdle Rate (% p.a.)</label>
             <input type="text" id="fs-hurdle" placeholder="e.g. 7.00">
           </div>
-          <div class="field fg-full">
+          <div class="field">
             <label>Notes <span style="font-weight:400;color:var(--fg-3);">(optional)</span></label>
             <input type="text" id="fs-notes" placeholder="e.g. 0.1% p.a. base fee accrued daily">
           </div>
