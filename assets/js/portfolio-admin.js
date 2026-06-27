@@ -16,7 +16,7 @@
     if(_prodMap[p]===undefined){ _prodMap[p]=_prodIdx%PROD_COLORS.length; _prodIdx++; }
     return '<span class="prod-pill '+PROD_COLORS[_prodMap[p]]+'">'+p+'</span>';
   }
-  function resetProdMap(){ _prodMap={}; _prodIdx=0; }; _prodIdx = 0; }
+  function resetProdMap(){ _prodMap={}; _prodIdx=0; }
   function fmt(n,dp){ var d=dp===undefined?2:dp; return parseFloat(n||0).toLocaleString('en-MY',{minimumFractionDigits:d,maximumFractionDigits:d}); }
 
   function isCash(r){ return r.product==='Cash on Hand'||r.product==='Cash Funds'; }

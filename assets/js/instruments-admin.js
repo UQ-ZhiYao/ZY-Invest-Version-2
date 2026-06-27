@@ -13,9 +13,7 @@
     if(_prodMap[p]===undefined){ _prodMap[p]=_prodIdx%PROD_COLORS.length; _prodIdx++; }
     return '<span class="prod-pill '+PROD_COLORS[_prodMap[p]]+'">'+p+'</span>';
   }
-  function resetProdMap(){ _prodMap={}; _prodIdx=0; }; _prodIdx = 0; }
-    return '<span class="prod-pill '+cls+'">'+(p||'Unknown')+'</span>';
-  }
+  function resetProdMap(){ _prodMap={}; _prodIdx=0; }
 
   // ── load from Supabase ───────────────────────────────────
   async function load(){
