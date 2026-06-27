@@ -16,7 +16,58 @@
 <link rel="stylesheet" href="../assets/css/dashboard.css">
 <link rel="stylesheet" href="../assets/css/dashboard-portfolio.css">
 <link rel="stylesheet" href="../assets/css/admin.css">
+<style>
+/* ── fee formula block ─────────────────────── */
+.fee-formula {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  font-size: 0.82rem;
+  line-height: 1.7;
+  color: var(--fg-2);
+  white-space: pre-wrap;
+  margin: 0;
+}
+/* ── fee type pills ─────────────────────────── */
+.fee-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.fee-pill.base { background: var(--blue-bg, #DBEAFE); color: var(--blue, #1D4ED8); }
+.fee-pill.perf { background: #FFF7ED; color: #C2410C; }
 
+/* ── fee table columns ──────────────────────── */
+.tbl.fee-tbl thead th:nth-child(1) { width: 16%; }  /* Type */
+.tbl.fee-tbl thead th:nth-child(2) { width: 18%; }  /* Financial Year */
+.tbl.fee-tbl thead th:nth-child(3) { width: 18%; }  /* Basis */
+.tbl.fee-tbl thead th:nth-child(4) { width: 24%; }  /* Rate */
+.tbl.fee-tbl thead th:nth-child(5) { width: 24%; }  /* Hurdle Rate */
+.tbl.fee-tbl { table-layout: fixed; width: 100%; }
+.tbl.fee-tbl thead th,
+.tbl.fee-tbl tbody td { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── FY filter bar for fee schedule ─────────── */
+.fee-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.fee-bar select {
+  padding: 5px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 0.86rem;
+  color: var(--fg-1);
+  background: #fff;
+  cursor: pointer;
+  min-width: 120px;
+}
+</style>
 </head>
 <body>
 <script>
@@ -90,87 +141,152 @@
     <div style="flex:1;min-height:12px;"></div>
     <a class="adm-nav adm-signout" id="admSignout" href="#"><span class="ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>Sign out</a>
   </aside>
+
   <main class="adm-main">
-<div class="ph"><h1>Compute Daily NTA</h1><p>Revalue the portfolio, divide by units in issue, and record the day's NTA.</p></div>
-<div class="metric-row">
-  <div class="mc"><div class="label">Last NTA</div><div class="value">RM 1.0233</div><div class="sub">18 Mar 2026</div></div>
-  <div class="mc"><div class="label">Today's NTA</div><div class="value blue" id="ntaToday">—</div><div class="sub">run job to compute</div></div>
-  <div class="mc"><div class="label">Units in Issue</div><div class="value">958,300</div><div class="sub">23 members</div></div>
-  <div class="mc"><div class="label">Revaluation</div><div class="value">RM 981,707</div><div class="sub">mark-to-market</div></div>
-</div>
-<div class="panel mt16"><div class="panel-head"><h3>Compute Job — 19 Mar 2026</h3></div>
-  <div style="padding:20px;"><ol style="margin:0;padding-left:18px;font-size:0.9rem;color:var(--fg-2);line-height:1.9;">
-    <li><b>Fetch prices</b> — 24 instruments revalued at today's close.</li>
-    <li><b>Compute market value</b> — units × last price + cash.</li>
-    <li><b>Divide by units in issue</b> — gross NAV ÷ 958,300 units.</li>
-    <li><b>Record NTA</b> — timestamp and publish to members.</li>
-  </ol></div>
-  <div class="callout"><span>⚠</span><div><b>Before running:</b> ensure all subscriptions, redemptions and distributions dated on or before 19 Mar 2026 have been posted.</div></div>
-  <div class="fc-foot"><button class="btn-line btn-sm" id="nta-preview">Preview</button><button class="btn-fill btn-sm" id="nta-run">Run Computation</button></div>
-</div>
-<div class="ph" style="margin-top:26px;"><h2 style="font-size:1.15rem;font-weight:600;color:var(--fg-1);margin:0;">Fee Schedule</h2><p style="margin:5px 0 0;">Management and performance fees that accrue into the daily NTA computation.</p></div>
-<div class="panel mt16"><div class="panel-head"><h3>Active Fee Schedules</h3><button class="btn-mini" id="openFeeModal">+ Add Fee Schedule</button></div>
-  <table class="tbl"><thead><tr><th>Type</th><th class="td-right">Rate</th><th>Basis</th><th class="td-right">Hurdle Rate</th><th>Valid From</th><th>Valid To</th><th>Status</th><th>Description</th></tr></thead>
-  <tbody id="feeBody"></tbody></table>
-</div>
-<div class="panel mt16"><div class="panel-head"><h3>How Daily Fee Accrual Works</h3></div>
-  <div class="row-2" style="padding:18px;">
-    <div>
-      <div style="font-size:0.86rem;font-weight:600;color:var(--blue);margin-bottom:9px;">Base Fee (daily)</div>
-      <pre class="fee-formula">Base Fee = AUM × rate% / 365</pre>
-      <p style="font-size:0.82rem;color:var(--fg-3);margin:10px 0 0;line-height:1.6;">Accrues every calendar day regardless of performance. Deducted from NTA daily.</p>
+
+    <div class="ph"><h1>Compute Daily NTA</h1><p>Revalue the portfolio, divide by units in issue, and record the day's NTA.</p></div>
+
+    <div class="metric-row">
+      <div class="mc"><div class="label">Last NTA</div><div class="value">RM 1.0233</div><div class="sub">18 Mar 2026</div></div>
+      <div class="mc"><div class="label">Today's NTA</div><div class="value blue" id="ntaToday">—</div><div class="sub">run job to compute</div></div>
+      <div class="mc"><div class="label">Units in Issue</div><div class="value">958,300</div><div class="sub">23 members</div></div>
+      <div class="mc"><div class="label">Revaluation</div><div class="value">RM 981,707</div><div class="sub">mark-to-market</div></div>
     </div>
-    <div>
-      <div style="font-size:0.86rem;font-weight:600;color:var(--orange);margin-bottom:9px;">Performance Fee (daily)</div>
-      <pre class="fee-formula">Annualised = NTA^(365 / days_since_inception) − 1
+
+    <div class="panel mt16">
+      <div class="panel-head"><h3>Compute Job — 19 Mar 2026</h3></div>
+      <div style="padding:20px;"><ol style="margin:0;padding-left:18px;font-size:0.9rem;color:var(--fg-2);line-height:1.9;">
+        <li><b>Fetch prices</b> — 24 instruments revalued at today's close.</li>
+        <li><b>Compute market value</b> — units × last price + cash.</li>
+        <li><b>Divide by units in issue</b> — gross NAV ÷ 958,300 units.</li>
+        <li><b>Record NTA</b> — timestamp and publish to members.</li>
+      </ol></div>
+      <div class="callout"><span>⚠</span><div><b>Before running:</b> ensure all subscriptions, redemptions and distributions dated on or before 19 Mar 2026 have been posted.</div></div>
+      <div class="fc-foot"><button class="btn-line btn-sm" id="nta-preview">Preview</button><button class="btn-fill btn-sm" id="nta-run">Run Computation</button></div>
+    </div>
+
+    <!-- ── Fee Schedule ──────────────────────────────────────── -->
+    <div class="ph" style="margin-top:26px;">
+      <h2 style="font-size:1.15rem;font-weight:600;color:var(--fg-1);margin:0;">Fee Schedule</h2>
+      <p style="margin:5px 0 0;">Management and performance fees that accrue into the daily NTA computation.</p>
+    </div>
+
+    <div class="panel mt16">
+      <div class="panel-head">
+        <h3>Fee Schedules</h3>
+        <div class="fee-bar">
+          <select id="fee-fy-filter"><option value="">All FY</option></select>
+          <span class="td-sub" id="feeListCount"></span>
+          <button class="btn-mini" id="openFeeModal">+ Add Fee Schedule</button>
+        </div>
+      </div>
+      <table class="tbl fee-tbl">
+        <thead><tr>
+          <th>Type</th>
+          <th>Financial Year</th>
+          <th>Basis</th>
+          <th class="r">Rate</th>
+          <th class="r">Hurdle Rate</th>
+        </tr></thead>
+        <tbody id="feeBody"><tr><td colspan="5" style="padding:24px;color:var(--fg-3);">Loading…</td></tr></tbody>
+      </table>
+    </div>
+
+    <!-- ── How Daily Fee Accrual Works ───────────────────────── -->
+    <div class="panel mt16">
+      <div class="panel-head"><h3>How Daily Fee Accrual Works</h3></div>
+      <div class="row-2" style="padding:18px;">
+        <div>
+          <div style="font-size:0.86rem;font-weight:600;color:var(--blue);margin-bottom:9px;">Base Fee (daily)</div>
+          <pre class="fee-formula">Base Fee = AUM × rate% / 365</pre>
+          <p style="font-size:0.82rem;color:var(--fg-3);margin:10px 0 0;line-height:1.6;">Accrues every calendar day regardless of performance. Deducted from NTA daily.</p>
+        </div>
+        <div>
+          <div style="font-size:0.86rem;font-weight:600;color:#C2410C;margin-bottom:9px;">Performance Fee (daily)</div>
+          <pre class="fee-formula">Annualised = NTA^(365 / days_since_inception) − 1
 If Annualised &gt; Hurdle Rate:
-   Excess   = Annualised − Hurdle Rate
+   Excess    = Annualised − Hurdle Rate
    Daily Fee = Units × (Excess ÷ 365) × Rate</pre>
-      <p style="font-size:0.82rem;color:var(--fg-3);margin:10px 0 0;line-height:1.6;">Accrues daily only when the fund's annualised return since inception exceeds the hurdle. Inception NTA = 1.0000.</p>
+          <p style="font-size:0.82rem;color:var(--fg-3);margin:10px 0 0;line-height:1.6;">Accrues daily only when the fund's annualised return since inception exceeds the hurdle. Inception NTA = 1.0000.</p>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-<div class="modal" id="feeModal2">
-  <div class="modal-head"><div><h3>Add Fee Schedule</h3><div class="sub">Define a management or performance fee that accrues into the daily NTA.</div></div><button class="modal-x" data-close>✕</button></div>
-  <div class="modal-body">
-    <div class="callout" style="margin:0 0 16px;"><span>⚠</span><div>Fee periods of the same type must not overlap. Set <b>Valid To</b> on the previous schedule before adding a new one.</div></div>
-    <div class="form-grid">
-      <div class="field"><label>Fee Type</label><select id="fee-type2"><option value="base">Base Fee</option><option value="performance">Performance Fee</option></select></div>
-      <div class="field"><label>Rate (% per annum)</label><input type="text" id="fee-rate" placeholder="e.g. 1.00 for 1%"></div>
-      <div class="field"><label>Valid From</label><input type="date" id="fee-from" value="2026-06-15"></div>
-      <div class="field"><label>Valid To <span style="font-weight:400;color:var(--fg-3);">(blank = open-ended)</span></label><input type="date" id="fee-to"></div>
-      <div class="field" id="fee-hurdle-wrap" style="display:none;"><label>Hurdle Rate (% p.a.)</label><input type="text" id="fee-hurdle" placeholder="e.g. 7.00"></div>
-      <div class="field fg-full"><label>Description</label><input type="text" id="fee-desc" placeholder="e.g. FY2024 base charge"></div>
+
+    <!-- ── Add / Edit Fee Schedule Modal ─────────────────────── -->
+    <div class="modal" id="feeModal">
+      <div class="modal-head">
+        <div><h3 id="fsTitle">Add Fee Schedule</h3><div class="sub">Define a management or performance fee that accrues into the daily NTA.</div></div>
+        <button class="modal-x" data-close>✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="callout" style="margin:0 0 16px;"><span>⚠</span><div>Each FY should have at most one Base Fee and one Performance Fee schedule.</div></div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Fee Type</label>
+            <select id="fs-type">
+              <option value="base">Base Fee</option>
+              <option value="performance">Performance Fee</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Financial Year</label>
+            <select id="fs-fy"><option value="">— Select FY —</option></select>
+          </div>
+          <div class="field">
+            <label>Basis</label>
+            <select id="fs-basis">
+              <option value="Daily">Daily</option>
+              <option value="Monthly">Monthly</option>
+              <option value="Annually">Annually</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Rate (% per annum)</label>
+            <input type="text" id="fs-rate" placeholder="e.g. 1.00 for 1%">
+          </div>
+          <div class="field" id="fs-hurdle-wrap">
+            <label>Hurdle Rate (% p.a.)</label>
+            <input type="text" id="fs-hurdle" placeholder="e.g. 7.00">
+          </div>
+          <div class="field fg-full">
+            <label>Notes <span style="font-weight:400;color:var(--fg-3);">(optional)</span></label>
+            <input type="text" id="fs-notes" placeholder="e.g. 0.1% p.a. base fee accrued daily">
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-rej btn-sm" id="fs-delete" style="display:none;margin-right:auto;">Delete</button>
+        <button class="btn-line btn-sm" data-close>Cancel</button>
+        <button class="btn-fill btn-sm" id="fs-confirm">Add Fee Schedule</button>
+      </div>
     </div>
-  </div>
-  <div class="modal-foot"><button class="btn-line btn-sm" data-close>Cancel</button><button class="btn-fill btn-sm" id="fee-add">Add Fee Schedule</button></div>
-</div>
+
   </main>
 </div>
+
 <div class="modal-scrim" id="modalScrim"></div>
 <div class="toast" id="toast"><span class="ok">✓</span><span id="toastMsg">Saved</span></div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../assets/js/supabase-auth.js"></script>
 <script src="../assets/js/auth-logout.js"></script>
 <script src="../assets/js/admin-shell.js"></script>
 <script src="../assets/js/admin-supabase.js"></script>
+<script src="../assets/js/fee-schedule-admin.js"></script>
 <script>
 (function(){
-  var FEES=[
-    {type:'base',rate:0.10,basis:'daily',hurdle:null,from:'1 Apr 2026',to:'Open-ended',status:'Active',desc:'0.1% p.a. base management fee, accrued daily (1/365 per day)'},
-    {type:'performance',rate:10.00,basis:'daily',hurdle:7.00,from:'1 Apr 2026',to:'Open-ended',status:'Active',desc:'10% performance fee on daily excess return above 7% p.a. hurdle'}
-  ];
-  var feeBody=document.getElementById('feeBody');
-  function render(){ feeBody.innerHTML=''; FEES.forEach(function(f){ var tr=document.createElement('tr'); tr.innerHTML='<td><span class="fee-pill '+(f.type==='base'?'base':'perf')+'">'+f.type+'</span></td><td class="td-right"><b>'+f.rate.toFixed(2)+'% p.a.</b></td><td>'+f.basis+'</td><td class="td-right">'+(f.hurdle!=null?f.hurdle.toFixed(2)+'% p.a.':'—')+'</td><td>'+f.from+'</td><td>'+(f.to==='Open-ended'?'<span style="color:var(--green);">Open-ended</span>':f.to)+'</td><td>'+(f.status==='Active'?'<span class="pill-ok">Active</span>':'<span class="pill-pending">'+f.status+'</span>')+'</td><td class="td-sub">'+f.desc+'</td>'; feeBody.appendChild(tr); }); }
-  render();
-  var typeSel=document.getElementById('fee-type2'), hw=document.getElementById('fee-hurdle-wrap');
-  typeSel.addEventListener('change',function(){ hw.style.display=this.value==='performance'?'':'none'; });
-  document.getElementById('openFeeModal').addEventListener('click',function(){ zyModalOpen('feeModal2'); });
-  document.getElementById('fee-add').addEventListener('click',function(){ var rate=zyParseNum(document.getElementById('fee-rate').value); if(rate<=0){ zyToast('Enter a valid rate'); return; } var type=typeSel.value; function fd(id){ var v=document.getElementById(id).value; if(!v) return null; var d=new Date(v); return isNaN(d)?null:d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); } var hurdle=type==='performance'?zyParseNum(document.getElementById('fee-hurdle').value):null; FEES.push({type:type,rate:rate,basis:'daily',hurdle:hurdle||(type==='performance'?7:null),from:fd('fee-from')||'15 Jun 2026',to:fd('fee-to')||'Open-ended',status:'Active',desc:document.getElementById('fee-desc').value||((type==='base'?'Base':'Performance')+' fee schedule')}); render(); zyModalClose(); zyToast('Fee schedule added — '+type); document.getElementById('fee-rate').value=''; document.getElementById('fee-desc').value=''; document.getElementById('fee-hurdle').value=''; });
-  document.getElementById('nta-run').addEventListener('click',function(){ var b=this; b.disabled=true; b.textContent='Computing…'; setTimeout(function(){ document.getElementById('ntaToday').textContent='RM 1.0245'; b.disabled=false; b.textContent='Run Computation'; zyToast('NTA computed: RM 1.0245 (+0.12%) — published'); },1100); });
-  document.getElementById('nta-preview').addEventListener('click',function(){ zyToast('Preview: gross NAV RM 981,707 ÷ 958,300 units = RM 1.0245'); });
+  document.getElementById('nta-run').addEventListener('click', function(){
+    var b = this; b.disabled = true; b.textContent = 'Computing…';
+    setTimeout(function(){
+      document.getElementById('ntaToday').textContent = 'RM 1.0245';
+      b.disabled = false; b.textContent = 'Run Computation';
+      if(window.zyToast) zyToast('NTA computed: RM 1.0245 (+0.12%) — published');
+    }, 1100);
+  });
+  document.getElementById('nta-preview').addEventListener('click', function(){
+    if(window.zyToast) zyToast('Preview: gross NAV RM 981,707 ÷ 958,300 units = RM 1.0245');
+  });
 })();
 </script>
-
 </body>
 </html>
