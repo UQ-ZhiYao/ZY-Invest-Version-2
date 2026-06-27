@@ -349,7 +349,7 @@ If Annualised &gt; Hurdle Rate:
 
   // ── Run engine ────────────────────────────────────────────
   document.getElementById('btnRunEngine').addEventListener('click', async function(){
-    if(typeof sb==='undefined'||!sb || typeof SUPABASE_URL==='undefined'){ zyToast('Supabase not ready'); return; }
+    if(typeof sb==='undefined'||!sb){ zyToast('Supabase not ready'); return; }
     var btn = this; btn.disabled = true; btn.textContent = 'Running…';
     setStatus('running', 'Calling NTA engine — this may take a minute…');
 
@@ -357,19 +357,29 @@ If Annualised &gt; Hurdle Rate:
     var body = forceFrom ? JSON.stringify({force_from: forceFrom}) : '{}';
 
     try{
+      // Use the live session access_token — same pattern as admin-update-password
+      var sessionRes = await sb.auth.getSession();
+      var accessToken = sessionRes.data && sessionRes.data.session
+        ? sessionRes.data.session.access_token
+        : SUPABASE_ANON;
+
       var fnUrl = SUPABASE_URL.replace(/\/$/,'') + '/functions/v1/nta-compute';
       var res   = await fetch(fnUrl, {
         method: 'POST',
         headers: {
           'Content-Type':  'application/json',
-          'Authorization': 'Bearer ' + SUPABASE_ANON,
+          'Authorization': 'Bearer ' + accessToken,
           'apikey':        SUPABASE_ANON
         },
         body: body
       });
-      var data = await res.json();
+
+      var text = await res.text();
+      var data;
+      try{ data = JSON.parse(text); } catch(e){ data = { error: 'Invalid response: ' + text.slice(0,200) }; }
+
       if(!res.ok || data.error){
-        setStatus('error', 'Engine error: ' + (data.error || 'Unknown'));
+        setStatus('error', 'Engine error (HTTP ' + res.status + '): ' + (data.error || data.message || 'Unknown'));
         zyToast('Engine failed — see status bar');
       } else {
         setStatus('done',
@@ -381,7 +391,8 @@ If Annualised &gt; Hurdle Rate:
       }
     }catch(ex){
       setStatus('error', 'Request failed: ' + ex.message);
-      zyToast('Engine request failed');
+      zyToast('Engine request failed: ' + ex.message);
+      console.error('NTA engine error:', ex);
     }
     btn.disabled = false; btn.textContent = '▶ Run Engine';
   });
