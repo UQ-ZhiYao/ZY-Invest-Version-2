@@ -66,13 +66,12 @@
 .tbl.stl-tbl thead th:nth-child(8) { width:  8%; }
 
 /* ── Dividend (.dv-tbl) ─────────────────────────────────────────
-   Ex-Date | Pay Date | Instrument | Type     | DPS  | Units | Amount | Status
-   10%       10%        28%          16%        8%     10%     10%      8%
-   (Type widened from 10%→16%, Instrument trimmed 26%→28% to compensate) */
-.tbl.dv-tbl thead th:nth-child(1) { width: 10%; }
-.tbl.dv-tbl thead th:nth-child(2) { width: 10%; }
-.tbl.dv-tbl thead th:nth-child(3) { width: 28%; }
-.tbl.dv-tbl thead th:nth-child(4) { width: 16%; }
+   Ex-Date | Pay Date | Instrument | Type | DPS | Units | Amount | Status
+   9%        9%         24%          22%    8%    10%     10%      8%      */
+.tbl.dv-tbl thead th:nth-child(1) { width:  9%; }
+.tbl.dv-tbl thead th:nth-child(2) { width:  9%; }
+.tbl.dv-tbl thead th:nth-child(3) { width: 24%; }
+.tbl.dv-tbl thead th:nth-child(4) { width: 22%; }
 .tbl.dv-tbl thead th:nth-child(5) { width:  8%; }
 .tbl.dv-tbl thead th:nth-child(6) { width: 10%; }
 .tbl.dv-tbl thead th:nth-child(7) { width: 10%; }
