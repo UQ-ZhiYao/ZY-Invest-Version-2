@@ -66,16 +66,17 @@
 .tbl.stl-tbl thead th:nth-child(8) { width:  8%; }
 
 /* ── Dividend (.dv-tbl) ─────────────────────────────────────────
-   Ex-Date | Pay Date | Instrument | Type | DPS | Units Held | Amount | Status
-   11%       11%        26%          10%    9%    11%          12%      10%    */
-.tbl.dv-tbl thead th:nth-child(1) { width: 11%; }
-.tbl.dv-tbl thead th:nth-child(2) { width: 11%; }
-.tbl.dv-tbl thead th:nth-child(3) { width: 26%; }
-.tbl.dv-tbl thead th:nth-child(4) { width: 10%; }
-.tbl.dv-tbl thead th:nth-child(5) { width:  9%; }
-.tbl.dv-tbl thead th:nth-child(6) { width: 11%; }
-.tbl.dv-tbl thead th:nth-child(7) { width: 12%; }
-.tbl.dv-tbl thead th:nth-child(8) { width: 10%; }
+   Ex-Date | Pay Date | Instrument | Type     | DPS  | Units | Amount | Status
+   10%       10%        28%          16%        8%     10%     10%      8%
+   (Type widened from 10%→16%, Instrument trimmed 26%→28% to compensate) */
+.tbl.dv-tbl thead th:nth-child(1) { width: 10%; }
+.tbl.dv-tbl thead th:nth-child(2) { width: 10%; }
+.tbl.dv-tbl thead th:nth-child(3) { width: 28%; }
+.tbl.dv-tbl thead th:nth-child(4) { width: 16%; }
+.tbl.dv-tbl thead th:nth-child(5) { width:  8%; }
+.tbl.dv-tbl thead th:nth-child(6) { width: 10%; }
+.tbl.dv-tbl thead th:nth-child(7) { width: 10%; }
+.tbl.dv-tbl thead th:nth-child(8) { width:  8%; }
 
 /* ── Capital Injection (.pt-tbl) ────────────────────────────────
    Date | Investor | Type | Reference ID | Amount | NTA | Units | Status
@@ -139,9 +140,7 @@
 .tbl.dm-tbl thead th:nth-child(7) { width: 10%; }
 .tbl.dm-tbl thead th:nth-child(8) { width: 14%; }
 
-/* ── FY Settings (.fy-tbl) ─────────────────────────────────────
-   (label + date cols — generous label, equal date cols)
-   Cell content may overflow: clip with ellipsis              */
+/* ── FY Settings (.fy-tbl) ──────────────────────────────────────*/
 .tbl.fy-tbl thead th:nth-child(1) { width: 20%; }
 .tbl.fy-tbl thead th:nth-child(2) { width: 20%; }
 .tbl.fy-tbl thead th:nth-child(3) { width: 20%; }
