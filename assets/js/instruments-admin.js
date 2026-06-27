@@ -18,7 +18,7 @@
     if(pt) return '<span style="display:inline-block;padding:2px 9px;border-radius:99px;font-size:0.75rem;font-weight:500;white-space:nowrap;letter-spacing:0.01em;background:'+pt.bg+';color:'+pt.color+'">'+p+'</span>';
     return '<span class="prod-pill">'+p+'</span>';
   }
-  function resetProdMap(){}; _prodIdx=0; }
+  function resetProdMap(){}
 
   // ── load from Supabase ───────────────────────────────────
   async function load(){
