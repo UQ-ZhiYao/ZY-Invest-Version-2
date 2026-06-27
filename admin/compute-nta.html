@@ -42,22 +42,14 @@
 .fee-pill.perf { background: #FFF7ED; color: #C2410C; }
 
 /* ── fee table columns ──────────────────────── */
-.tbl.fee-tbl thead th:nth-child(1) { width: 16%; }  /* Type */
-.tbl.fee-tbl thead th:nth-child(2) { width: 18%; }  /* Financial Year */
-.tbl.fee-tbl thead th:nth-child(3) { width: 18%; }  /* Basis */
-.tbl.fee-tbl thead th:nth-child(4) { width: 24%; }  /* Rate */
-.tbl.fee-tbl thead th:nth-child(5) { width: 24%; }  /* Hurdle Rate */
+.tbl.fee-tbl thead th:nth-child(1) { width: 16%; }
+.tbl.fee-tbl thead th:nth-child(2) { width: 18%; }
+.tbl.fee-tbl thead th:nth-child(3) { width: 18%; }
+.tbl.fee-tbl thead th:nth-child(4) { width: 24%; }
+.tbl.fee-tbl thead th:nth-child(5) { width: 24%; }
 .tbl.fee-tbl { table-layout: fixed; width: 100%; }
 .tbl.fee-tbl thead th,
 .tbl.fee-tbl tbody td { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-/* ── fee modal — matches trade modal sizing ─── */
-.fee-modal { width: 460px !important; max-width: 96vw !important; }
-.fee-modal .modal-body { padding: 20px 22px; }
-.fee-col { display: flex; flex-direction: column; gap: 14px; }
-.fee-col .field { margin: 0; }
-.fee-col .field input,
-.fee-col .field select { width: 100%; box-sizing: border-box; }
 
 /* ── FY filter bar for fee schedule ─────────── */
 .fee-bar {
@@ -75,6 +67,36 @@
   cursor: pointer;
   min-width: 120px;
 }
+
+/* ── fee modal — matches trade modal sizing ─── */
+.fee-modal { width: 460px !important; max-width: 96vw !important; }
+.fee-modal .modal-body { padding: 20px 22px; }
+.fee-col { display: flex; flex-direction: column; gap: 14px; }
+.fee-col .field { margin: 0; }
+.fee-col .field input,
+.fee-col .field select { width: 100%; box-sizing: border-box; }
+
+/* ── engine status panel ────────────────────── */
+.engine-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: var(--surface-1);
+  border-top: 1px solid var(--border);
+  font-size: 0.84rem;
+  color: var(--fg-2);
+  flex-wrap: wrap;
+}
+.engine-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex: none;
+  background: var(--fg-3);
+}
+.engine-dot.running { background: var(--orange); animation: pulse 1s infinite; }
+.engine-dot.done    { background: var(--green); }
+.engine-dot.error   { background: var(--red); }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.engine-msg { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -152,28 +174,47 @@
 
   <main class="adm-main">
 
-    <div class="ph"><h1>Compute Daily NTA</h1><p>Revalue the portfolio, divide by units in issue, and record the day's NTA.</p></div>
+    <div class="ph"><h1>Compute Daily NTA</h1><p>Run the NTA engine to extend the daily balance sheet from the last computed date to today.</p></div>
 
+    <!-- ── Live metrics from nta_daily ── -->
     <div class="metric-row">
-      <div class="mc"><div class="label">Last NTA</div><div class="value">RM 1.0233</div><div class="sub">18 Mar 2026</div></div>
-      <div class="mc"><div class="label">Today's NTA</div><div class="value blue" id="ntaToday">—</div><div class="sub">run job to compute</div></div>
-      <div class="mc"><div class="label">Units in Issue</div><div class="value">958,300</div><div class="sub">23 members</div></div>
-      <div class="mc"><div class="label">Revaluation</div><div class="value">RM 981,707</div><div class="sub">mark-to-market</div></div>
+      <div class="mc"><div class="label">Last NTA</div><div class="value" id="mcLastNta">—</div><div class="sub" id="mcLastDate">—</div></div>
+      <div class="mc"><div class="label">Latest Date</div><div class="value blue" id="mcLatestDate">—</div><div class="sub" id="mcDaysAgo">—</div></div>
+      <div class="mc"><div class="label">Units in Issue</div><div class="value" id="mcUnits">—</div><div class="sub">as at latest row</div></div>
+      <div class="mc"><div class="label">Total Equity</div><div class="value" id="mcNav">—</div><div class="sub">securities + others + cash − fees</div></div>
     </div>
 
+    <!-- ── Engine control panel ── -->
     <div class="panel mt16">
-      <div class="panel-head"><h3>Compute Job — 19 Mar 2026</h3></div>
-      <div style="padding:20px;"><ol style="margin:0;padding-left:18px;font-size:0.9rem;color:var(--fg-2);line-height:1.9;">
-        <li><b>Fetch prices</b> — 24 instruments revalued at today's close.</li>
-        <li><b>Compute market value</b> — units × last price + cash.</li>
-        <li><b>Divide by units in issue</b> — gross NAV ÷ 958,300 units.</li>
-        <li><b>Record NTA</b> — timestamp and publish to members.</li>
-      </ol></div>
-      <div class="callout"><span>⚠</span><div><b>Before running:</b> ensure all subscriptions, redemptions and distributions dated on or before 19 Mar 2026 have been posted.</div></div>
-      <div class="fc-foot"><button class="btn-line btn-sm" id="nta-preview">Preview</button><button class="btn-fill btn-sm" id="nta-run">Run Computation</button></div>
+      <div class="panel-head"><h3>NTA Engine</h3></div>
+      <div style="padding:18px 20px;">
+        <p style="margin:0 0 16px;font-size:0.9rem;color:var(--fg-2);line-height:1.6;">
+          The engine reads all transaction data — trades, capital injections, dividends, distributions, remuneration, and others — and computes a daily balance sheet row for every calendar day from the last locked date to today.
+        </p>
+        <div class="callout" style="margin:0 0 16px;">
+          <span>⚠</span>
+          <div>Ensure all transactions dated up to today are posted before running. Locked historical rows (your backfill) are never overwritten.</div>
+        </div>
+
+        <!-- Optional: force recompute from a specific date -->
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div class="field" style="margin:0;flex:none;">
+            <label style="font-size:0.78rem;font-weight:600;color:var(--fg-2);display:block;margin-bottom:5px;">Recompute from date <span style="font-weight:400;color:var(--fg-3);">(optional — leave blank to resume)</span></label>
+            <input type="date" id="forceFrom" style="font:inherit;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-md);font-size:0.88rem;color:var(--fg-1);">
+          </div>
+        </div>
+      </div>
+      <div class="engine-status" id="engineStatus">
+        <span class="engine-dot" id="engineDot"></span>
+        <span class="engine-msg" id="engineMsg">Ready — click Run Engine to start.</span>
+      </div>
+      <div class="fc-foot">
+        <button class="btn-line btn-sm" id="btnRefreshMetrics">↻ Refresh Metrics</button>
+        <button class="btn-fill btn-sm" id="btnRunEngine">▶ Run Engine</button>
+      </div>
     </div>
 
-    <!-- ── Fee Schedule ──────────────────────────────────────── -->
+    <!-- ── Fee Schedule ── -->
     <div class="ph" style="margin-top:26px;">
       <h2 style="font-size:1.15rem;font-weight:600;color:var(--fg-1);margin:0;">Fee Schedule</h2>
       <p style="margin:5px 0 0;">Management and performance fees that accrue into the daily NTA computation.</p>
@@ -200,14 +241,14 @@
       </table>
     </div>
 
-    <!-- ── How Daily Fee Accrual Works ───────────────────────── -->
+    <!-- ── How Daily Fee Accrual Works ── -->
     <div class="panel mt16">
       <div class="panel-head"><h3>How Daily Fee Accrual Works</h3></div>
       <div class="row-2" style="padding:18px;">
         <div>
           <div style="font-size:0.86rem;font-weight:600;color:var(--blue);margin-bottom:9px;">Base Fee (daily)</div>
-          <pre class="fee-formula">Base Fee = AUM × rate% / 365</pre>
-          <p style="font-size:0.82rem;color:var(--fg-3);margin:10px 0 0;line-height:1.6;">Accrues every calendar day regardless of performance. Deducted from NTA daily.</p>
+          <pre class="fee-formula">Base Fee = Total Equity × rate% / 365</pre>
+          <p style="font-size:0.82rem;color:var(--fg-3);margin:10px 0 0;line-height:1.6;">Accrues every calendar day regardless of performance. Deducted from total equity daily.</p>
         </div>
         <div>
           <div style="font-size:0.86rem;font-weight:600;color:#C2410C;margin-bottom:9px;">Performance Fee (daily)</div>
@@ -220,7 +261,7 @@ If Annualised &gt; Hurdle Rate:
       </div>
     </div>
 
-    <!-- ── Add / Edit Fee Schedule Modal ─────────────────────── -->
+    <!-- ── Add / Edit Fee Schedule Modal ── -->
     <div class="modal fee-modal" id="feeModal">
       <div class="modal-head">
         <div><h3 id="fsTitle">Add Fee Schedule</h3><div class="sub">Define a management or performance fee that accrues into the daily NTA.</div></div>
@@ -271,16 +312,91 @@ If Annualised &gt; Hurdle Rate:
 <script src="../assets/js/fee-schedule-admin.js"></script>
 <script>
 (function(){
-  document.getElementById('nta-run').addEventListener('click', function(){
-    var b = this; b.disabled = true; b.textContent = 'Computing…';
-    setTimeout(function(){
-      document.getElementById('ntaToday').textContent = 'RM 1.0245';
-      b.disabled = false; b.textContent = 'Run Computation';
-      if(window.zyToast) zyToast('NTA computed: RM 1.0245 (+0.12%) — published');
-    }, 1100);
+  function fmt(n,dp){ var d=dp===undefined?2:dp; return parseFloat(n||0).toLocaleString('en-MY',{minimumFractionDigits:d,maximumFractionDigits:d}); }
+  function fmtDate(d){ if(!d) return '—'; return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+
+  // ── Load latest NTA metrics ────────────────────────────────
+  async function loadMetrics(){
+    if(typeof sb==='undefined'||!sb) return;
+    var res = await sb.from('nta_daily')
+      .select('date, nta, total_units, total_equity')
+      .order('date', {ascending: false})
+      .limit(1)
+      .single();
+    if(res.error || !res.data) return;
+    var r = res.data;
+    document.getElementById('mcLastNta').textContent   = 'RM ' + fmt(r.nta, 4);
+    document.getElementById('mcLastDate').textContent  = fmtDate(r.date);
+    document.getElementById('mcLatestDate').textContent= fmtDate(r.date);
+    document.getElementById('mcUnits').textContent     = fmt(r.total_units, 4);
+    document.getElementById('mcNav').textContent       = 'RM ' + fmt(r.total_equity);
+
+    // Days ago
+    var today = new Date(); today.setHours(0,0,0,0);
+    var last  = new Date(r.date + 'T00:00:00Z');
+    var diff  = Math.round((today - last) / 86400000);
+    document.getElementById('mcDaysAgo').textContent =
+      diff === 0 ? 'up to date' : diff + ' day' + (diff===1?'':'s') + ' behind';
+  }
+
+  // ── Engine status display ──────────────────────────────────
+  function setStatus(state, msg){
+    var dot = document.getElementById('engineDot');
+    var txt = document.getElementById('engineMsg');
+    dot.className = 'engine-dot' + (state ? ' ' + state : '');
+    txt.textContent = msg;
+  }
+
+  // ── Run engine ────────────────────────────────────────────
+  document.getElementById('btnRunEngine').addEventListener('click', async function(){
+    if(typeof sb==='undefined'||!sb || typeof SUPABASE_URL==='undefined'){ zyToast('Supabase not ready'); return; }
+    var btn = this; btn.disabled = true; btn.textContent = 'Running…';
+    setStatus('running', 'Calling NTA engine — this may take a minute…');
+
+    var forceFrom = document.getElementById('forceFrom').value || null;
+    var body = forceFrom ? JSON.stringify({force_from: forceFrom}) : '{}';
+
+    try{
+      var fnUrl = SUPABASE_URL.replace(/\/$/,'') + '/functions/v1/nta-compute';
+      var res   = await fetch(fnUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type':  'application/json',
+          'Authorization': 'Bearer ' + SUPABASE_ANON,
+          'apikey':        SUPABASE_ANON
+        },
+        body: body
+      });
+      var data = await res.json();
+      if(!res.ok || data.error){
+        setStatus('error', 'Engine error: ' + (data.error || 'Unknown'));
+        zyToast('Engine failed — see status bar');
+      } else {
+        setStatus('done',
+          'Done — ' + data.computed + ' day' + (data.computed===1?'':'s') +
+          ' computed (' + (data.from||'') + ' → ' + (data.to||'') + ')' +
+          (data.errors > 0 ? ' · ' + data.errors + ' errors' : ''));
+        zyToast('NTA engine complete — ' + data.computed + ' days');
+        await loadMetrics();
+      }
+    }catch(ex){
+      setStatus('error', 'Request failed: ' + ex.message);
+      zyToast('Engine request failed');
+    }
+    btn.disabled = false; btn.textContent = '▶ Run Engine';
   });
-  document.getElementById('nta-preview').addEventListener('click', function(){
-    if(window.zyToast) zyToast('Preview: gross NAV RM 981,707 ÷ 958,300 units = RM 1.0245');
+
+  // ── Refresh metrics button ─────────────────────────────────
+  document.getElementById('btnRefreshMetrics').addEventListener('click', async function(){
+    await loadMetrics();
+    zyToast('Metrics refreshed');
+  });
+
+  // ── Init ──────────────────────────────────────────────────
+  window.addEventListener('DOMContentLoaded', function(){
+    setTimeout(function(){
+      if(typeof sb!=='undefined'&&sb) loadMetrics();
+    }, 700);
   });
 })();
 </script>
