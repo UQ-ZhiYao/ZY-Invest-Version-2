@@ -89,9 +89,9 @@
       tr.className = 'clickable';
       tr.innerHTML =
         '<td>' + typePill(r.type) + '</td>' +
-        '<td><b>' + fyLabel + '</b></td>' +
+        '<td>' + fyLabel + '</td>' +
         '<td>' + basis + '</td>' +
-        '<td class="r"><b>' + fmt(rate, 2) + '% p.a.</b></td>' +
+        '<td class="r">' + fmt(rate, 2) + '% p.a.</td>' +
         '<td class="r">' + hurdle + '</td>';
       tr.addEventListener('click', function(){ openEdit(r); });
       tbody.appendChild(tr);
