@@ -32,10 +32,6 @@
     return '<span class="prod-pill ' + PROD_COLORS[_prodMap[p]] + '">' + p + '</span>';
   }
   function resetProdMap() { _prodMap = {}; _prodIdx = 0; }
-      cls=_pfCache[p];
-    }
-    return '<span class="prod-pill '+cls+'">'+(p||'Unknown')+'</span>';
-  }
 
   function pnlCell(v){
     var n=parseFloat(v)||0;
