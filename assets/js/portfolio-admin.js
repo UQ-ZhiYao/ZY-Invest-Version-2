@@ -36,7 +36,7 @@
   function fmt(n,dp){ var d=dp===undefined?2:dp; return parseFloat(n||0).toLocaleString('en-MY',{minimumFractionDigits:d,maximumFractionDigits:d}); }
 
   var CASH_NAME = 'MYR Cash Account';
-  function isCash(r){ return r.product==='Cash on Hand'||r.product==='Cash Funds'||r.instrument_name===CASH_NAME; }
+  function isCash(r){ return r.instrument_name===CASH_NAME; }
   function isSecurity(r){ return r.product==='Securities'; }
 
   // ── load portfolio ─────────────────────────────────────────
