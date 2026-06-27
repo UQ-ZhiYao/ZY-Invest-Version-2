@@ -4,16 +4,21 @@
 (function(){
   var ALL = [], inFilter = '', inEditId = null;
 
-  // ── per-product colour pill ──────────────────────────────
-  // Product colour — each unique product name gets its own colour by order of appearance
-  var PROD_COLORS=['prod-securities','prod-derivatives','prod-cash-funds','prod-collectibles','prod-private-eq','prod-cash-hand'];
-  var _prodMap={}, _prodIdx=0;
-  function prodPill(p){
-    if(!p) return '';
-    if(_prodMap[p]===undefined){ _prodMap[p]=_prodIdx%PROD_COLORS.length; _prodIdx++; }
-    return '<span class="prod-pill '+PROD_COLORS[_prodMap[p]]+'">'+p+'</span>';
+  // ── product type colours from DB ─────────────────────────
+  var PRODUCT_TYPES = {};
+  async function loadProductTypes(){
+    if(typeof sb==='undefined'||!sb) return;
+    var res = await sb.from('product_types').select('name,color,bg_color');
+    if(!res.error && res.data){
+      res.data.forEach(function(p){ PRODUCT_TYPES[p.name]={color:p.color,bg:p.bg_color}; });
+    }
   }
-  function resetProdMap(){ _prodMap={}; _prodIdx=0; }
+  function prodPill(p){
+    var pt=PRODUCT_TYPES[p];
+    if(pt) return '<span style="display:inline-block;padding:2px 9px;border-radius:99px;font-size:0.75rem;font-weight:500;white-space:nowrap;letter-spacing:0.01em;background:'+pt.bg+';color:'+pt.color+'">'+p+'</span>';
+    return '<span class="prod-pill">'+p+'</span>';
+  }
+  function resetProdMap(){}; _prodIdx=0; }
 
   // ── load from Supabase ───────────────────────────────────
   async function load(){
@@ -158,6 +163,6 @@
 
   // ── init ─────────────────────────────────────────────────
   window.addEventListener('DOMContentLoaded',function(){
-    setTimeout(function(){ if(typeof sb!=='undefined'&&sb) load(); }, 600);
+    setTimeout(function(){ if(typeof sb!=='undefined'&&sb){ loadProductTypes(); load(); } }, 600);
   });
 })();

@@ -12,26 +12,21 @@
   function fmtDate(d){ if(!d) return '—'; return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
 
   // product colour pill — consistent with instruments and trades pages
-  // Product colour: each unique product name gets its own colour, stably assigned
-  var PROD_COLORS = [
-    'prod-securities',   // blue
-    'prod-derivatives',  // yellow
-    'prod-cash-funds',   // green
-    'prod-collectibles', // purple
-    'prod-private-eq',   // rose
-    'prod-cash-hand'     // slate
-  ];
-  var _prodMap = {};
-  var _prodIdx = 0;
-  function prodPill(p) {
-    if (!p) return '';
-    if (_prodMap[p] === undefined) {
-      _prodMap[p] = _prodIdx % PROD_COLORS.length;
-      _prodIdx++;
+  // ── product type colours from DB ─────────────────────────
+  var PRODUCT_TYPES = {};
+  async function loadProductTypes(){
+    if(typeof sb==='undefined'||!sb) return;
+    var res = await sb.from('product_types').select('name,color,bg_color');
+    if(!res.error && res.data){
+      res.data.forEach(function(p){ PRODUCT_TYPES[p.name]={color:p.color,bg:p.bg_color}; });
     }
-    return '<span class="prod-pill ' + PROD_COLORS[_prodMap[p]] + '">' + p + '</span>';
   }
-  function resetProdMap() { _prodMap = {}; _prodIdx = 0; }
+  function prodPill(p){
+    var pt=PRODUCT_TYPES[p];
+    if(pt) return '<span style="display:inline-block;padding:2px 9px;border-radius:99px;font-size:0.75rem;font-weight:500;white-space:nowrap;letter-spacing:0.01em;background:'+pt.bg+';color:'+pt.color+'">'+p+'</span>';
+    return '<span class="prod-pill">'+p+'</span>';
+  }
+  function resetProdMap(){}
 
   function pnlCell(v){
     var n=parseFloat(v)||0;
@@ -391,6 +386,6 @@
   // ── init ──────────────────────────────────────────────────────
   window.addEventListener('DOMContentLoaded',function(){
     wireInstDd();
-    setTimeout(function(){ if(typeof sb!=='undefined'&&sb){ loadFY(); loadInstruments(); load(); } },600);
+    setTimeout(function(){ if(typeof sb!=='undefined'&&sb){ loadProductTypes(); loadFY(); loadInstruments(); load(); } },600);
   });
 })();
