@@ -1,5 +1,16 @@
 /* ===== ZY-Invest Admin — shared chrome behaviour (all pages) ===== */
 (function(){
+  // inject table-fixed CSS on every admin page
+  (function(){
+    var id='zy-tbl-fix';
+    if(!document.getElementById(id)){
+      var lnk=document.createElement('link');
+      lnk.id=id; lnk.rel='stylesheet';
+      lnk.href='../assets/css/admin-table-fixed.css';
+      document.head.appendChild(lnk);
+    }
+  })();
+
   // sidebar collapse (persisted)
   var admShell=document.getElementById('admShell');
   var tg=document.getElementById('admToggle');
