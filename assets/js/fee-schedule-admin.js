@@ -111,10 +111,8 @@
     var typeSel = document.getElementById('fs-type');
     typeSel.value = r ? r.type : 'base';
     document.getElementById('fs-fy').value = r ? r.fy_id : (selectedFY || '');
-    document.getElementById('fs-basis').value = r ? (r.basis || 'Daily') : 'Daily';
     document.getElementById('fs-rate').value = r ? fmt(r.rate, 2) : '';
     document.getElementById('fs-hurdle').value = r && r.hurdle_rate != null ? fmt(r.hurdle_rate, 2) : '';
-    document.getElementById('fs-notes').value = r ? (r.notes || '') : '';
 
     toggleHurdle(typeSel.value);
     zyModalOpen('feeModal');
@@ -137,10 +135,8 @@
   document.getElementById('fs-confirm').addEventListener('click', async function(){
     var type   = document.getElementById('fs-type').value;
     var fyId   = document.getElementById('fs-fy').value;
-    var basis  = document.getElementById('fs-basis').value;
     var rate   = parseNum(document.getElementById('fs-rate').value);
     var hurdle = type === 'performance' ? parseNum(document.getElementById('fs-hurdle').value) : null;
-    var notes  = document.getElementById('fs-notes').value.trim() || null;
 
     if(!fyId)    { if(window.zyToast) zyToast('Select a financial year'); return; }
     if(rate <= 0){ if(window.zyToast) zyToast('Enter a valid rate'); return; }
@@ -148,7 +144,7 @@
       if(window.zyToast) zyToast('Enter a hurdle rate for performance fee'); return;
     }
 
-    var payload = { type: type, fy_id: fyId, basis: basis, rate: rate, hurdle_rate: hurdle, notes: notes };
+    var payload = { type: type, fy_id: fyId, basis: 'Daily', rate: rate, hurdle_rate: hurdle };
 
     var btn = this; btn.disabled = true; btn.textContent = 'Saving…';
     try{
