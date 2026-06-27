@@ -249,11 +249,9 @@
       // ── 4. Compute MYR Cash Balance ───────────────────────
       var cash = 0;
 
-      // + Capital Injections (Approved)
+      // + Capital Injections (Approved) — amount already signed
       (ciRes.data||[]).forEach(function(r){
-        var a = parseFloat(r.amount)||0;
-        if(r.type === 'Subscription') cash += a;
-        else if(r.type === 'Redemption') cash -= a;
+        cash += parseFloat(r.amount)||0;
       });
 
       // + Trade cashflows (already signed: buy = negative, sell = positive)
