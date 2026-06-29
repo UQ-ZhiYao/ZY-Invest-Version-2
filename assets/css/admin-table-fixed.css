@@ -159,3 +159,7 @@
   white-space: normal;
   overflow: visible;
 }
+
+/* Fee schedule table — body cells not bold, pills keep their weight */
+.tbl.fee-tbl tbody td { font-weight: 400 !important; }
+.tbl.fee-tbl tbody td .fee-pill { font-weight: 700 !important; }
