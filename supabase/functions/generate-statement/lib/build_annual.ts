@@ -1,0 +1,147 @@
+import {
+  newDoc, drawHeaderBlock, drawLabelValueGrid, drawSectionHeader, drawNoticeHeader, drawKeptTogether,
+  drawFooterOnAllPages, drawText, drawTable, rm, redIfNegative, fmt, InvestorInfo, Cell,
+} from "./common.ts";
+import { xirr, daysHeldText, CapitalInjectionRow, DistributionRow } from "./compute.ts";
+
+function dstr(d: Date): string {
+  return d.toISOString().slice(0, 10).split("-").reverse().join(" - ");
+}
+function dmy(d: Date): string {
+  return d.toISOString().slice(0, 10).split("-").reverse().join("/");
+}
+
+export interface BuildAnnualArgs {
+  investor: InvestorInfo;
+  fyStart: Date;
+  fyEnd: Date;
+  openingUnits: number;
+  openingCost: number;
+  closingUnits: number;
+  closingCost: number;
+  latestNavPerUnit: number;
+  transactionsInFy: CapitalInjectionRow[];
+  distributionsInFy: DistributionRow[];
+  cashflowsForIrr: [Date, number][];
+  realizedPl?: number;
+  adjustment?: number;
+}
+
+export async function buildAnnualPdf({
+  investor, fyStart, fyEnd, openingUnits, openingCost, closingUnits, closingCost,
+  latestNavPerUnit, transactionsInFy, distributionsInFy, cashflowsForIrr,
+  realizedPl = 0, adjustment = 0,
+}: BuildAnnualArgs): Promise<Uint8Array> {
+  const periodText = `${dmy(fyStart)} - ${dmy(fyEnd)}`;
+  const doc = await newDoc();
+
+  drawHeaderBlock(doc, { title: "INVESTMENT  ACCOUNT  STATEMENT", investor, statementType: "Annually", periodText });
+  drawSectionHeader(doc, "Investor's Information");
+  drawLabelValueGrid(doc, [
+    ["Account Type", investor.accountType, "Account ID", investor.accountId],
+    ["Registered Name", investor.registeredName, "Settlement Type", investor.settlementType],
+    ["Phone No.", investor.phone, "Bank Name", investor.bankName],
+    ["Email Address", investor.email, "Bank Account No.", investor.bankAccountNo],
+    [investor.nomineeLabel, investor.nomineeValue, "Total Days Held", daysHeldText(investor.issuedDate, fyEnd)],
+  ]);
+  doc.y -= 4;
+
+  // --- Principal Transaction: itemised ------------------------------------
+  const pCols = [
+    { header: "Date", width: 95 },
+    { header: "Description", width: 90 },
+    { header: "Cashflow @ Price", width: 150 },
+    { header: "Avg. Cost (RM)", width: 110 },
+    { header: "Units Issued", width: 100 },
+    { header: "Units Balanced", width: 100 },
+  ];
+  let runUnits = openingUnits, runCost = openingCost;
+  const pRows: Cell[][] = [
+    [dstr(fyStart), "Opening", "-", runUnits > 0 ? rm(runCost / runUnits, 4) : "-", "-", fmt(runUnits)],
+  ];
+  for (const tx of transactionsInFy) {
+    const d = new Date(tx.date + "T00:00:00Z");
+    const amt = Number(tx.amount), units = Number(tx.units), price = Number(tx.nta);
+    const signedUnits = tx.type === "Subscription" ? units : -units;
+    runUnits += signedUnits;
+    runCost += tx.type === "Subscription" ? amt : -amt;
+    pRows.push([
+      dstr(d), tx.type, `${rm(amt)} @ ${fmt(price)}`,
+      runUnits > 0 ? rm(runCost / runUnits, 4) : "-",
+      redIfNegative(signedUnits, 4), fmt(runUnits),
+    ]);
+  }
+  pRows.push([dstr(fyEnd), "Closing", "-", closingUnits > 0 ? rm(closingCost / closingUnits, 4) : "-", "-", fmt(closingUnits)]);
+  drawKeptTogether(doc, "Principal Transaction", { columns: pCols, rows: pRows });
+  doc.y -= 4;
+
+  // --- Dividend Transaction: itemised --------------------------------------
+  const dCols = [
+    { header: "Date", width: 95 },
+    { header: "Description", width: 120 },
+    { header: "DPS", width: 75 },
+    { header: "Holding Units", width: 110 },
+    { header: "Dividend Amount", width: 120 },
+    { header: "Balanced (RM)", width: 115 },
+  ];
+  let runningDiv = 0;
+  const dRows: Cell[][] = [[dstr(fyStart), "Opening", "", "", "", rm(0)]];
+  for (const d of distributionsInFy) {
+    const payDate = new Date((d.pay_date || d.ex_date) + "T00:00:00Z");
+    const dps = Number(d.dps);
+    const amount = Math.round(closingUnits * dps / 100 * 100) / 100;
+    runningDiv += amount;
+    dRows.push([dstr(payDate), `${d.type || ""} Dividend`.trim(), fmt(dps), fmt(closingUnits), rm(amount), rm(runningDiv)]);
+  }
+  const dividendReceived = Math.round(runningDiv * 100) / 100;
+  dRows.push([dstr(fyEnd), "Closing", "", "", "", rm(dividendReceived)]);
+  drawKeptTogether(doc, "Dividend Transaction", { columns: dCols, rows: dRows });
+  doc.y -= 4;
+
+  // --- Account Summary -------------------------------------------------------
+  const marketValue = Math.round(closingUnits * latestNavPerUnit * 100) / 100;
+  const costBasis = Math.round(closingCost * 100) / 100;
+  const unrealizedPl = Math.round((marketValue - costBasis) * 100) / 100;
+  const totalPl = Math.round((unrealizedPl + realizedPl + dividendReceived + adjustment) * 100) / 100;
+  const totalPerfPct = costBasis ? (totalPl / costBasis) * 100 : null;
+  const irr = xirr(cashflowsForIrr);
+
+  const sCols = [
+    { header: "Fields", width: 220 },
+    { header: "Holding Units", width: 130 },
+    { header: "Average Price", width: 130 },
+    { header: "Total Value (RM)", width: 160 },
+  ];
+  const sRows: Cell[][] = [
+    ["( a )  Latest Fund Price", fmt(closingUnits), fmt(latestNavPerUnit, 6), rm(marketValue)],
+    ["( b )  Subscription Cost", fmt(closingUnits), closingUnits ? fmt(Math.abs(costBasis / closingUnits), 6) : "-",
+      redIfNegative(-costBasis, 2)],
+  ];
+  drawKeptTogether(doc, "Account Summary", { columns: sCols, rows: sRows });
+  doc.y -= 6;
+
+  const plainCols = [
+    { header: "", width: 476 },
+    { header: "", width: 164 },
+  ];
+  const plainRows = [
+    ["( c )  Unrealized Profit & Loss:  ( a ) + ( b )", rm(unrealizedPl)],
+    ["( d )  Realized Profit & Loss", rm(realizedPl)],
+    ["( e )  Dividend Received", rm(dividendReceived)],
+    ["( f )  Adjustment", rm(adjustment)],
+    ["Total Profit & Loss:  ( c ) + ( d ) + ( e ) + ( f )", rm(totalPl)],
+    ["Total Performance %", totalPerfPct !== null ? `${totalPerfPct.toFixed(2)} %` : "-"],
+    ["Annualized Performance* %", irr !== null ? `${(irr * 100).toFixed(2)} %` : "-"],
+  ];
+  drawTable(doc, { columns: plainCols, rows: plainRows, noHeader: true });
+  doc.y -= 2;
+  const { sans } = doc.fonts;
+  drawText(doc,
+    "*Powered by Financial Formulation of Internal Rate of Return (IRR) & Mathematical Algorithm Newton's method",
+    { x: 45, y: doc.y - 10, font: sans, size: 9 });
+  doc.y -= 18;
+
+  drawNoticeHeader(doc, "IMPORTANT NOTICES");
+  drawFooterOnAllPages(doc);
+  return doc.pdf.save();
+}
