@@ -22,7 +22,7 @@ from pdf_common import (
     col_widths,
     header_block,
     investor_block_name_first,
-    notice_style,
+    important_notices,
     rm,
     section_header,
     table_cell_style,
@@ -80,7 +80,7 @@ def build_dividend_pdf(out_path, *, distributions: list[dict], investor: Investo
         table_cell_style,
     ))
 
-    flow.append(Paragraph("IMPORTANT NOTICES", notice_style))
+    flow.extend(important_notices())
     build_with_footer(out_path, flow)
 
 

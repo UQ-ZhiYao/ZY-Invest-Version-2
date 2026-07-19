@@ -22,7 +22,7 @@ from pdf_common import (
     col_widths,
     header_block,
     investor_block_with_account_type,
-    notice_style,
+    important_notices,
     red_if_negative,
     rm,
     section_header,
@@ -79,7 +79,7 @@ def build_subscription_pdf(out_path, *, tx: dict, investor: InvestorInfo,
     t.setStyle(TableStyle(style))
     flow.append(t)
 
-    flow.append(Paragraph("IMPORTANT NOTICES", notice_style))
+    flow.extend(important_notices())
     build_with_footer(out_path, flow)
 
 

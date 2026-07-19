@@ -1,5 +1,5 @@
 import {
-  newDoc, drawHeaderBlock, drawLabelValueGrid, drawSectionHeader, drawNoticeHeader, drawKeptTogether,
+  newDoc, drawHeaderBlock, drawLabelValueGrid, drawSectionHeader, drawKeptTogether, drawImportantNotices,
   drawFooterOnAllPages, drawText, drawTable, rm, redIfNegative, fmt, colWidths, BODY_W, InvestorInfo, Cell,
 } from "./common.ts";
 import { xirr, daysHeldText, CapitalInjectionRow, DistributionRow } from "./compute.ts";
@@ -145,7 +145,7 @@ export async function buildAnnualPdf({
     { x: 45, y: doc.y - 10, font: sans, size: 8.5 });
   doc.y -= 18;
 
-  drawNoticeHeader(doc, "IMPORTANT NOTICES");
+  drawImportantNotices(doc);
   drawFooterOnAllPages(doc);
   return doc.pdf.save();
 }

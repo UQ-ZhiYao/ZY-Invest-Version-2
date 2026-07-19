@@ -43,12 +43,14 @@ RED = colors.HexColor("#C00000")
 BORDER = colors.black
 
 title_style = ParagraphStyle("title", fontName=FONT_SERIF_BOLD, fontSize=12.5, leading=15,
-                             alignment=2)  # right-aligned
+                             alignment=1)  # centered over the meta column
 name_style = ParagraphStyle("name", fontName=FONT_SERIF, fontSize=11, leading=15)
 section_style = ParagraphStyle("section", fontName=FONT_SANS, fontSize=12.5, leading=16,
                                 spaceBefore=10, spaceAfter=6)
 notice_style = ParagraphStyle("notice", fontName=FONT_SANS_BOLD, fontSize=11, leading=14,
                                spaceBefore=14)
+notice_item_style = ParagraphStyle("notice_item", fontName=FONT_SANS, fontSize=9.5, leading=13.5,
+                                    leftIndent=32 * mm, firstLineIndent=-32 * mm, spaceAfter=4)
 meta_label_style = ParagraphStyle("meta_label", fontName=FONT_SANS, fontSize=10, leading=13)
 meta_value_style = ParagraphStyle("meta_value", fontName=FONT_SANS, fontSize=10, leading=13)
 cell_label_style = ParagraphStyle("cell_label", fontName=FONT_SANS, fontSize=10, leading=13)
@@ -113,11 +115,14 @@ FUND_PHONE = "(+60)11 - 1121 8085"
 
 def header_block(*, title: str, investor: InvestorInfo, statement_type: str,
                   issued_date: dt.date, period_text: str) -> list:
-    """Logo top-left + title top-right, investor name/address below (full
-    width), then a 2-pair-per-row meta grid (Page No./Issued Date,
-    Statement Type/Period, Email/Telephone) spanning the full body width."""
-    logo_w = 26.0  # mm
-    logo_h = logo_w  # placeholder, replaced below once we know the real aspect ratio
+    """Small logo top-left with the title centered over the right column on
+    the same row; below that, investor name/address on the left and a
+    single-column statement meta list (Page No., Issued Date, Statement
+    Type, Statement Period, Email, Telephone) on the right."""
+    left_w, right_w = col_widths(BODY_W_MM, [270, 235])
+
+    logo_w = 15.0  # mm
+    logo_h = logo_w
     if LOGO_PATH.exists():
         img_w, img_h = ImageReader(str(LOGO_PATH)).getSize()
         logo_h = logo_w * img_h / img_w
@@ -126,37 +131,66 @@ def header_block(*, title: str, investor: InvestorInfo, statement_type: str,
         logo = Paragraph("", name_style)
 
     title_para = Paragraph(title, title_style)
-    top_row = Table([[logo, title_para]], colWidths=[logo_w * mm, None])
+    top_row = Table([[logo, title_para]], colWidths=[left_w, right_w])
     top_row.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("ALIGN", (1, 0), (1, 0), "RIGHT"),
+        ("ALIGN", (0, 0), (0, 0), "LEFT"),
+        ("ALIGN", (1, 0), (1, 0), "CENTER"),
         ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
         ("TOPPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
     ]))
 
-    flow: list = [top_row, Paragraph(investor.registered_name.upper(), name_style)]
+    name_block = [Paragraph(investor.registered_name.upper(), name_style)]
     for line in (investor.address_line1, investor.address_line2, investor.address_line3):
         if line:
-            flow.append(Paragraph(line, name_style))
+            name_block.append(Paragraph(line, name_style))
 
-    label_w1, val_w1, label_w2, val_w2 = col_widths(BODY_W_MM, [95, 160, 95, 155])
+    meta_label_w, meta_value_w = col_widths(right_w / mm, [95, 140])
     meta_rows = [
-        ("Page No.", ":  1 of 1", "Issued Date", f":  {dt.date.today().strftime('%d-%m-%Y')}"),
-        ("Statement Type", f":  {statement_type}", "Statement Period", f":  {period_text}"),
-        ("Email Address", f":  {FUND_EMAIL}", "Telephone No.", f":  {FUND_PHONE}"),
+        ("Page No.", ":  1 of 1"),
+        ("Issued Date", f":  {dt.date.today().strftime('%d-%m-%Y')}"),
+        ("Statement Type", f":  {statement_type}"),
+        ("Statement Period", f":  {period_text}"),
+        ("Email Address", f":  {FUND_EMAIL}"),
+        ("Telephone No.", f":  {FUND_PHONE}"),
     ]
     meta_table = Table(
-        [[Paragraph(l1, meta_label_style), Paragraph(v1, meta_value_style),
-          Paragraph(l2, meta_label_style), Paragraph(v2, meta_value_style)]
-         for l1, v1, l2, v2 in meta_rows],
-        colWidths=[label_w1, val_w1, label_w2, val_w2], hAlign="LEFT",
+        [[Paragraph(label, meta_label_style), Paragraph(value, meta_value_style)]
+         for label, value in meta_rows],
+        colWidths=[meta_label_w, meta_value_w], hAlign="LEFT",
     )
     meta_table.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-        ("TOPPADDING", (0, 0), (-1, -1), 3), ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+        ("TOPPADDING", (0, 0), (-1, -1), 2), ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
     ]))
-    flow.append(meta_table)
+
+    bottom_row = Table([[name_block, meta_table]], colWidths=[left_w, right_w])
+    bottom_row.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+    ]))
+    return [top_row, bottom_row]
+
+
+NOTICE_ITEMS = [
+    ("Confidentiality", "This statement contains personal data and is intended solely for the "
+     "recipient. Please do not share this document with any third parties."),
+    ("Discrepancies", 'Please review all figures carefully. Any discrepancies or "untally" figures '
+     "must be reported to us immediately; failure to do so may result in the recipient bearing any "
+     "associated losses."),
+    ("Digital Statements", "Effective 1st January 2026, all future portfolio statements will be "
+     "provided exclusively via App ZY-Invest."),
+]
+
+
+def important_notices() -> list:
+    """"IMPORTANT NOTICES" heading + the numbered notice list, hanging-indented
+    so wrapped continuation lines align under the body text."""
+    flow: list = [Paragraph("IMPORTANT NOTICES", notice_style)]
+    for i, (label, text) in enumerate(NOTICE_ITEMS, start=1):
+        flow.append(Paragraph(f"{i}.  <b>{label}:</b> {text}", notice_item_style))
     return flow
 
 

@@ -30,7 +30,7 @@ from pdf_common import (
     col_widths,
     header_block,
     investor_block_with_account_type,
-    notice_style,
+    important_notices,
     red_if_negative,
     rm,
     section_header,
@@ -189,7 +189,7 @@ def build_annual_pdf(
         table_cell_style,
     ))
 
-    flow.append(Paragraph("IMPORTANT NOTICES", notice_style))
+    flow.extend(important_notices())
     build_with_footer(out_path, flow)
 
 

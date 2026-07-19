@@ -1,5 +1,5 @@
 import {
-  newDoc, drawHeaderBlock, drawLabelValueGrid, drawSectionHeader, drawNoticeHeader, drawKeptTogether,
+  newDoc, drawHeaderBlock, drawLabelValueGrid, drawSectionHeader, drawKeptTogether, drawImportantNotices,
   drawFooterOnAllPages, rm, redIfNegative, fmt, colWidths, BODY_W, InvestorInfo,
 } from "./common.ts";
 import { CapitalInjectionRow } from "./compute.ts";
@@ -59,7 +59,7 @@ export async function buildSubscriptionPdf(
   ];
   drawKeptTogether(doc, "Principal Transaction", { columns, rows });
 
-  drawNoticeHeader(doc, "IMPORTANT NOTICES");
+  drawImportantNotices(doc);
   drawFooterOnAllPages(doc);
   return doc.pdf.save();
 }

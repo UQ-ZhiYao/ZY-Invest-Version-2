@@ -1,5 +1,5 @@
 import {
-  newDoc, drawHeaderBlock, drawLabelValueGrid, drawSectionHeader, drawNoticeHeader, drawKeptTogether,
+  newDoc, drawHeaderBlock, drawLabelValueGrid, drawSectionHeader, drawKeptTogether, drawImportantNotices,
   drawFooterOnAllPages, drawText, rm, colWidths, BODY_W, InvestorInfo, Cell,
 } from "./common.ts";
 import { DistributionRow } from "./compute.ts";
@@ -56,7 +56,7 @@ export async function buildDividendPdf(
     { x: 45, y: doc.y - 12, font: sans, size: 8.5 });
   doc.y -= 20;
 
-  drawNoticeHeader(doc, "IMPORTANT NOTICES");
+  drawImportantNotices(doc);
   drawFooterOnAllPages(doc);
   return doc.pdf.save();
 }
