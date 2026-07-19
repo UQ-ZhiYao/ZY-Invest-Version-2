@@ -1,0 +1,200 @@
+"""
+Shared ReportLab building blocks for the three statement PDFs.
+
+Fonts/colors/borders below were read directly off the source template
+(templates/ZYInvest_Statement_Templates.xlsx) with openpyxl — Times New Roman
+for the investor name/address block and statement title, a plain sans-serif
+for everything else (the template used "Aptos Narrow", a Windows-only font;
+Helvetica is ReportLab's built-in equivalent and needs no font embedding),
+thin black borders, no fills. Kept here so all three statements stay visually
+consistent without duplicating the constants three times.
+"""
+from __future__ import annotations
+
+import datetime as dt
+from dataclasses import dataclass
+
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.units import mm
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Table, TableStyle
+
+PAGE_SIZE = landscape(A4)
+MARGIN = 16 * mm
+
+FONT_SERIF = "Times-Roman"
+FONT_SERIF_BOLD = "Times-Bold"
+FONT_SANS = "Helvetica"
+FONT_SANS_BOLD = "Helvetica-Bold"
+
+RED = colors.HexColor("#C00000")
+BORDER = colors.black
+
+title_style = ParagraphStyle("title", fontName=FONT_SERIF_BOLD, fontSize=13, leading=16,
+                             alignment=2)  # right-aligned
+name_style = ParagraphStyle("name", fontName=FONT_SERIF, fontSize=11, leading=15)
+section_style = ParagraphStyle("section", fontName=FONT_SANS, fontSize=12.5, leading=16,
+                                spaceBefore=10, spaceAfter=6)
+notice_style = ParagraphStyle("notice", fontName=FONT_SANS_BOLD, fontSize=11, leading=14,
+                               spaceBefore=14)
+meta_label_style = ParagraphStyle("meta_label", fontName=FONT_SANS, fontSize=10, leading=13)
+meta_value_style = ParagraphStyle("meta_value", fontName=FONT_SANS, fontSize=10, leading=13)
+cell_label_style = ParagraphStyle("cell_label", fontName=FONT_SANS, fontSize=10, leading=13)
+cell_value_style = ParagraphStyle("cell_value", fontName=FONT_SANS, fontSize=10, leading=13)
+table_header_style = ParagraphStyle("table_header", fontName=FONT_SANS, fontSize=10, leading=13)
+table_cell_style = ParagraphStyle("table_cell", fontName=FONT_SANS, fontSize=10, leading=13)
+footer_style = ParagraphStyle("footer", fontName=FONT_SANS, fontSize=8.5, leading=11)
+
+
+def red_if_negative(value: float, decimals: int) -> str:
+    """Matches the template's `[Red](#,##0.0000)` style negative formatting."""
+    fmt = f"{{:,.{decimals}f}}"
+    if value < 0:
+        return f'<font color="#{RED.hexval()[2:]}">({fmt.format(abs(value))})</font>'
+    return fmt.format(value)
+
+
+def rm(value, decimals: int = 2, dash_if_none: bool = True) -> str:
+    if value is None or value == "-":
+        return "-" if dash_if_none else ""
+    return f"RM {value:,.{decimals}f}"
+
+
+@dataclass
+class InvestorInfo:
+    account_type: str
+    account_id: str
+    registered_name: str
+    settlement_type: str
+    phone: str
+    bank_name: str
+    email: str
+    bank_account_no: str
+    nominee_or_joint_label: str
+    nominee_or_joint_value: str
+    total_days_held_text: str
+    address_line1: str
+    address_line2: str
+    address_line3: str
+
+
+def days_held_text(issued: dt.date, asof: dt.date) -> str:
+    return f"{(asof - issued).days:,}  days"
+
+
+FUND_EMAIL = "nzy.invest@gmail.com"
+FUND_PHONE = "(+60)11 - 1121 8085"
+
+
+def header_block(*, title: str, investor: InvestorInfo, statement_type: str,
+                  issued_date: dt.date, period_text: str) -> Table:
+    """Two-column header: investor name/address (serif, left) beside the
+    Page No./Issued Date/Statement Type/... meta block (sans, right) —
+    mirrors the template's A8:A11 / L7:O12 layout."""
+    left = [Paragraph(investor.registered_name.upper(), name_style)]
+    for line in (investor.address_line1, investor.address_line2, investor.address_line3):
+        if line:
+            left.append(Paragraph(line, name_style))
+
+    meta_rows = [
+        ("Page No.", ":  1 of 1"),
+        ("Issued Date", f":  {dt.date.today().strftime('%d-%m-%Y')}"),
+        ("Statement Type", f":  {statement_type}"),
+        ("Statement Period", f":  {period_text}"),
+        ("Email Address", f":  {FUND_EMAIL}"),
+        ("Telephone No.", f":  {FUND_PHONE}"),
+    ]
+    meta_table = Table(
+        [[Paragraph(k, meta_label_style), Paragraph(v, meta_value_style)] for k, v in meta_rows],
+        colWidths=[38 * mm, 55 * mm], hAlign="RIGHT",
+    )
+    meta_table.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 1), ("BOTTOMPADDING", (0, 0), (-1, -1), 1),
+    ]))
+
+    outer = Table([[left, meta_table]], colWidths=[130 * mm, None])
+    outer.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+    ]))
+
+    title_para = Paragraph(title, title_style)
+    wrapper = Table([[title_para]], colWidths=[None])
+    wrapper.setStyle(TableStyle([
+        ("ALIGN", (0, 0), (-1, -1), "RIGHT"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+    ]))
+    return [wrapper, outer]
+
+
+def investor_block_with_account_type(investor: InvestorInfo) -> Table:
+    """Subscription & Annual layout — has Account Type / Account ID row."""
+    rows = [
+        ("Account Type", investor.account_type, "Account ID", investor.account_id),
+        ("Registered Name", investor.registered_name, "Settlement Type", investor.settlement_type),
+        ("Phone No.", investor.phone, "Bank Name", investor.bank_name),
+        ("Email Address", investor.email, "Bank Account No.", investor.bank_account_no),
+        (investor.nominee_or_joint_label, investor.nominee_or_joint_value,
+         "Total Days Held", investor.total_days_held_text),
+    ]
+    return _label_value_grid(rows)
+
+
+def investor_block_name_first(investor: InvestorInfo) -> Table:
+    """Dividend layout — starts at Registered Name, no Account Type/ID row."""
+    rows = [
+        ("Investor's Name", investor.registered_name, "Settlement Type", investor.settlement_type),
+        ("Phone Number", investor.phone, "Bank Name", investor.bank_name),
+        ("Email Address", investor.email, "Bank Account No.", investor.bank_account_no),
+    ]
+    return _label_value_grid(rows)
+
+
+def _label_value_grid(rows: list[tuple[str, str, str, str]]) -> Table:
+    data = [
+        [Paragraph(a, cell_label_style), Paragraph(str(b), cell_value_style),
+         Paragraph(c, cell_label_style), Paragraph(str(d), cell_value_style)]
+        for a, b, c, d in rows
+    ]
+    t = Table(data, colWidths=[45 * mm, 75 * mm, 45 * mm, 75 * mm], hAlign="LEFT")
+    t.setStyle(TableStyle([
+        ("GRID", (0, 0), (-1, -1), 0.6, BORDER),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6), ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+        ("TOPPADDING", (0, 0), (-1, -1), 5), ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+    ]))
+    return t
+
+
+def section_header(text: str) -> Paragraph:
+    return Paragraph(text, section_style)
+
+
+def draw_footer(canvas, doc) -> None:
+    """Drawn as a fixed element on every page (see build_with_footer below)
+    instead of a flowable — a flowable footer either overflows onto its own
+    near-blank extra page on short statements, or has to fight the content
+    for space; a page-anchored footer is simpler and always sits at the
+    bottom margin regardless of how much content precedes it."""
+    canvas.saveState()
+    canvas.setFont(FONT_SANS, 8.5)
+    y = MARGIN - 4 * mm
+    canvas.setLineWidth(0.6)
+    canvas.line(MARGIN, y + 5 * mm, PAGE_SIZE[0] - MARGIN, y + 5 * mm)
+    canvas.drawString(MARGIN, y, "Head Office: None")
+    canvas.drawRightString(
+        PAGE_SIZE[0] - MARGIN, y,
+        f"Line: {FUND_PHONE}      Email: {FUND_EMAIL}      Website: -",
+    )
+    canvas.restoreState()
+
+
+def build_with_footer(out_path, flow: list) -> None:
+    doc = SimpleDocTemplate(str(out_path), pagesize=PAGE_SIZE, topMargin=MARGIN,
+                             bottomMargin=MARGIN + 8 * mm, leftMargin=MARGIN, rightMargin=MARGIN)
+    doc.build(flow, onFirstPage=draw_footer, onLaterPages=draw_footer)
