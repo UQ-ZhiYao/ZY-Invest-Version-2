@@ -19,6 +19,14 @@ is kept only as a **design reference** — its fonts/colors/layout were read
 once with openpyxl to match this PDF output to it, but nothing here opens or
 converts that file at runtime anymore.
 
+**Want a button instead of a terminal?** See
+`supabase/functions/generate-statement/` — a TypeScript port of this same
+logic (using pdf-lib instead of ReportLab) deployed as a Supabase Edge
+Function, called from the admin console's "Generate Statement" buttons
+(`admin/principal.html`, `admin/investors.html`). It's a second, independent
+implementation of the same math and layout — keep both in sync by hand if
+you change either.
+
 ## Setup
 
 ```bash

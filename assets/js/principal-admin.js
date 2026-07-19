@@ -136,6 +136,7 @@
     document.getElementById('st-nta').textContent=r.nta?parseFloat(r.nta).toFixed(4):'—';
     document.getElementById('st-units').textContent=(r.amount&&r.nta)?fmt(r.amount/r.nta):'—';
     document.getElementById('st-cur').innerHTML=sPill(r.status);
+    document.getElementById('st-gen-statement').disabled=(r.status!=='Approved');
 
     // document preview
     var docPrev=document.getElementById('st-doc-preview');
@@ -167,12 +168,20 @@
     if(res.error){ if(window.zyToast) zyToast('Error: '+res.error.message); return; }
     curTx.status=newStatus;
     document.getElementById('st-cur').innerHTML=sPill(newStatus);
+    document.getElementById('st-gen-statement').disabled=(newStatus!=='Approved');
     await loadTransactions(); zyModalClose();
     if(window.zyToast) zyToast('Status → '+newStatus+' — '+(curTx.full_name||''));
   }
 
   document.getElementById('st-approve').addEventListener('click',function(){ setStatus('Approved'); });
   document.getElementById('st-reject').addEventListener('click', function(){ setStatus('Rejected'); });
+
+  document.getElementById('st-gen-statement').addEventListener('click', async function(){
+    if(!curTx) return;
+    if(!window.zyGenerateStatement) return;
+    try{ await zyGenerateStatement({ type: curTx.type, txId: curTx.id }, { button: this }); }
+    catch(ex){ /* zyGenerateStatement already toasts the error */ }
+  });
 
   window.addEventListener('DOMContentLoaded',function(){
     setTimeout(function(){ if(typeof sb!=='undefined'&&sb){ loadInvestorSelect(); loadTransactions(); } },600);
