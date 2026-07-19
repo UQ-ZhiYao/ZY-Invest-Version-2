@@ -119,8 +119,15 @@
   var fr=document.getElementById('fvFrame');
   fr.src='reports/'+src+'?embed=1';
   function size(){ try{ var d=fr.contentDocument; if(d&&d.documentElement){ fr.style.height=Math.max(d.documentElement.scrollHeight, window.innerHeight-108)+'px'; } }catch(e){} }
-  fr.addEventListener('load',function(){ size(); setTimeout(size,300); setTimeout(size,800); });
+  fr.addEventListener('load',size);
   window.addEventListener('resize',size);
+  // Report pages resize their own content live (FY/Sector tabs, async Supabase
+  // loads that land after the iframe's initial load). A same-origin iframe
+  // never reports those height changes to the parent on its own, so poll
+  // instead of just load+resize — otherwise content taller than the last
+  // measured height is stuck unreachable (html.embed hides the iframe's own
+  // scrollbar by design, so the parent's computed height is the only way in).
+  setInterval(size,400);
 })();
 </script>
 
