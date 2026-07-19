@@ -63,9 +63,6 @@ body{font-family:var(--font-body);color:var(--ink);background:#0B1220;-webkit-fo
 .submit:disabled{opacity:.7;cursor:default;transform:none;}
 .spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;display:none;animation:rot .7s linear infinite;}
 @keyframes rot{to{transform:rotate(360deg);}}
-.back{margin-top:16px;text-align:center;font-size:0.82rem;}
-.back a{color:var(--fg-3);text-decoration:none;}
-.back a:hover{color:var(--blue);}
 .install-row{margin-top:18px;display:none;}
 .install-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:9px;font-family:var(--font-body);font-size:0.9rem;font-weight:600;color:var(--blue);background:var(--blue-bg,#E8F0FB);border:1.5px solid var(--blue);border-radius:var(--radius-md,10px);padding:11px;cursor:pointer;transition:background .2s;}
 .install-btn:hover{background:#dbe8fa;}
@@ -113,7 +110,6 @@ body{font-family:var(--font-body);color:var(--ink);background:#0B1220;-webkit-fo
       </div>
       <button type="submit" class="submit" id="submitBtn"><span id="btnText">Sign In to Console</span><span class="spin" id="spin"></span></button>
     </form>
-    <div class="back"><a href="https://zy-invest.com" target="_blank" rel="noopener">← Member login</a></div>
     <div class="install-row" id="installRow">
       <button class="install-btn" id="installBtn"><img src="assets/img/icon-192.png" alt=""> Install Admin App</button>
       <div class="install-hint" id="installHint"></div>
