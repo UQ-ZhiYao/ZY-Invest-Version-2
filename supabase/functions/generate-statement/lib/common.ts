@@ -1,16 +1,30 @@
-import { PDFDocument, PDFFont, PDFPage, RGB, StandardFonts, rgb } from "npm:pdf-lib@1.17.1";
+import { PDFDocument, PDFFont, PDFImage, PDFPage, RGB, StandardFonts, rgb } from "npm:pdf-lib@1.17.1";
 
-// A4 landscape, in points (1pt = 1/72in). Matches the ReportLab version this
+// A4 portrait, in points (1pt = 1/72in). Matches the ReportLab version this
 // was ported from (scripts/statements/src/pdf_common.py).
-export const PAGE_W = 841.89;
-export const PAGE_H = 595.28;
+export const PAGE_W = 595.28;
+export const PAGE_H = 841.89;
 export const MARGIN = 45; // ~16mm
+export const BODY_W = PAGE_W - MARGIN * 2;
 
 export const RED = rgb(0.7529, 0, 0); // #C00000
 export const BLACK = rgb(0, 0, 0);
 
 export const FUND_EMAIL = "nzy.invest@gmail.com";
 export const FUND_PHONE = "(+60)11 - 1121 8085";
+
+// ZY-Invest logo (assets/img/logo.png, trimmed + downsized to 212x180 and
+// palette-quantized so it can be inlined here as one self-contained module —
+// no extra file, no network fetch at render time).
+const LOGO_PNG_BASE64 =
+  "iVBORw0KGgoAAAANSUhEUgAAANQAAAC0CAMAAADb9PJwAAAAkFBMVEUAAAAcm9MbY6T1ohmqzizsaR1pnSLQ2Ccbh7mKtiwad8IJdHwYOoQbw+0WN3oA//8AAP9WlK5/fwAhYpomZJj//wAJD3ggY5vo428vj68mi7cti7XZ11Qxn8kAf///AABercmcsmJPdJkdNnAomMbjajRxdHv3fAz5+vjwrStQehOZs1AlX3AlRHgcOnmdqqfDRK+XAAAAMHRSTlMA/fv+/v39/Pj8/gf8/fIBASMCH2EBCaEWJ5xgT2QCASYcJGaeUAYMA5v/U/VeoQfi/+J4AAARIUlEQVR42u2di3qquhKAR3S3WNwCRUFwF6/LWlfV93+7kxuQhCQEjd1nneN8trUaQv7MZDIJJAC0ZL1GL0nYF0hi8ksjCZbtdhvPAP6phXvLCczhJvn8heWT/lHJZ+uQEI77ga34VDyVALya5TaqFfz6q0NAAQV/82INOHjDwoi+Pc/vghot4L2/mrqZVFDHPUbpCSQQEaaBz6lqJPMQgf6qWgFYMK2ko0peUX2gCEyDhW1Ta4CjUUXVU1Wr1aYTCo4yE+S3QiE9cboa+Li9wcigJyx9DdDO+FaqFjW4rUFxToL5EKyq0UivrFfoZ4FzC+P71T6svF1Rgukxxwgw4qHIPyNeehpfNxRsWoqCiIMaDHq3qYYJUw2IAbZABOlhgKvbPF/tz/s6P8n0eFXhJmXCWlgb4LsF0y9FHQW3QXkKJtYxE18xMggcHTYoZHwaRQ0Y1C1Ini9HG2BE6uHXb+uimKIG/dqUFBxJIdSA+Qoz1dzKm9t4PlXYR6AGfaC0TBRrwKjMBjifO2FSdLutsK8/kqcMd+H1tcsAXRmfonKiRb9Y1jMz1b7ColnNHYQSKuMTO95uKK+TSeiCO1T13uHNPy2YVppOamBJpRpC6QdcNlR3hxIklbZFWTgKz5Kpblaju/y6XSihMD5ifQMr+/Nt9dRAdVKZwqX5PcYnNSkNlHr83jHgt/DrWqi5jfFd31dw1zC+B5MLA8Rd1PCGUIIM4y19n2qqpXtyBiyo9HHsEEvPOJYLZbs1pYCymHHyLDzguy6ORUBGKLiuVpoqEYC0DUrRqmzm0Yr4NgNcIajhsENTOuNre4m/lW3Db/s/q9nBGOAmqsr4/jI0K2UoQaxv3WF9vig9mLBnycEGatOKbEko0QGlY8JTytL/Hy1Zkp+lJFYTuUsoD/NNf1XRUGLIi8r2bpy/1orVFPUHNu/3bl2Nf0tUdI55aKT61CsKNSuNlGWel40ktaC3tkwlO0cX1HgjUZFQYmii+mVi6i9hCB+WesLhChw6qcZjIbDAVqWAGj7S+AJbprJu9Z1QL/zQanWk4dHQQAWOFWXHtKdhpQ0VYnp5aZxFfdHGAAU3XDjRS4RCECumuGGC+fxqosJML1zIV8XmQxXVkOlp5RAqsdRTjAMwsFMVgapV9XkALVSFBuCyQZWQWzGtBSZc3t9dUDVVPTDUMQ3dMoWwtppAW3O2Rw3wvW2A47EEtZGmxHRQX8f3lUs9xZZMpXzoATaEYcxDjQUorCrh6poG6gtWK5e+/EY98QY4boR3fi+Vs+BmJTRQTo2vtAyOoK0nzgDHbXl5aaj4WQkd06fL9hQXdp1urplGIQbYAQVdUF9uma6WAV+gHZ//ViHxUC/CTMvDFRVGtkFsbphvhZEZ6tQJ5db45h/Wgw39PN6mQ1Mw7ID6cugkkJ4smaLQODX+22x94y4ol4oq+wexOgM0QY3FSPzPYMIGCHqoUxeUy9jccgC1X3cxqQ1QUBRPpQglnLWoxHqwEdjcPwA3QzkMJUpLJrBhIiIQjRt3Lg8FH9egQssgNrdkehf8Ouf5TmMzFPLmc2ftaW3JVFrn+VuBhPsoedT+KONDA6j9jYMNvQe8ArI6CalRlAbKHROyqMIuME/sM6UG+CJLe4JFML6jq1mJ0JLpw9pHNH5dZhqboZwpCgXmVkzL7v5JGlohD2hQVEX1EKbUVk9hz5yRAb5oW5QK6uvoKJSIAJaP0BPrgkWmF9W0pXtFhcHRiqnAIfy9VJKiZChnxoeavm/F1M9JNNcAeKaTcobZeSiRwNKK6XqD8cmqOrUUJVB9wcqVnuyY4huZBKoTDE1QrhQVQO7bDTbK20+yAV2Lqi8GuGRKIPHeLKDim9pTM2A0MVVQX/DpxEuUEOOb6C0CvuCe01QGqIEaUqiFG88XQIz01A2V38dUGaCOiUI5Mj7ElNnoKb+nPXGqOg0NUODG+BjTW3cgUbqoQjGSlS9EORoYRnClTG9dTIGDs2FdDQ3ipkGhXifz6Jqon9ATHloZmBw1qPRImLo05YgJy5cJav7pxPhmHl261mV7oRuklRnKhfUFNZNRU8UnRPCnQDE9UfvThxTFAUKAHzG/+6FKxlRBvak9exY7ZHq0poKKieFomIq1Sz09GCqArffmvTVIAzVT7KSD+hmoBAV8tZZqbQ1kf+GY6bFQJIiVba9tg75jpoc6Cmx79VrxFhP5Te7h3rpsTw/WVArbrAJS6urNIyvykJ7eJQHuLSx0Ml/Mf1pTUc2kNkGKiu9dfoA8CAoz1TBqCyT2x67DEGF/RAH1TiF0uxBd+R4DFaIBlMcxKYHQN83sz1gjo5F6FwAg24UsfhAqwAMoj9OTskl5njhPrCbSUSFZ/KymrkxPtfFZMLWomrv4+u7r8gioCDJ+oY3aALuYhBsulVCa4q3MUDdu3JOggK8FJUS05C28GKDk20jtmbqgwA2UQFepzftuXct80SKNerWoh2iK66JUULSLAtAyKe5dVinqCD/a+aZaVVXmp9ITw1LekK10Ewv4QU1BFGFVvWmgPJWTqJg0d5n3UdRjHAUdG+qbled9Qy8kFZW+bI+CQpK9aVuV2vbG5kU2tr7vgVC6VqXuoIiaRr2gDEV7nKaiY+bp5Pt06os0avvzgwnq9SFQASRaJmufp6cylexxUBCqVIVt77tfW1JDLQz+HB4HRQbzjb+ju8DhDkq0vbEl08jSSzxWU2JUWwfmyJlzVGO8NMiOy15RNdSre6iAzY81IxBse3B6OdnERUYo80ZWBOr1dYh/XEMRt/7WxBK00z2dTvdDmVvUCsKvKqVzqJJMzwp+T2S6FaojJOWhXl1DkQseLSZVXN7TU/xjdn0IituKUmZ6vRsqZobHfMRJ0etipn6qgk5NCftrOtZUc82D9E8AJ/UIys7/cYrqmqCVNg11CxVF16zqpr5BE5n31lTX1fUWlAj2z/2XcmamwYZtiCRAdY5cxTYlaurVwfUpqirtQLdjDKXz551QpWF/YSdXEpMMC4BhmsXKsxMdkY63u0zh15B2vo9oU0SOx+PmgO+Dgk2H4AT4iA23WWXrWoflWbXXSmBxP5Kz+wj+y4TcuDzn5B29DHKo/rbl3bJBGPKfw1Oe8pSnPOUpT3nKU57ylKc85cdGhEElz7r4t1VRifJb/NSyHL3QT/w/g8ztLJbDH2OB9Nly+I/y6vh68OdBRWQ5v6+/Q/7PhNpzhTZoyv+joApukbHCAOM/UlMFt5hBBVUvJPf/76AMncJtvUwQhF07WEQhCQzCVkIRCuygUF4liTFC9m+9nrIUViGGZGNulK5U4uJM8PdlIH3clE6/qDEIIuFMVcoInS7nHUWQBFxZZShNmwrxh0eys+KanO0ufYWE6IhzytdHUnhDKuracnoXBo+576+pfMl2sweyIUi8/tiTXPb7DwzWFKPe9V6V83FZZbOst1PCh8YsN5RfAbhMrVoKSaqiUce++FizL3IRavAR426YBEUmTQWNxaKuDWJxnw1/GbOrPdGqcaz7q3wFiN/LAmUTMaR4KW3tU+QyFfpvvVRsALTPr6otBv3qIQncgsK2pjgoP7+2M/GXR1JGYb+/1r4AAbeJz7LKeKHaIRBhpRF/oHa7ElzHH4ZtMXgoXw+l3su0OGCqkLcCeYehCNZc1ZAvQ4j3ugcvNHqOTPvcLg1QvgLKF6EY6F63UU0kKcOXVsg2u8MgzZJ8TXurLGsoIxMqYR8oX60p89ZPAd8gW+voSc2QlXEkX9UeONzRc9oXRaHp5IVQjyYob0CfrOI3UMZt73y+mXCuIo5aboJCFbj+hQpQPKymbnZLnrVlpomlpjz2RENbKG7xMm9RYjwSUb2QysLlDWUmf1/4PgflJ/hwsnG0z6Xc7/dFUT/NJu8B5bWhpMryi6Io+JPRokKEy9A0Yt5N4CzJU1UL0hUd+IraL9EwexuTzsJnD1QsriHZMd+voVDnEZN+HyUs/GobrRxRsh6MVMb+A4OjD5dcN8ygfB6qGPhNNeJi4fTztWDuxTEUGwpfUyUsWU1Visr5+mhu0yz8+imRWFXouPrUhRAroJPztlBUT8xUL/us7zD1vaSG4h9glMU0BEW/toXfPNcWn0Jw3JyriKqz+gMPs4acQ8WFTYIwQj6hhGPBykabXkCh3mj+SR17JnQyheYdpdEm8ytHMCtR7BdK0TF326wERQ0DMaU08zBnNTuoNYBKu6w1SnRXuYlK+37G3Aa2hwFdJZxzGr1mA7+upZIZCX4wqw9JKEegjWS1JmaqLS23CqgleRoTfSYT6u7rtAnpAOjnPvHqlQMgJUkq+yO3TfvV8dj6kDV61CBnwqbjFJ8+CWqGoerSIvhSiNQFrOa2bCVUrITyfJozOobPC4V79dOnsiMN1Kih4QNmrAsNuUyzA/4/KWiOKF0c5EEjZXItfEaBMuRX3GVJPdRoRbzXDiilpurqqj5r4oTmpDE1oLx5xFZSxa0z7pwRUUd9VKsAs8qQvK204CmbxVvmUySuLqjEAFWVnIPikpPQO8JrnpsTBCB9hN1EwmW4zJOcCPuT5zPu/ElrvUmWzfKcFEIYNN4AxdmAOKKQoMJWajkRwdQu45SElE+1NAiR4ZI3jXvzYKgQ1nIOi0z8ILCGQtrYar7MZltwBDWTY+8WlLBChLagbUt11lD6FZ+157jf/CSoVAEViFkIhyds0GEPJbquVgJmN4s+UGknVNCCAtFVJLw/37Ihch+oFGJtcuZe+0EpPHKghao2RRHa4DVqH91TU+jXdqZeSpgFtIjHTFfC+6EiBiX0dZy9B5WBchkmSbIlkpAXkhnqq5DArKpyGsYlsyzTcR8fqKmoiop4d8n787TlXjKr2UE2GXhAxCJZ5Y3v1FTaDSW4j+2s1QKE3jgJ0kASSBXXnI/V/8ctt64/U3g/M1Rwo6ZEc1D2cfyngTTtBIlYc82MfxRSssYvZKkVVNABZaEpjSdowkZBlSjLVJjlm2UCVXIQ94mOoiSqs/9O5Uo6s8SRMEUyrQ+4GQpVbrtN85dYIs4HozxRRmka4R90tllTnbR9kk72EHEzgU2BMlYMTvPbCBUxEnXdF+pbCaVQ1Zk7NOArA4UG9XaRwTljrjrlmkNWOUJG1ugZWlCTneBbWAIF1NkA1STf8tOq7TBAvBY2F53YDPmFhHPaVVthxZ1ks3NAP1oh3+5JxhZxxZhMIT0ctucpv0A1nU4mEwEqbaAmeqjJ94HTFHonIqEKlFq/ueO9JDSbgPN0KDhH2EJtBFW8eUGn8Ca46JPJdHqZTr1p2pyRQE2xUU1rqB2iJKSTswqK5jbloQJGO6nOPg3EI7uiiimphNb6/clERK9z201EEasxnRLBvGkDVYkKin0lQKHB6GXiTWnN4cJc2ot7zt/68k4pFLa+yYT7biKkujTtJrhMZLlsgIeakBenKQKJC76ToUhywiRC4YPo5/SVStYnWHVV3kn9bnpm1sfy8CQ10FSN60dOsvqSlIf8pHybmlIuTlPoX/KpGoqlF6CiCpfU0OSStnvEFLaXKTVQXNDvprjTS1IrYMo+ZhVUYX1PJ0KQF8G5qnhaePRu13SMxPKIpE2lU3vEmoqUUC1N1aqiv3aqpWUo/3M25SuYtvTpjnPHu0v9Da3t6v1FihyO5+rLKcvs8i61qX5Q5IQByM2tLq7C+hjVgRa6Li3yXOcEhNTB+dLAVG9ASkTdRaNKkhGXxW53PuPXLuU/w5/Odq2iBbta5O8OzVc73ZNS0DGL5Hy5MBOGyxl3mnxOOMo4BsnsAlVh4bLbbaG9rBAdlewuzGFcdsH237tbhY1GkgTf/7AFRWFZyLMhsTtKF4AqVTNKQaOyIBC2hvgPn2sYmih1Bo0AAAAASUVORK5CYII=";
+
+function base64ToBytes(b64: string): Uint8Array {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
 
 export interface Fonts {
   serif: PDFFont;
@@ -25,6 +39,7 @@ export interface Doc {
   pages: PDFPage[];
   page: PDFPage;
   y: number;
+  logoImage: PDFImage;
 }
 
 export interface InvestorInfo {
@@ -58,6 +73,18 @@ export interface TableSpec {
   noHeader?: boolean;
 }
 
+// Splits `total` into widths proportional to `weights`, forced to sum to
+// exactly `total` (the remainder is folded into the last column) — every
+// table/grid width call goes through this so its columns always add up to
+// exactly the page body width, never more, never less.
+export function colWidths(total: number, weights: number[]): number[] {
+  const sum = weights.reduce((a, b) => a + b, 0);
+  const widths = weights.map((w) => Math.round((total * w) / sum * 100) / 100);
+  const used = widths.reduce((a, b) => a + b, 0);
+  widths[widths.length - 1] = Math.round((widths[widths.length - 1] + (total - used)) * 100) / 100;
+  return widths;
+}
+
 export async function newDoc(): Promise<Doc> {
   const pdf = await PDFDocument.create();
   const fonts: Fonts = {
@@ -66,7 +93,8 @@ export async function newDoc(): Promise<Doc> {
     sans: await pdf.embedFont(StandardFonts.Helvetica),
     sansBold: await pdf.embedFont(StandardFonts.HelveticaBold),
   };
-  const doc = { pdf, fonts, pages: [], y: PAGE_H - MARGIN } as unknown as Doc;
+  const logoImage = await pdf.embedPng(base64ToBytes(LOGO_PNG_BASE64));
+  const doc = { pdf, fonts, pages: [], y: PAGE_H - MARGIN, logoImage } as unknown as Doc;
   addPage(doc);
   return doc;
 }
@@ -137,11 +165,11 @@ function cellColor(cell: Cell): RGB {
  * repeating the header row on the continuation page.
  */
 export function drawTable(doc: Doc, spec: TableSpec): void {
-  const { columns, rows, fontSize = 10, repeatHeaderOnBreak = true, noHeader = false } = spec;
+  const { columns, rows, fontSize = 8.5, repeatHeaderOnBreak = true, noHeader = false } = spec;
   const { sans, sansBold } = doc.fonts;
   const lineHeight = fontSize + 3;
-  const cellPadX = 6;
-  const cellPadY = 5;
+  const cellPadX = 4;
+  const cellPadY = 4;
 
   function rowHeight(cells: Cell[], bold: boolean): number {
     const font = bold ? sansBold : sans;
@@ -191,16 +219,16 @@ export function drawTable(doc: Doc, spec: TableSpec): void {
 // Reserves the vertical space a table would need, without drawing — used to
 // decide whether a "section header + table" pair should jump to a fresh page
 // together (avoids a lone header stranded at the bottom of a page).
-export function estimateTableHeight(doc: Doc, spec: Pick<TableSpec, "columns" | "rows">, fontSize = 10): number {
+export function estimateTableHeight(doc: Doc, spec: Pick<TableSpec, "columns" | "rows">, fontSize = 8.5): number {
   const { columns, rows } = spec;
   const { sans, sansBold } = doc.fonts;
   const lineHeight = fontSize + 3;
-  const cellPadY = 5;
+  const cellPadY = 4;
   function h(cells: Cell[], bold: boolean): number {
     const font = bold ? sansBold : sans;
     let maxLines = 1;
     cells.forEach((cell, i) => {
-      const lines = wrapText(cellText(cell), font, fontSize, columns[i].width - 12);
+      const lines = wrapText(cellText(cell), font, fontSize, columns[i].width - 8);
       maxLines = Math.max(maxLines, lines.length);
     });
     return maxLines * lineHeight + cellPadY * 2;
@@ -267,12 +295,27 @@ export function drawHeaderBlock(
   },
 ): void {
   const { serif, serifBold, sans } = doc.fonts;
-  const titleSize = 13;
-  drawTextRight(doc, title, { x: PAGE_W - MARGIN, y: doc.y - titleSize, font: serifBold, size: titleSize });
-  doc.y -= titleSize + 10;
+  const topY = doc.y;
 
-  const leftTopY = doc.y;
-  let ly = leftTopY;
+  // Logo, top-left.
+  const logoDrawW = 74;
+  const logoDims = doc.logoImage.scale(1);
+  const logoDrawH = (logoDims.height / logoDims.width) * logoDrawW;
+  doc.page.drawImage(doc.logoImage, { x: MARGIN, y: topY - logoDrawH, width: logoDrawW, height: logoDrawH });
+
+  // Title, right-aligned, vertically centered against the logo.
+  const titleSize = 12.5;
+  drawTextRight(doc, title, {
+    x: PAGE_W - MARGIN,
+    y: topY - logoDrawH / 2 - titleSize / 2 + 2,
+    font: serifBold,
+    size: titleSize,
+  });
+
+  doc.y = topY - Math.max(logoDrawH, titleSize) - 16;
+
+  // Investor name + address, left aligned, full width.
+  let ly = doc.y;
   const nameSize = 11;
   drawText(doc, investor.registeredName.toUpperCase(), { x: MARGIN, y: ly - nameSize, font: serif, size: nameSize });
   ly -= nameSize + 4;
@@ -281,41 +324,50 @@ export function drawHeaderBlock(
     drawText(doc, line, { x: MARGIN, y: ly - nameSize, font: serif, size: nameSize });
     ly -= nameSize + 4;
   }
+  doc.y = ly - 8;
 
-  const metaRows: [string, string][] = [
-    ["Page No.", ": 1 of 1"],
-    ["Issued Date", `: ${new Date().toISOString().slice(0, 10).split("-").reverse().join("-")}`],
-    ["Statement Type", `: ${statementType}`],
-    ["Statement Period", `: ${periodText}`],
-    ["Email Address", `: ${FUND_EMAIL}`],
-    ["Telephone No.", `: ${FUND_PHONE}`],
+  // Meta info: 2 label/value pairs per row, spanning the full body width.
+  const [labelW1, valW1, labelW2] = colWidths(BODY_W, [95, 160, 95, 155]);
+  const metaRows: [string, string, string, string][] = [
+    ["Page No.", "1 of 1", "Issued Date", new Date().toISOString().slice(0, 10).split("-").reverse().join("-")],
+    ["Statement Type", statementType, "Statement Period", periodText],
+    ["Email Address", FUND_EMAIL, "Telephone No.", FUND_PHONE],
   ];
   const metaSize = 10;
-  const metaLabelX = PAGE_W - MARGIN - 340;
-  const metaValueX = PAGE_W - MARGIN - 205;
-  let my = leftTopY;
-  for (const [label, value] of metaRows) {
-    drawText(doc, label, { x: metaLabelX, y: my - metaSize, font: sans, size: metaSize });
-    drawText(doc, value, { x: metaValueX, y: my - metaSize, font: sans, size: metaSize });
-    my -= metaSize + 3.5;
+  let my = doc.y;
+  for (const [l1, v1, l2, v2] of metaRows) {
+    let x = MARGIN;
+    drawText(doc, l1, { x, y: my - metaSize, font: sans, size: metaSize }); x += labelW1;
+    drawText(doc, `: ${v1}`, { x, y: my - metaSize, font: sans, size: metaSize }); x += valW1;
+    drawText(doc, l2, { x, y: my - metaSize, font: sans, size: metaSize }); x += labelW2;
+    drawText(doc, `: ${v2}`, { x, y: my - metaSize, font: sans, size: metaSize });
+    my -= metaSize + 5.5;
   }
-
-  doc.y = Math.min(ly, my) - 14;
+  doc.y = my - 12;
 }
 
 // rows: [[label, value, label, value], ...] — 4-column grid, 2 label/value pairs per row
 export function drawLabelValueGrid(doc: Doc, rows: [string, string, string, string][]): void {
-  const colWidths = [130, 210, 130, 210];
+  const colW = colWidths(BODY_W, [130, 210, 130, 210]);
   const { sans } = doc.fonts;
   const fontSize = 10;
-  const rowH = 24;
-  ensureSpace(doc, rowH * rows.length);
+  const lineHeight = fontSize + 3;
+  const padY = 7;
   for (const row of rows) {
+    const cellLines = row.map((text, i) => wrapText(text, sans, fontSize, colW[i] - 12));
+    const maxLines = Math.max(...cellLines.map((l) => l.length));
+    const rowH = maxLines * lineHeight + padY * 2 - 3;
+    ensureSpace(doc, rowH);
     let x = MARGIN;
     for (let i = 0; i < 4; i++) {
-      drawRect(doc, { x, y: doc.y - rowH, width: colWidths[i], height: rowH });
-      drawText(doc, row[i], { x: x + 6, y: doc.y - rowH / 2 - fontSize / 2 + 2, font: sans, size: fontSize });
-      x += colWidths[i];
+      drawRect(doc, { x, y: doc.y - rowH, width: colW[i], height: rowH });
+      const blockH = cellLines[i].length * lineHeight;
+      let ty = doc.y - (rowH - blockH) / 2 - fontSize + 1;
+      for (const line of cellLines[i]) {
+        drawText(doc, line, { x: x + 6, y: ty, font: sans, size: fontSize });
+        ty -= lineHeight;
+      }
+      x += colW[i];
     }
     doc.y -= rowH;
   }

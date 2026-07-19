@@ -15,9 +15,11 @@ from reportlab.lib.units import mm
 from reportlab.platypus import Paragraph, Table, TableStyle
 
 from pdf_common import (
+    BODY_W_MM,
     FONT_SANS_BOLD,
     InvestorInfo,
     build_with_footer,
+    col_widths,
     header_block,
     investor_block_with_account_type,
     notice_style,
@@ -66,13 +68,13 @@ def build_subscription_pdf(out_path, *, tx: dict, investor: InvestorInfo,
     data = [[Paragraph(c, table_header_style) for c in header]]
     for r in rows:
         data.append([Paragraph(str(c), table_cell_style) for c in r])
-    t = Table(data, colWidths=[28 * mm, 32 * mm, 32 * mm, 30 * mm, 32 * mm, 28 * mm], hAlign="LEFT")
+    t = Table(data, colWidths=col_widths(BODY_W_MM, [78, 86, 90, 82, 90, 78]), hAlign="LEFT")
     style = [
         ("GRID", (0, 0), (-1, -1), 0.6, colors.black),
         ("FONTNAME", (0, 0), (-1, 0), FONT_SANS_BOLD),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("LEFTPADDING", (0, 0), (-1, -1), 6), ("RIGHTPADDING", (0, 0), (-1, -1), 6),
-        ("TOPPADDING", (0, 0), (-1, -1), 5), ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+        ("LEFTPADDING", (0, 0), (-1, -1), 4), ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+        ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
     ]
     t.setStyle(TableStyle(style))
     flow.append(t)
