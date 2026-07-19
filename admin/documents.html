@@ -156,13 +156,29 @@
 <script src="../assets/js/statements-admin.js"></script>
 <script>
 (function(){
-  var DOCS=[
-    {date:'15 Jun 2026',name:'ZY-Invest Monthly Factsheet — 30 May 2026',file:'ZY-Invest_Monthly_Factsheet_-_30_May_2026.pdf',type:'Factsheet',scope:'Fund-wide',fy:'—',vis:'Fund',size:'212 KB'},
-    {date:'04 May 2026',name:'ZY-Invest Monthly Factsheet — 29 April 2026',file:'ZY-Invest_Monthly_Factsheet_-_29_April_2026.pdf',type:'Factsheet',scope:'Fund-wide',fy:'—',vis:'Fund',size:'212 KB'},
-    {date:'07 Apr 2026',name:'Redemption Statement — Ng Zhi Yao',file:'Redemption_Statement_-_Ng_Zhi_Yao.pdf',type:'Redemption Statement',scope:'Ng Zhi Yao',fy:'FY2023',vis:'Member',size:'142 KB'},
-    {date:'28 Mar 2026',name:'Account Statement — Tan Hui Mei',file:'Account_Statement_-_Tan_Hui_Mei.pdf',type:'Account Statement',scope:'Tan Hui Mei',fy:'FY2025',vis:'Member',size:'96 KB'},
-    {date:'06 Mar 2026',name:'Subscription Statement — Lim Wealth Trust',file:'Subscription_Statement_-_Lim_Wealth_Trust.pdf',type:'Subscription Statement',scope:'Lim Wealth Trust',fy:'FY2026',vis:'Member',size:'90 KB'}
-  ];
+  // Factsheet rows stay local/mock (out of scope for now — fund-level, not
+  // tied to an investor/transaction). Every other row is loaded live below
+  // from the real `statements` table so generated statements survive reload.
+  var DOCS=[];
+  var DB_TYPE_LABEL={'Subscription':'Subscription Statement','Redemption':'Redemption Statement','Dividend':'Dividend Statement','Annual':'Account Statement'};
+  async function loadDocs(){
+    if(typeof sb==='undefined'||!sb) return;
+    var res=await sb.from('statements').select('id,type,period_label,storage_path,file_name,generated_at,investor_id,profiles(full_name),fy_settings(label)').order('generated_at',{ascending:false});
+    if(res.error){ if(window.zyToast) zyToast('Load documents failed: '+res.error.message); return; }
+    var real=(res.data||[]).map(function(r){
+      var typeLabel=DB_TYPE_LABEL[r.type]||r.type;
+      var investor=r.profiles?(r.profiles.full_name||r.investor_id):r.investor_id;
+      return {
+        _id:r.id, storage_path:r.storage_path,
+        date:(new Date(r.generated_at)).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}),
+        name:typeLabel+' — '+investor, file:r.file_name, type:typeLabel, scope:investor,
+        fy:(r.fy_settings&&r.fy_settings.label)||r.period_label||'—', vis:'Member', size:'—'
+      };
+    });
+    var mock=DOCS.filter(function(d){ return !d._id; });
+    DOCS.length=0; real.forEach(function(d){DOCS.push(d);}); mock.forEach(function(d){DOCS.push(d);});
+    render();
+  }
   function us(s){ return s.replace(/[^A-Za-z0-9]+/g,'_').replace(/^_|_$/g,''); }
   function typePill(t){ var k=t.replace(' Statement',''); var c={'Factsheet':'tp-fact','Dividend':'tp-div','Subscription':'tp-sub','Redemption':'tp-red','Account':'tp-acct'}[k]||'tp-acct'; return '<span class="type-pill '+c+'">◆ '+k.toUpperCase()+'</span>'; }
   function visPill(v){ return '<span class="vis-pill '+(v==='Fund'?'fund':'member')+'">◆ '+v.toUpperCase()+'</span>'; }
@@ -180,17 +196,41 @@
     var head=document.getElementById('dmHeadChk'); head.checked=idxs.length>0&&idxs.every(function(i){return dmSel.has(i);});
     document.getElementById('dmBulkAll').checked=head.checked;
     dmBody.querySelectorAll('input[type=checkbox]').forEach(function(cb){ cb.addEventListener('change',function(){ var i=+cb.dataset.i; if(cb.checked)dmSel.add(i); else dmSel.delete(i); render(); }); });
-    dmBody.querySelectorAll('.dm-act button').forEach(function(b){ b.addEventListener('click',function(e){ e.stopPropagation(); var i=+b.dataset.i,a=b.dataset.act,d=DOCS[i]; if(a==='dl'){ zyToast('Downloading — '+d.file); } else if(a==='pv'){ zyToast('Preview — '+d.name); } else { var n=d.name; DOCS.splice(i,1); dmSel.clear(); render(); zyToast('Deleted — '+n); } }); });
+    dmBody.querySelectorAll('.dm-act button').forEach(function(b){ b.addEventListener('click',function(e){ e.stopPropagation(); var i=+b.dataset.i,a=b.dataset.act,d=DOCS[i];
+      if(a==='dl'||a==='pv'){
+        if(!d.storage_path){ zyToast((a==='dl'?'Downloading':'Preview')+' — '+(a==='dl'?d.file:d.name)); return; }
+        sb.storage.from('statements').createSignedUrl(d.storage_path,300).then(function(res){
+          if(res.error){ zyToast('Could not open file: '+res.error.message); return; }
+          window.open(res.data.signedUrl,'_blank');
+        });
+      } else if(d._id){
+        sb.from('statements').delete().eq('id',d._id).then(function(res){
+          if(res.error){ zyToast('Delete failed: '+res.error.message); return; }
+          sb.storage.from('statements').remove([d.storage_path]);
+          DOCS.splice(i,1); dmSel.clear(); render(); zyToast('Deleted — '+d.name);
+        });
+      } else {
+        var n=d.name; DOCS.splice(i,1); dmSel.clear(); render(); zyToast('Deleted — '+n);
+      }
+    }); });
   }
-  render();
+  loadDocs();
   ['dmSearch','dmType','dmFy','dmVis'].forEach(function(id){ document.getElementById(id).addEventListener('input',function(){ dmSel.clear(); render(); }); document.getElementById(id).addEventListener('change',function(){ dmSel.clear(); render(); }); });
   document.getElementById('dmClear').addEventListener('click',function(){ ['dmSearch','dmType','dmFy','dmVis'].forEach(function(id){ document.getElementById(id).value=''; }); dmSel.clear(); render(); });
   function toggleAll(on){ fIdx().forEach(function(i){ if(on)dmSel.add(i); else dmSel.delete(i); }); render(); }
   document.getElementById('dmHeadChk').addEventListener('change',function(){ toggleAll(this.checked); });
   document.getElementById('dmBulkAll').addEventListener('change',function(){ toggleAll(this.checked); });
   document.getElementById('dmBulkClear').addEventListener('click',function(){ dmSel.clear(); render(); });
-  document.getElementById('dmBulkDownload').addEventListener('click',function(){ zyToast('Downloading '+dmSel.size+' document'+(dmSel.size>1?'s':'')+'…'); });
-  document.getElementById('dmBulkDelete').addEventListener('click',function(){ var n=dmSel.size,keep=[]; DOCS.forEach(function(d,i){ if(!dmSel.has(i)) keep.push(d); }); DOCS.length=0; keep.forEach(function(d){DOCS.push(d);}); dmSel.clear(); render(); zyToast('Deleted '+n+' document'+(n>1?'s':'')); });
+  document.getElementById('dmBulkDownload').addEventListener('click',function(){
+    var items=Array.from(dmSel).map(function(i){return DOCS[i];});
+    items.forEach(function(d){ if(d.storage_path){ sb.storage.from('statements').createSignedUrl(d.storage_path,300).then(function(res){ if(!res.error) window.open(res.data.signedUrl,'_blank'); }); } });
+    zyToast('Downloading '+dmSel.size+' document'+(dmSel.size>1?'s':'')+'…');
+  });
+  document.getElementById('dmBulkDelete').addEventListener('click',async function(){
+    var n=dmSel.size, items=Array.from(dmSel).map(function(i){return DOCS[i];});
+    for(var k=0;k<items.length;k++){ var d=items[k]; if(d._id){ await sb.from('statements').delete().eq('id',d._id); await sb.storage.from('statements').remove([d.storage_path]); } }
+    var keep=[]; DOCS.forEach(function(d,i){ if(!dmSel.has(i)) keep.push(d); }); DOCS.length=0; keep.forEach(function(d){DOCS.push(d);}); dmSel.clear(); render(); zyToast('Deleted '+n+' document'+(n>1?'s':''));
+  });
   // ── Statement generation (real Supabase data + the generate-statement Edge Function) ──
   // Factsheet stays a manual mock upload (out of scope for the generator — it's
   // fund-level, not tied to an investor/transaction). Every other Document Type
@@ -300,14 +340,9 @@
       payload={ type:edgeType, investorId:investorId, fyId:duFy.value };
     }
     try{
-      var result=await zyGenerateStatement(payload, { button:this });
-      DOCS.unshift({
-        date:(new Date()).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}),
-        name:type+' — '+investorName(investorId),
-        file:result.file_name, type:type, scope:investorName(investorId),
-        fy:result.period_label||'—', vis:'Member', size:'—'
-      });
-      render(); zyModalClose();
+      await zyGenerateStatement(payload, { button:this });
+      await loadDocs();
+      zyModalClose();
     }catch(ex){ /* zyGenerateStatement already toasts the error */ }
   });
 })();
