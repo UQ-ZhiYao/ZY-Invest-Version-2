@@ -7,6 +7,18 @@
 <link rel="stylesheet" href="../../assets/css/dashboard.css">
 <link rel="stylesheet" href="../../assets/css/dashboard-portfolio.css">
 <script>if(location.search.indexOf("embed")!==-1)document.documentElement.classList.add("embed");</script>
+<style>
+/* Page-local shim: pages-performance.js's pgNtaHistory() (ported verbatim
+   from the member portal) renders markup using member-portal.css's .seg /
+   .acc classes. That stylesheet isn't part of the admin CSS bundle, so the
+   handful of rules it needs are reproduced here (copied from
+   test-mv/assets/css/member-portal.css) rather than editing the shared
+   admin CSS files. See the same pattern in admin/fund-overview.html. */
+.ph-xl h1 .acc{font-family:var(--font-display,'DM Serif Display',Georgia,serif);font-style:italic;font-weight:400;color:var(--blue);}
+.seg{display:flex;gap:2px;background:var(--gray-100);padding:3px;border-radius:var(--radius-sm);}
+.seg button{font:inherit;font-size:.76rem;font-weight:500;padding:4px 10px;border:none;background:none;border-radius:5px;color:var(--fg-3);cursor:pointer;transition:.15s;}
+.seg button.on{background:#fff;color:var(--fg-1);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+</style>
 </head>
 <body>
 <script>
@@ -165,15 +177,7 @@
     </aside>
 
     <!-- main -->
-    <main class="main">
-      <div class="ph-xl">
-        <h1><span class="ph-accent">NTA History</span></h1>
-        <p>NTA per unit over time, with daily NTA and Net Asset Value history.</p>
-      </div>
-      <div class="panel"><div class="panel-head"><h3>NTA per Unit</h3><div class="seg-ctrl"><button>1Y</button><button class="on">3Y</button><button>Max</button></div></div><div class="chart-flex"><div class="chart-main"><svg class="chart-svg" viewBox="0 0 560 215" preserveAspectRatio="none"><defs><linearGradient id="ntaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1565C0" stop-opacity="0.18"/><stop offset="1" stop-color="#1565C0" stop-opacity="0"/></linearGradient></defs><g class="grid"><line x1="0" y1="44" x2="560" y2="44"/><line x1="0" y1="94" x2="560" y2="94"/><line x1="0" y1="144" x2="560" y2="144"/><line x1="0" y1="193" x2="560" y2="193"/></g><path class="area" d="M0,172 C50,164 80,168 120,150 C170,128 200,138 250,116 C300,94 330,108 380,86 C430,62 470,74 520,48 C540,38 552,42 560,32 L560,215 L0,215 Z"/><path class="line" d="M0,172 C50,164 80,168 120,150 C170,128 200,138 250,116 C300,94 330,108 380,86 C430,62 470,74 520,48 C540,38 552,42 560,32"/><circle class="dot" cx="560" cy="32" r="4.5"/></svg><div class="float-tip" id="ntaTip" style="left:54%;top:32%;display:none;"><div class="ft-d">19 Mar 2026</div><div class="ft-v">RM 1.0245</div></div><div class="chart-xaxis"><span>FY23</span><span>FY24</span><span>FY25</span><span>FY26</span></div></div><div class="chart-side"><div class="cside"><div class="ck">Current NTA</div><div class="cv blue">RM 1.0245</div></div><div class="cside"><div class="ck">Inception NTA</div><div class="cv">RM 1.0000</div></div><div class="cside"><div class="ck">All-time High</div><div class="cv">RM 1.0258</div></div></div></div></div>
-      <div class="panel" style="margin-top:16px;"><div class="panel-head"><h3>Daily NTA &amp; Net Asset Value</h3><a>Download CSV →</a></div><table class="tbl"><thead><tr><th>Date</th><th class="td-right">NTA / Unit (RM)</th><th class="td-right">Net Asset Value (RM)</th><th class="td-right">Daily Change</th></tr></thead><tbody><tr><td>19 Mar 2026</td><td class="td-right">1.0245</td><td class="td-right">981,707</td><td class="td-right pos">+0.42%</td></tr><tr><td>18 Mar 2026</td><td class="td-right">1.0202</td><td class="td-right">977,586</td><td class="td-right pos">+0.18%</td></tr><tr><td>17 Mar 2026</td><td class="td-right">1.0184</td><td class="td-right">975,861</td><td class="td-right neg">−0.11%</td></tr><tr><td>16 Mar 2026</td><td class="td-right">1.0195</td><td class="td-right">976,915</td><td class="td-right pos">+0.27%</td></tr><tr><td>15 Mar 2026</td><td class="td-right">1.0168</td><td class="td-right">974,328</td><td class="td-right pos">+0.33%</td></tr><tr><td>14 Mar 2026</td><td class="td-right">1.0134</td><td class="td-right">971,070</td><td class="td-right neg">−0.08%</td></tr><tr><td>13 Mar 2026</td><td class="td-right">1.0142</td><td class="td-right">971,837</td><td class="td-right pos">+0.21%</td></tr></tbody></table></div>
-
-    </main>
+    <main class="main" id="mainContent"></main>
   </div>
 </div>
 
@@ -245,42 +249,6 @@
     document.addEventListener('click',function(e){ if(!wrap.contains(e.target)) wrap.classList.remove('open'); });
   })();
 
-  // NTA chart hover tooltip — only show on hover, follow the line
-  (function(){
-    var main=document.querySelector('.chart-main');
-    var svg=main && main.querySelector('.chart-svg');
-    var tip=document.getElementById('ntaTip');
-    if(!main||!svg||!tip) return;
-    var path=svg.querySelector('.line');
-    var dEl=tip.querySelector('.ft-d'), vEl=tip.querySelector('.ft-v');
-    var len=path.getTotalLength();
-    // map x (0..1) to a date + NTA value
-    var start=new Date(2023,0,1), end=new Date(2026,2,19);
-    function fmtDate(t){ var d=new Date(start.getTime()+(end-start)*t);
-      return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
-    function ntaAt(t){ var v=1.0003+(0.0242)*Math.pow(t,0.92); return 'RM '+v.toFixed(4); }
-    function move(e){
-      var r=svg.getBoundingClientRect();
-      var x=Math.min(Math.max((e.clientX-r.left)/r.width,0),1);
-      // find point on path at this x fraction (path x is monotonic with length here)
-      var pt=path.getPointAtLength(len*x);
-      var vb=svg.viewBox.baseVal;
-      var px=(pt.x/vb.width)*100, py=(pt.y/vb.height)*100;
-      tip.style.left=px+'%'; tip.style.top=(py-14)+'%';
-      dEl.textContent=fmtDate(x); vEl.textContent=ntaAt(x);
-    }
-    main.addEventListener('mouseenter',function(){ tip.style.display='block'; });
-    main.addEventListener('mousemove',move);
-    main.addEventListener('mouseleave',function(){ tip.style.display='none'; });
-  })();
-
-  // period toggle
-  document.querySelectorAll('.seg-ctrl').forEach(function(g){
-    g.querySelectorAll('button').forEach(function(b){
-      b.addEventListener('click',function(){ g.querySelectorAll('button').forEach(function(x){x.classList.remove('on');}); b.classList.add('on'); });
-    });
-  });
-
   // floating chat
   var fab=document.getElementById('chatFab'), min=document.getElementById('chatMin');
   var body=document.getElementById('chatBody'), input=document.getElementById('chatInput'), send=document.getElementById('chatSend');
@@ -300,6 +268,44 @@
 <script src="../../assets/js/member-notifications.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../../assets/js/supabase-auth.js"></script>
+<script src="../../assets/js/member-api.js"></script>
+<script src="../../assets/js/portal/shell.js"></script>
+<script src="../../assets/js/portal/charts.js"></script>
+<script src="../../assets/js/portal/admin-portal-shim.js"></script>
+<script src="../../assets/js/portal/pages-performance.js"></script>
 <script src="../../assets/js/auth-logout.js"></script>
+<script>
+var S = { page:'ntahistory', period:'ytd', txf:'all' };
+
+// Page init (waits for live Supabase data)
+loadLiveData().then(function(){
+  return Promise.allSettled([
+    (typeof mpLoadNtaDaily==='function') ? mpLoadNtaDaily() : Promise.resolve([]),
+    (typeof mpLoadNtaWeeklyOHLC==='function') ? mpLoadNtaWeeklyOHLC() : Promise.resolve([]),
+    (typeof mpLoadNtaMonthly==='function') ? mpLoadNtaMonthly() : Promise.resolve([]),
+    (typeof mpLoadNtaQuarterlyOHLC==='function') ? mpLoadNtaQuarterlyOHLC() : Promise.resolve([])
+  ]);
+}).then(function(results){
+  NTA_DAILY = (results[0].status==='fulfilled') ? (results[0].value||[]) : [];
+  NTA_DAILY_ERROR = (results[0].status==='fulfilled') ? null : ((results[0].reason&&results[0].reason.message)||'Unknown error');
+  if(NTA_DAILY_ERROR) console.warn('NTA daily load failed:', NTA_DAILY_ERROR);
+
+  NTA_WEEKLY_OHLC = (results[1].status==='fulfilled') ? (results[1].value||[]) : [];
+  NTA_WEEKLY_OHLC_ERROR = (results[1].status==='fulfilled') ? null : ((results[1].reason&&results[1].reason.message)||'Unknown error');
+  if(NTA_WEEKLY_OHLC_ERROR) console.warn('NTA weekly load failed:', NTA_WEEKLY_OHLC_ERROR);
+
+  NTA_MONTHLY = (results[2].status==='fulfilled') ? (results[2].value||[]) : [];
+  NTA_MONTHLY_ERROR = (results[2].status==='fulfilled') ? null : ((results[2].reason&&results[2].reason.message)||'Unknown error');
+  if(NTA_MONTHLY_ERROR) console.warn('NTA monthly load failed:', NTA_MONTHLY_ERROR);
+
+  NTA_QUARTERLY_OHLC = (results[3].status==='fulfilled') ? (results[3].value||[]) : [];
+  NTA_QUARTERLY_OHLC_ERROR = (results[3].status==='fulfilled') ? null : ((results[3].reason&&results[3].reason.message)||'Unknown error');
+  if(NTA_QUARTERLY_OHLC_ERROR) console.warn('NTA quarterly load failed:', NTA_QUARTERLY_OHLC_ERROR);
+}).catch(function(e){
+  console.warn('NTA History page data load failed:', e && e.message);
+}).finally(function(){
+  document.getElementById('mainContent').innerHTML=pgNtaHistory();renderNotifs();
+});
+</script>
 </body>
 </html>

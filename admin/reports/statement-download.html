@@ -167,12 +167,28 @@
     <!-- main -->
     <main class="main">
       <div class="ph-xl">
-        <h1><span class="ph-accent">Statement Download</span></h1>
-        <p>Download fund factsheets and audited annual reports.</p>
+        <h1><span class="ph-accent">Statements &amp; Reports</span></h1>
+        <p>Factsheets, annual reports and statements of account for this fund.</p>
       </div>
-      <div class="split" style="grid-template-columns:1fr 1fr;">
-        <div class="col-main"><div class="panel"><div class="panel-head"><h3>Factsheets</h3></div><div class="res-list" style="padding:8px;"><a class="res-item"><span class="ri-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/></svg></span><span class="ri-t"><b>Factsheet — March 2026</b><span>PDF · 248 KB</span></span><span class="ri-arr">↓</span></a><a class="res-item"><span class="ri-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/></svg></span><span class="ri-t"><b>Factsheet — February 2026</b><span>PDF · 241 KB</span></span><span class="ri-arr">↓</span></a><a class="res-item"><span class="ri-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/></svg></span><span class="ri-t"><b>Factsheet — January 2026</b><span>PDF · 256 KB</span></span><span class="ri-arr">↓</span></a><a class="res-item"><span class="ri-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/></svg></span><span class="ri-t"><b>Factsheet — December 2025</b><span>PDF · 239 KB</span></span><span class="ri-arr">↓</span></a></div></div></div>
-        <div class="col-main"><div class="panel"><div class="panel-head"><h3>Annual Reports</h3></div><div class="res-list" style="padding:8px;"><a class="res-item"><span class="ri-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/></svg></span><span class="ri-t"><b>Annual Report FY2025</b><span>PDF · 3.4 MB · audited</span></span><span class="ri-arr">↓</span></a><a class="res-item"><span class="ri-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/></svg></span><span class="ri-t"><b>Annual Report FY2024</b><span>PDF · 3.1 MB · audited</span></span><span class="ri-arr">↓</span></a><a class="res-item"><span class="ri-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/></svg></span><span class="ri-t"><b>Annual Report FY2023</b><span>PDF · 2.8 MB · audited</span></span><span class="ri-arr">↓</span></a><a class="res-item"><span class="ri-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/></svg></span><span class="ri-t"><b>Annual Report FY2022</b><span>PDF · 2.5 MB · audited</span></span><span class="ri-arr">↓</span></a></div></div></div>
+
+      <!--
+        Presentational only (see admin-portal-shim.js include below for showToast).
+        Unlike the other report pages in this admin console — which are wired to
+        live Supabase data — this page has no single "current investor" to scope
+        a document list to: it's an admin viewing the FUND, not a member viewing
+        their own account. The member portal's pgStatements() renders a member's
+        own generated documents (the DOCS global, populated per logged-in member);
+        there's no equivalent "my documents" concept for a fund-wide admin view.
+        (A real, investor-agnostic, all-statements view already exists and is
+        live at admin/documents.html, backed by the public.statements Supabase
+        table — that page is out of scope here.) So the list below keeps the same
+        kind of representative placeholder entries the previous 2-column mock
+        used (Factsheets + Annual Reports), just re-skinned into the unified
+        single-list visual pattern from test-mv's desktop/statements.html.
+      -->
+      <div class="panel">
+        <div class="panel-head"><h3>Available Documents</h3><span style="font-size:.8rem;color:var(--fg-3)" id="stmtCount"></span></div>
+        <div id="stmtList"></div>
       </div>
 
     </main>
@@ -303,5 +319,39 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../../assets/js/supabase-auth.js"></script>
 <script src="../../assets/js/auth-logout.js"></script>
+<!-- showToast() shim: delegates to the admin console's zyToast if present (parent
+     fund-view.html frame), otherwise no-ops. See comment above the panel for why
+     this page renders a static placeholder list instead of live Supabase data. -->
+<script src="../../assets/js/portal/admin-portal-shim.js"></script>
+<script>
+(function(){
+  // Representative placeholder documents — same entries the previous 2-column
+  // mock used (Factsheets + Annual Reports), reshaped into pgStatements()'s
+  // {n, type, date, sz} row shape and rendered as a single unified list.
+  var STMT_DOCS=[
+    {n:'Factsheet — March 2026',    type:'Factsheet',     date:'31 Mar 2026', sz:'PDF · 248 KB'},
+    {n:'Factsheet — February 2026', type:'Factsheet',     date:'28 Feb 2026', sz:'PDF · 241 KB'},
+    {n:'Factsheet — January 2026',  type:'Factsheet',     date:'31 Jan 2026', sz:'PDF · 256 KB'},
+    {n:'Factsheet — December 2025', type:'Factsheet',     date:'31 Dec 2025', sz:'PDF · 239 KB'},
+    {n:'Annual Report FY2025',      type:'Annual Report', date:'30 Jun 2025', sz:'PDF · 3.4 MB · audited'},
+    {n:'Annual Report FY2024',      type:'Annual Report', date:'30 Jun 2024', sz:'PDF · 3.1 MB · audited'},
+    {n:'Annual Report FY2023',      type:'Annual Report', date:'30 Jun 2023', sz:'PDF · 2.8 MB · audited'},
+    {n:'Annual Report FY2022',      type:'Annual Report', date:'30 Jun 2022', sz:'PDF · 2.5 MB · audited'}
+  ];
+  var dBg={'Statement':'var(--blue-bg)','Annual Report':'var(--green-bg)','Factsheet':'var(--orange-bg)'};
+  var dC={'Statement':'var(--blue)','Annual Report':'var(--green)','Factsheet':'var(--orange)'};
+  var rows=STMT_DOCS.map(function(d,i){
+    return '<div style="display:flex;align-items:center;gap:14px;padding:13px 20px;'+(i<STMT_DOCS.length-1?'border-bottom:1px solid var(--gray-100)':'')+';transition:.15s" onmouseover="this.style.background=\'var(--gray-50)\'" onmouseout="this.style.background=\'\'">'
+      +'<div style="width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:'+dBg[d.type]+';color:'+dC[d.type]+'">'
+      +'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/></svg></div>'
+      +'<div style="flex:1;min-width:0"><div style="font-size:.88rem;font-weight:600;color:var(--fg-1)">'+d.n+'</div><div style="font-size:.74rem;color:var(--fg-3);margin-top:2px">'+d.date+' · '+d.sz+'</div></div>'
+      +'<span class="pill" style="flex-shrink:0;background:'+dBg[d.type]+';color:'+dC[d.type]+'">'+d.type+'</span>'
+      +'<button onclick="showToast(\'Downloading: '+d.n.replace(/'/g,'')+'\')" style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:#fff;font-size:.8rem;font-weight:600;color:var(--fg-2);cursor:pointer;flex-shrink:0;transition:.15s" onmouseover="this.style.color=\'var(--blue)\';this.style.borderColor=\'var(--blue)\'" onmouseout="this.style.color=\'var(--fg-2)\';this.style.borderColor=\'var(--border)\'">'
+      +'<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download</button></div>';
+  }).join('');
+  document.getElementById('stmtList').innerHTML=rows;
+  document.getElementById('stmtCount').textContent=STMT_DOCS.length+' documents';
+})();
+</script>
 </body>
 </html>

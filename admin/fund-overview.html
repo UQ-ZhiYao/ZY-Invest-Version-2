@@ -16,6 +16,29 @@
 <link rel="stylesheet" href="../assets/css/dashboard.css">
 <link rel="stylesheet" href="../assets/css/dashboard-portfolio.css">
 <link rel="stylesheet" href="../assets/css/admin.css">
+<style>
+/* Page-local shim: pages-fund-overview.js (ported verbatim from the member
+   portal) renders markup using member-portal.css's .fov-* / .acc classes.
+   That stylesheet isn't part of the admin CSS bundle, so the handful of
+   rules it needs are reproduced here (copied from
+   test-mv/assets/css/member-portal.css) rather than editing the shared
+   admin CSS files. If/when the other admin pages being ported from the
+   portal in parallel need the same classes, consider consolidating this
+   into admin.css instead of duplicating it per page. */
+.fov-section-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--fg-3);margin-bottom:10px;}
+.fov-about{font-size:.88rem;color:var(--fg-2);line-height:1.75;margin:0;}
+.fov-kfgrid-full{display:grid;grid-template-columns:repeat(4,1fr);gap:0;}
+.fov-kfgrid-full .fov-kf{padding:14px 16px;}
+.fov-kf{} .fov-kl{font-size:.88rem;font-weight:600;color:#000;margin-bottom:4px;}
+.fov-kv{font-size:.88rem;font-weight:700;color:#000;}
+.fov-ku{font-size:.68rem;font-weight:400;color:var(--fg-3);}
+.fov-2col{display:grid;grid-template-columns:1fr 1fr;gap:40px 10%;width:100%;}
+.fov-cc{display:flex;flex-direction:column;}
+.fov-ct{font-size:.92rem;font-weight:700;color:var(--fg-2);margin-bottom:2px;}
+.fov-csub{font-size:.72rem;font-weight:500;color:#9CA3AF;margin-bottom:8px;}
+.fov-ch{height:360px;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;overflow:hidden;}
+.ph-xl h1 .acc{font-family:var(--font-display,'DM Serif Display',Georgia,serif);font-style:italic;font-weight:400;color:var(--blue);}
+</style>
 
 </head>
 <body>
@@ -91,43 +114,7 @@
     <a class="adm-nav adm-signout" id="admSignout" href="#"><span class="ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>Sign out</a>
   </aside>
   <main class="adm-main">
-<div class="ph" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
-  <div><h1>Fund Overview <span style="font-size:0.7rem;font-weight:600;color:var(--blue);background:var(--blue-bg);padding:4px 10px;border-radius:999px;vertical-align:middle;margin-left:8px;">Editable</span></h1><p>Edit the mandate, key facts and headline figures shown to members. Saved to Supabase.</p></div>
-  <button class="btn-fill btn-sm" id="foSave" style="white-space:nowrap;">Save Changes</button>
-</div>
-
-<div id="foLoading" style="padding:40px;text-align:center;color:var(--fg-3);">Loading fund overview…</div>
-
-<div id="foForm" style="display:none;">
-  <div class="row-2 wide-left">
-    <div class="panel"><div class="panel-head"><h3>About the Fund</h3><span class="td-sub">One paragraph per line</span></div>
-      <div style="padding:16px;">
-        <textarea id="fo-about" rows="10" style="width:100%;font:inherit;font-size:0.9rem;line-height:1.6;color:var(--fg-1);border:1.5px solid var(--border);border-radius:var(--radius-md);padding:13px 15px;resize:vertical;box-sizing:border-box;"></textarea>
-      </div>
-    </div>
-    <div class="panel"><div class="panel-head"><h3>Key Facts</h3></div>
-      <div style="padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:13px;">
-        <div class="field"><label>Inception</label><input type="text" id="fo-inception"></div>
-        <div class="field"><label>Domicile</label><input type="text" id="fo-domicile"></div>
-        <div class="field"><label>Base Currency</label><input type="text" id="fo-currency"></div>
-        <div class="field"><label>NTA Frequency</label><input type="text" id="fo-ntafreq"></div>
-        <div class="field"><label>Strategy</label><input type="text" id="fo-strategy"></div>
-        <div class="field"><label>Universe</label><input type="text" id="fo-universe"></div>
-        <div class="field"><label>Dealing</label><input type="text" id="fo-dealing"></div>
-        <div class="field"><label>Reporting</label><input type="text" id="fo-reporting"></div>
-      </div>
-    </div>
-  </div>
-  <div class="panel mt16"><div class="panel-head"><h3>Headline Figures</h3><span class="td-sub">Shown in the metric row</span></div>
-    <div style="padding:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:13px;">
-      <div class="field"><label>Current NTA</label><input type="text" id="fo-nta" placeholder="RM 1.0245"></div>
-      <div class="field"><label>Annualised IRR</label><input type="text" id="fo-irr" placeholder="+14.8%"></div>
-      <div class="field"><label>Holdings</label><input type="text" id="fo-holdings" placeholder="18"></div>
-      <div class="field"><label>Track Record</label><input type="text" id="fo-track" placeholder="4 yrs"></div>
-    </div>
-  </div>
-  <p style="font-size:0.78rem;color:var(--fg-3);margin-top:14px;">Last updated: <span id="fo-updated">—</span></p>
-</div>
+<div id="mainContent"></div>
   </main>
 </div>
 <div class="modal-scrim" id="modalScrim"></div>
@@ -137,41 +124,69 @@
 <script src="../assets/js/auth-logout.js"></script>
 <script src="../assets/js/admin-shell.js"></script>
 <script src="../assets/js/admin-supabase.js"></script>
+<script src="../assets/js/member-api.js"></script>
+<script src="../assets/js/portal/shell.js"></script>
+<script src="../assets/js/portal/charts.js"></script>
+<script src="../assets/js/portal/admin-portal-shim.js"></script>
+<script src="../assets/js/portal/pages-fund-overview.js"></script>
 <script>
-(function(){
-  var FIELDS={ 'fo-about':'about_html','fo-inception':'inception','fo-domicile':'domicile','fo-currency':'base_currency','fo-ntafreq':'nta_frequency','fo-strategy':'strategy','fo-universe':'universe','fo-dealing':'dealing','fo-reporting':'reporting','fo-nta':'current_nta','fo-irr':'annualised_irr','fo-holdings':'holdings','fo-track':'track_record' };
-  function gv(id){ return document.getElementById(id); }
+// Read-only fund overview, ported from the member portal's
+// desktop/fund-overview.html. This page used to be an editable form that
+// wrote to the `fund_overview` Supabase table; that table/UI is retired —
+// this now just renders pgFundOverview() against live Supabase data,
+// same as the member-facing page.
+//
+// Workaround: pgFundOverview() (shared, unmodified) reads a global
+// NTA_PRICE. In the member portal that's set by pages-subscribe-redeem.js
+// (loaded alongside pages-fund-overview.js there), which isn't relevant to
+// — and wasn't ported for — the admin console. Define/derive it here from
+// the same live NTA data the member portal uses, instead of touching the
+// shared portal scripts.
+var S = { page:'fundoverview', period:'ytd', txf:'all' };
+var NTA_PRICE = 0;
+loadLiveData().then(function(){
+  NTA_PRICE = (typeof NTA !== 'undefined' && NTA && NTA.all && NTA.all.v && NTA.all.v.length) ? NTA.all.v[NTA.all.v.length - 1] : 0;
+  return Promise.allSettled([
+    (typeof mpLoadBalanceSheet==='function') ? mpLoadBalanceSheet() : Promise.resolve([]),
+    (typeof mpLoadInceptionDate==='function') ? mpLoadInceptionDate() : Promise.resolve(null),
+    (typeof mpLoadIncomeStatement==='function') ? mpLoadIncomeStatement() : Promise.resolve([]),
+    (typeof mpLoadNtaMonthly==='function') ? mpLoadNtaMonthly() : Promise.resolve([]),
+    (typeof mpLoadDistributionsByFy==='function') ? mpLoadDistributionsByFy() : Promise.resolve([])
+  ]);
+}).then(function(results){
+  BALANCE_SHEET = (results[0].status==='fulfilled') ? (results[0].value||[]) : [];
+  BALANCE_SHEET_ERROR = (results[0].status==='fulfilled') ? null : ((results[0].reason&&results[0].reason.message)||'Unknown error');
+  if(BALANCE_SHEET_ERROR) console.warn('Balance sheet load failed:', BALANCE_SHEET_ERROR);
 
-  async function load(){
-    if(typeof sb==='undefined' || !sb){ document.getElementById('foLoading').textContent='Auth service not configured — set your Supabase URL and key in supabase-auth.js.'; return; }
-    var res=await sb.from('fund_overview').select('*').eq('id',1).single();
-    if(res.error){ document.getElementById('foLoading').textContent='Could not load fund overview: '+res.error.message+' (did you run the SQL?)'; return; }
-    var d=res.data;
-    for(var id in FIELDS){ var v=d[FIELDS[id]]; if(gv(id)) gv(id).value=(v==null?'':v); }
-    var u=d.updated_at?new Date(d.updated_at).toLocaleString('en-GB'):'—';
-    document.getElementById('fo-updated').textContent=u;
-    document.getElementById('foLoading').style.display='none';
-    document.getElementById('foForm').style.display='block';
-  }
+  INCEPTION_DATE = (results[1].status==='fulfilled') ? results[1].value : null;
+  if(results[1].status!=='fulfilled') console.warn('Inception date load failed:', results[1].reason && results[1].reason.message);
 
-  async function save(){
-    if(typeof sb==='undefined' || !sb){ if(window.zyToast) zyToast('Auth service not configured'); return; }
-    var upd={};
-    for(var id in FIELDS){ if(gv(id)) upd[FIELDS[id]]=gv(id).value; }
-    var btn=document.getElementById('foSave'); btn.disabled=true; btn.textContent='Saving…';
-    var res=await sb.from('fund_overview').update(upd).eq('id',1);
-    btn.disabled=false; btn.textContent='Save Changes';
-    if(res.error){ if(window.zyToast) zyToast('Save failed: '+res.error.message); return; }
-    if(window.zyToast) zyToast('Fund overview saved — members will see the update.');
-    load();
-  }
+  INCOME_STATEMENT = (results[2].status==='fulfilled') ? (results[2].value||[]) : [];
+  INCOME_STATEMENT_ERROR = (results[2].status==='fulfilled') ? null : ((results[2].reason&&results[2].reason.message)||'Unknown error');
+  if(INCOME_STATEMENT_ERROR) console.warn('Income statement load failed:', INCOME_STATEMENT_ERROR);
 
-  window.addEventListener('DOMContentLoaded',function(){
-    document.getElementById('foSave').addEventListener('click',save);
-    // admin-supabase.js runs its own guard; load after a tick so sb session is ready
-    setTimeout(load, 400);
-  });
-})();
+  NTA_MONTHLY = (results[3].status==='fulfilled') ? (results[3].value||[]) : [];
+  NTA_MONTHLY_ERROR = (results[3].status==='fulfilled') ? null : ((results[3].reason&&results[3].reason.message)||'Unknown error');
+  if(NTA_MONTHLY_ERROR) console.warn('NTA monthly load failed:', NTA_MONTHLY_ERROR);
+
+  DIST_BY_FY = (results[4].status==='fulfilled') ? (results[4].value||[]) : [];
+  DIST_BY_FY_ERROR = (results[4].status==='fulfilled') ? null : ((results[4].reason&&results[4].reason.message)||'Unknown error');
+  if(DIST_BY_FY_ERROR) console.warn('Distribution breakdown load failed:', DIST_BY_FY_ERROR);
+
+  // Ratio Analysis (drives Cash Reserve Ratio + Distribution History's
+  // dividend yield) needs INCOME_STATEMENT/BALANCE_SHEET already resolved
+  // above, so it's chained as its own step rather than run in parallel.
+  return (typeof mpLoadRatioAnalysis==='function') ? mpLoadRatioAnalysis(INCOME_STATEMENT, BALANCE_SHEET) : Promise.resolve([]);
+}).then(function(ratios){
+  RATIO_ANALYSIS = ratios || [];
+  RATIO_ANALYSIS_ERROR = null;
+}).catch(function(e){
+  RATIO_ANALYSIS = [];
+  RATIO_ANALYSIS_ERROR = (e && e.message) || 'Unknown error';
+  console.warn('Ratio analysis load failed (fund overview):', RATIO_ANALYSIS_ERROR);
+}).finally(function(){
+  document.getElementById('mainContent').innerHTML=pgFundOverview();renderNotifs();
+});
 </script>
 
 </body>

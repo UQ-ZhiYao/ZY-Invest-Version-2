@@ -6,6 +6,15 @@
 <title>Factsheet — ZY-Invest</title>
 <link rel="stylesheet" href="../../assets/css/dashboard.css">
 <link rel="stylesheet" href="../../assets/css/dashboard-portfolio.css">
+<style>
+/* pgFactsheet() (ported from test-mv's member portal) uses two classes from
+   test-mv's member-portal.css that this admin console's stylesheets don't
+   define. Scoped here rather than touching the shared dashboard*.css files. */
+#mainContent .seg{display:flex;gap:2px;background:var(--gray-100);padding:3px;border-radius:var(--radius-sm);}
+#mainContent .seg button{font:inherit;font-size:.76rem;font-weight:500;padding:4px 10px;border:none;background:none;border-radius:5px;color:var(--fg-3);cursor:pointer;transition:.15s;}
+#mainContent .seg button.on{background:#fff;color:var(--fg-1);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+#mainContent .ph-xl h1 .acc{font-family:var(--font-display);font-style:italic;font-weight:400;color:var(--blue);}
+</style>
 <script>if(location.search.indexOf("embed")!==-1)document.documentElement.classList.add("embed");</script>
 </head>
 <body>
@@ -166,31 +175,10 @@
 
     <!-- main -->
     <main class="main">
-      <div class="ph-xl">
-        <h1><span class="ph-accent">Factsheet</span></h1>
-        <p>Holdings allocation across each financial year, plus the latest downloadable factsheet.</p>
-      </div>
-      <div class="panel"><div class="panel-head"><h3>Holdings Allocation by Financial Year</h3></div>
-        <div style="padding:20px;">
-          <div style="display:flex;flex-wrap:wrap;gap:14px 20px;margin-bottom:18px;font-size:0.8rem;color:var(--fg-2);"><span style="display:flex;align-items:center;gap:7px;"><span style="width:11px;height:11px;border-radius:3px;background:var(--blue)"></span>Healthcare</span><span style="display:flex;align-items:center;gap:7px;"><span style="width:11px;height:11px;border-radius:3px;background:var(--green)"></span>Financials</span><span style="display:flex;align-items:center;gap:7px;"><span style="width:11px;height:11px;border-radius:3px;background:var(--orange)"></span>Technology</span><span style="display:flex;align-items:center;gap:7px;"><span style="width:11px;height:11px;border-radius:3px;background:#7E57C2"></span>Telcos</span><span style="display:flex;align-items:center;gap:7px;"><span style="width:11px;height:11px;border-radius:3px;background:var(--gray-400)"></span>Other &amp; Cash</span></div>
-        <div style="margin-bottom:18px;">
-          <div style="display:flex;justify-content:space-between;font-size:0.84rem;margin-bottom:7px;"><span style="font-weight:600;color:var(--fg-1);">FY2025</span><span style="color:var(--fg-3);">NTA RM 1.0210</span></div>
-          <div class="dist-stack" style="height:18px;"><span style="width:28%;background:var(--blue)"></span><span style="width:22%;background:var(--green)"></span><span style="width:15%;background:var(--orange)"></span><span style="width:11%;background:#7E57C2"></span><span style="width:24%;background:var(--gray-400)"></span></div>
-        </div>
-        <div style="margin-bottom:18px;">
-          <div style="display:flex;justify-content:space-between;font-size:0.84rem;margin-bottom:7px;"><span style="font-weight:600;color:var(--fg-1);">FY2024</span><span style="color:var(--fg-3);">NTA RM 0.9920</span></div>
-          <div class="dist-stack" style="height:18px;"><span style="width:25%;background:var(--blue)"></span><span style="width:24%;background:var(--green)"></span><span style="width:12%;background:var(--orange)"></span><span style="width:13%;background:#7E57C2"></span><span style="width:26%;background:var(--gray-400)"></span></div>
-        </div>
-        <div style="margin-bottom:18px;">
-          <div style="display:flex;justify-content:space-between;font-size:0.84rem;margin-bottom:7px;"><span style="font-weight:600;color:var(--fg-1);">FY2023</span><span style="color:var(--fg-3);">NTA RM 0.9710</span></div>
-          <div class="dist-stack" style="height:18px;"><span style="width:22%;background:var(--blue)"></span><span style="width:26%;background:var(--green)"></span><span style="width:9%;background:var(--orange)"></span><span style="width:15%;background:#7E57C2"></span><span style="width:28%;background:var(--gray-400)"></span></div>
-        </div>
-        <div style="margin-bottom:18px;">
-          <div style="display:flex;justify-content:space-between;font-size:0.84rem;margin-bottom:7px;"><span style="font-weight:600;color:var(--fg-1);">FY2022</span><span style="color:var(--fg-3);">NTA RM 0.9650</span></div>
-          <div class="dist-stack" style="height:18px;"><span style="width:18%;background:var(--blue)"></span><span style="width:28%;background:var(--green)"></span><span style="width:6%;background:var(--orange)"></span><span style="width:16%;background:#7E57C2"></span><span style="width:32%;background:var(--gray-400)"></span></div>
-        </div>
-        </div>
-      </div>
+      <!-- Ported live from test-mv/desktop/factsheet.html: pgFactsheet() (Sector/Product
+           toggle + interactive per-FY stacked chart + full holdings table) renders itself
+           into this container — see the init script near the end of <body>. -->
+      <div id="mainContent"></div>
       <div class="panel" style="margin-top:16px;"><div class="panel-head"><h3>Download Factsheet</h3></div><div class="res-list" style="padding:8px;"><a class="res-item"><span class="ri-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/></svg></span><span class="ri-t"><b>Fund Factsheet — March 2026</b><span>PDF · 248 KB · updated monthly</span></span><span class="ri-arr">↓</span></a><a class="res-item"><span class="ri-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/></svg></span><span class="ri-t"><b>Fund Factsheet — February 2026</b><span>PDF · 241 KB</span></span><span class="ri-arr">↓</span></a><a class="res-item"><span class="ri-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/></svg></span><span class="ri-t"><b>Fund Factsheet — January 2026</b><span>PDF · 256 KB</span></span><span class="ri-arr">↓</span></a></div></div>
 
     </main>
@@ -320,6 +308,27 @@
 <script src="../../assets/js/member-notifications.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../../assets/js/supabase-auth.js"></script>
+<script src="../../assets/js/member-api.js"></script>
+<script src="../../assets/js/portal/shell.js"></script>
+<script src="../../assets/js/portal/charts.js"></script>
+<script src="../../assets/js/portal/admin-portal-shim.js"></script>
+<script src="../../assets/js/portal/pages-factsheet.js"></script>
 <script src="../../assets/js/auth-logout.js"></script>
+<script>
+// Page init (waits for live Supabase data) — mirrors test-mv/desktop/factsheet.html
+var S = { page:'factsheet', period:'ytd', txf:'all' };
+loadLiveData().then(function(){
+  return (typeof mpLoadHoldingsByFy==='function') ? mpLoadHoldingsByFy() : Promise.resolve([]);
+}).then(function(byFy){
+  HOLDINGS_BY_FY = byFy || [];
+  HOLDINGS_BY_FY_ERROR = null;
+}).catch(function(e){
+  HOLDINGS_BY_FY = [];
+  HOLDINGS_BY_FY_ERROR = (e && e.message) || 'Unknown error';
+  console.warn('Holdings by FY load failed:', HOLDINGS_BY_FY_ERROR);
+}).finally(function(){
+  document.getElementById('mainContent').innerHTML=pgFactsheet();renderNotifs();
+});
+</script>
 </body>
 </html>

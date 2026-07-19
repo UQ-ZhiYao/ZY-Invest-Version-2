@@ -154,54 +154,130 @@
       var shMyP=document.getElementById('shMyPct'); if(shMyP) shMyP.textContent=myRow?pct(myUnits,totalUnits)+' of fund':'Not a unitholder';
       var shMyR=document.getElementById('shMyRank'); if(shMyR) shMyR.textContent=myRank?'#'+myRank+' of '+rows.length:'—';
     }
-    var shLC=document.getElementById('shListCount'); if(shLC) shLC.textContent=rows.length+' unitholders';
+    // NOTE: metric cards (shCount/shTotalUnits/shMyUnits/etc, computed above) are
+    // intentionally LIVE-SNAPSHOT-ONLY — they always reflect current holdings and do
+    // NOT change when an FY tab below is selected. Only the "Unitholders" table (and
+    // its shListCount caption) becomes FY-aware. This keeps the fund-level headline
+    // numbers stable/authoritative while still letting admins browse historical,
+    // cumulative-to-FY-end shareholder snapshots in the table.
 
-    // 8. Compute max ownership for bar scaling
-    var maxOwnPct = rows.length > 0
-      ? Math.max.apply(null, rows.map(function(r){ return totalUnits>0?(r.units/totalUnits*100):0; }))
-      : 100;
-    if(maxOwnPct <= 0) maxOwnPct = 100;
+    // 8. Render table for a given row-set (current snapshot OR a selected FY bucket).
+    //    Re-derives totals/bar-scaling from whatever rows are passed in, so ownership
+    //    % and bar widths are always relative to the row-set actually on screen.
+    function renderTable(tblRows){
+      var tblTotalUnits=tblRows.reduce(function(s,r){return s+r.units;},0);
 
-    // 8. Render table
-    var tbody=document.getElementById('shBody');
-    if(!rows.length){
-      tbody.innerHTML='<tr><td colspan="6" style="padding:24px;color:var(--fg-3);">No unitholders found. Approve capital injections to see data here.</td></tr>';
-      return;
-    }
-    tbody.innerHTML='';
-    rows.forEach(function(r,i){
-      var rank=i+1;
-      var ownPct=totalUnits>0?(r.units/totalUnits*100):0;
-      // bar scaled: max holder fills bar to 100%, others proportional
-      var barWidth=maxOwnPct>0?Math.min(100,(ownPct/maxOwnPct*100)).toFixed(1):'0';
+      var shLC=document.getElementById('shListCount'); if(shLC) shLC.textContent=tblRows.length+' unitholders';
 
-      // Privacy masking for member pages
-      var displayName;
-      if(isAdminPage){
-        displayName=r.name;
-      } else if(r.isMe){
-        displayName=r.name+'<span class="you-badge">You</span>';
-      } else if(r.isDir){
-        displayName=r.name+'<span class="dir-badge">Director</span>';
-      } else {
-        displayName='<span class="masked-name">****</span>';
+      var maxOwnPct = tblRows.length > 0
+        ? Math.max.apply(null, tblRows.map(function(r){ return tblTotalUnits>0?(r.units/tblTotalUnits*100):0; }))
+        : 100;
+      if(maxOwnPct <= 0) maxOwnPct = 100;
+
+      var tbody=document.getElementById('shBody');
+      if(!tblRows.length){
+        tbody.innerHTML='<tr><td colspan="6" style="padding:24px;color:var(--fg-3);">No unitholders found for this period.</td></tr>';
+        return;
       }
+      tbody.innerHTML='';
+      tblRows.forEach(function(r,i){
+        var rank=i+1;
+        var ownPct=tblTotalUnits>0?(r.units/tblTotalUnits*100):0;
+        // bar scaled: max holder fills bar to 100%, others proportional
+        var barWidth=maxOwnPct>0?Math.min(100,(ownPct/maxOwnPct*100)).toFixed(1):'0';
 
-      var position = r.isDir ? 'Director' : 'Shareholder';
+        // Privacy masking for member pages
+        var displayName;
+        if(isAdminPage){
+          displayName=r.name;
+        } else if(r.isMe){
+          displayName=r.name+'<span class="you-badge">You</span>';
+        } else if(r.isDir){
+          displayName=r.name+'<span class="dir-badge">Director</span>';
+        } else {
+          displayName='<span class="masked-name">****</span>';
+        }
 
-      var avClass=(isAdminPage||r.isMe||r.isDir)?'sh-av':'sh-av hidden-av';
-      var avContent=(!isAdminPage&&!r.isMe&&!r.isDir)?'?':initials(r.name);
+        var position = r.isDir ? 'Director' : 'Shareholder';
 
-      var tr=document.createElement('tr');
-      if(r.isMe) tr.style.background='var(--blue-bg)';
-      tr.innerHTML=
-        '<td style="font-weight:600;color:var(--fg-3);width:40px;">'+rank+'</td>'+
-        '<td><div style="display:flex;align-items:center;gap:10px;"><div class="'+avClass+'">'+avContent+'</div><span>'+displayName+'</span></div></td>'+
-        '<td>'+position+'</td>'+
-        '<td>'+fmtDate(r.since)+'</td>'+
-        '<td class="r">'+fmt(r.units)+'</td>'+
-        '<td class="r"><div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;"><div class="own-bar-wrap"><div class="own-bar" style="width:'+barWidth+'%"></div></div>'+ownPct.toFixed(2)+'%</div></td>';
-      tbody.appendChild(tr);
-    });
+        var avClass=(isAdminPage||r.isMe||r.isDir)?'sh-av':'sh-av hidden-av';
+        var avContent=(!isAdminPage&&!r.isMe&&!r.isDir)?'?':initials(r.name);
+
+        var tr=document.createElement('tr');
+        if(r.isMe) tr.style.background='var(--blue-bg)';
+        tr.innerHTML=
+          '<td style="font-weight:600;color:var(--fg-3);width:40px;">'+rank+'</td>'+
+          '<td><div style="display:flex;align-items:center;gap:10px;"><div class="'+avClass+'">'+avContent+'</div><span>'+displayName+'</span></div></td>'+
+          '<td>'+position+'</td>'+
+          '<td>'+fmtDate(r.since)+'</td>'+
+          '<td class="r">'+fmt(r.units)+'</td>'+
+          '<td class="r"><div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;"><div class="own-bar-wrap"><div class="own-bar" style="width:'+barWidth+'%"></div></div>'+ownPct.toFixed(2)+'%</div></td>';
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Render the current (live) snapshot by default — same as pre-FY-tab behavior.
+    renderTable(rows);
+
+    // 9. FY tabs — cumulative-to-FY-end shareholder snapshots, sourced from
+    //    mpLoadShareholdersByFy() (assets/js/member-api.js: joins fy_settings +
+    //    capital_injection, one bucket per FY with units_held as of that FY's end).
+    //    Re-uses the SAME renderTable()/masking/avatar logic above — just swaps the
+    //    row source, so the metric cards and privacy rules are untouched.
+    var fyBuckets=[]; // [{fy:'FY2025', rows:[...]}, ...] oldest → newest
+    if(typeof mpLoadShareholdersByFy==='function'){
+      try{
+        var byFy=await mpLoadShareholdersByFy();
+        fyBuckets=(byFy||[]).map(function(b){
+          var fyRows=(b.list||[]).map(function(s){
+            var uid=s.investor_id;
+            var prof=(uid&&profiles[uid])||{name:s.full_name||'—',role:'member'};
+            return {
+              uid:uid,
+              name:prof.name||s.full_name||'—',
+              role:prof.role,
+              units:parseFloat(s.units_held)||0,
+              since:s.joined_date,
+              isMe:!!(uid&&myUid&&uid.trim()===myUid.trim()),
+              isDir:prof.role==='admin'
+            };
+          }).filter(function(r){ return r.units>0.0001; }); // fully-redeemed by FY end
+          fyRows.sort(function(a,b){ return b.units-a.units; });
+          return {fy:b.fy, rows:fyRows};
+        });
+      }catch(e){
+        console.error('Shareholders by FY load failed (FY tabs disabled, "Current" still works):', e);
+      }
+    }
+
+    // 10. Build the FY tab bar (static "Current" button already in the HTML) and
+    //     wire click-to-switch. Fails soft: if fyBuckets is empty (query error, no
+    //     fy_settings rows, or member-api.js not loaded) only "Current" is shown.
+    var fyTabsEl=document.getElementById('shFyTabs');
+    if(fyTabsEl && fyBuckets.length){
+      fyBuckets.forEach(function(b){
+        var btn=document.createElement('button');
+        btn.type='button';
+        btn.textContent=b.fy;
+        btn.setAttribute('data-fy',b.fy);
+        fyTabsEl.appendChild(btn);
+      });
+    }
+    if(fyTabsEl){
+      fyTabsEl.addEventListener('click',function(e){
+        var btn=e.target;
+        while(btn&&btn!==fyTabsEl&&btn.tagName!=='BUTTON') btn=btn.parentNode;
+        if(!btn||btn===fyTabsEl) return;
+        var already=btn.classList.contains('on');
+        if(already) return;
+        var siblings=fyTabsEl.querySelectorAll('button');
+        for(var i=0;i<siblings.length;i++) siblings[i].classList.remove('on');
+        btn.classList.add('on');
+        var fy=btn.getAttribute('data-fy');
+        if(!fy){ renderTable(rows); return; } // "Current" = live snapshot
+        var bucket=fyBuckets.filter(function(b){ return b.fy===fy; })[0];
+        renderTable(bucket?bucket.rows:[]);
+      });
+    }
   });
 })();
