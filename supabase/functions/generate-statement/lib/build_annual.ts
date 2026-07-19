@@ -1,6 +1,7 @@
 import {
-  newDoc, drawHeaderBlock, drawLabelValueGrid, drawSectionHeader, drawNoticeHeader, drawKeptTogether,
-  drawFooterOnAllPages, drawText, drawTable, rm, redIfNegative, fmt, colWidths, BODY_W, InvestorInfo, Cell,
+  newDoc, drawHeaderBlock, drawLabelValueGrid, drawSectionHeader, drawKeptTogether, drawImportantNotices,
+  drawFooterOnAllPages, drawText, drawTable, rm, redIfNegative, fmt, colWidths, BODY_W, SECTION_GAP, CONTENT_SIZE,
+  InvestorInfo, Cell,
 } from "./common.ts";
 import { xirr, daysHeldText, CapitalInjectionRow, DistributionRow } from "./compute.ts";
 
@@ -44,17 +45,17 @@ export async function buildAnnualPdf({
     ["Email Address", investor.email, "Bank Account No.", investor.bankAccountNo],
     [investor.nomineeLabel, investor.nomineeValue, "Total Days Held", daysHeldText(investor.issuedDate, fyEnd)],
   ]);
-  doc.y -= 4;
+  doc.y -= SECTION_GAP;
 
   // --- Principal Transaction: itemised ------------------------------------
   const pW = colWidths(BODY_W, [74, 70, 118, 86, 78, 78]);
   const pCols = [
     { header: "Date", width: pW[0] },
     { header: "Description", width: pW[1] },
-    { header: "Cashflow @ Price", width: pW[2] },
-    { header: "Avg. Cost (RM)", width: pW[3] },
-    { header: "Units Issued", width: pW[4] },
-    { header: "Units Balanced", width: pW[5] },
+    { header: "Cashflow @ Price", width: pW[2], align: "right" as const },
+    { header: "Avg. Cost (RM)", width: pW[3], align: "right" as const },
+    { header: "Units Issued", width: pW[4], align: "right" as const },
+    { header: "Units Balanced", width: pW[5], align: "right" as const },
   ];
   let runUnits = openingUnits, runCost = openingCost;
   const pRows: Cell[][] = [
@@ -74,17 +75,17 @@ export async function buildAnnualPdf({
   }
   pRows.push([dstr(fyEnd), "Closing", "-", closingUnits > 0 ? rm(closingCost / closingUnits, 4) : "-", "-", fmt(closingUnits)]);
   drawKeptTogether(doc, "Principal Transaction", { columns: pCols, rows: pRows });
-  doc.y -= 4;
+  doc.y -= SECTION_GAP;
 
   // --- Dividend Transaction: itemised --------------------------------------
   const dW = colWidths(BODY_W, [76, 96, 60, 88, 96, 92]);
   const dCols = [
     { header: "Date", width: dW[0] },
     { header: "Description", width: dW[1] },
-    { header: "DPS", width: dW[2] },
-    { header: "Holding Units", width: dW[3] },
-    { header: "Dividend Amount", width: dW[4] },
-    { header: "Balanced (RM)", width: dW[5] },
+    { header: "DPS", width: dW[2], align: "right" as const },
+    { header: "Holding Units", width: dW[3], align: "right" as const },
+    { header: "Dividend Amount", width: dW[4], align: "right" as const },
+    { header: "Balanced (RM)", width: dW[5], align: "right" as const },
   ];
   let runningDiv = 0;
   const dRows: Cell[][] = [[dstr(fyStart), "Opening", "", "", "", rm(0)]];
@@ -98,7 +99,7 @@ export async function buildAnnualPdf({
   const dividendReceived = Math.round(runningDiv * 100) / 100;
   dRows.push([dstr(fyEnd), "Closing", "", "", "", rm(dividendReceived)]);
   drawKeptTogether(doc, "Dividend Transaction", { columns: dCols, rows: dRows });
-  doc.y -= 4;
+  doc.y -= SECTION_GAP;
 
   // --- Account Summary -------------------------------------------------------
   const marketValue = Math.round(closingUnits * latestNavPerUnit * 100) / 100;
@@ -111,9 +112,9 @@ export async function buildAnnualPdf({
   const sW = colWidths(BODY_W, [174, 103, 103, 126]);
   const sCols = [
     { header: "Fields", width: sW[0] },
-    { header: "Holding Units", width: sW[1] },
-    { header: "Average Price", width: sW[2] },
-    { header: "Total Value (RM)", width: sW[3] },
+    { header: "Holding Units", width: sW[1], align: "right" as const },
+    { header: "Average Price", width: sW[2], align: "right" as const },
+    { header: "Total Value (RM)", width: sW[3], align: "right" as const },
   ];
   const sRows: Cell[][] = [
     ["( a )  Latest Fund Price", fmt(closingUnits), fmt(latestNavPerUnit, 6), rm(marketValue)],
@@ -121,12 +122,12 @@ export async function buildAnnualPdf({
       redIfNegative(-costBasis, 2)],
   ];
   drawKeptTogether(doc, "Account Summary", { columns: sCols, rows: sRows });
-  doc.y -= 6;
+  doc.y -= SECTION_GAP;
 
   const plainW = colWidths(BODY_W, [376, 130]);
   const plainCols = [
     { header: "", width: plainW[0] },
-    { header: "", width: plainW[1] },
+    { header: "", width: plainW[1], align: "right" as const },
   ];
   const plainRows = [
     ["( c )  Unrealized Profit & Loss:  ( a ) + ( b )", rm(unrealizedPl)],
@@ -142,10 +143,10 @@ export async function buildAnnualPdf({
   const { sans } = doc.fonts;
   drawText(doc,
     "*Powered by Financial Formulation of Internal Rate of Return (IRR) & Mathematical Algorithm Newton's method",
-    { x: 45, y: doc.y - 10, font: sans, size: 8.5 });
+    { x: 45, y: doc.y - 10, font: sans, size: CONTENT_SIZE - 1 });
   doc.y -= 18;
 
-  drawNoticeHeader(doc, "IMPORTANT NOTICES");
+  drawImportantNotices(doc);
   drawFooterOnAllPages(doc);
   return doc.pdf.save();
 }

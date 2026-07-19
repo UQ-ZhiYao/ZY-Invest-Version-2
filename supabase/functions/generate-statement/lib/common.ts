@@ -13,6 +13,13 @@ export const BLACK = rgb(0, 0, 0);
 export const FUND_EMAIL = "nzy.invest@gmail.com";
 export const FUND_PHONE = "(+60)11 - 1121 8085";
 
+// One consistent body font size for every table (transactional tables, the
+// investor info grid) and the header's meta info list — headings
+// (title/section headers) are exempt, they're deliberately larger.
+export const CONTENT_SIZE = 9.5;
+// Vertical gap between one table/section and the next — "1 line" of space.
+export const SECTION_GAP = 16;
+
 // ZY-Invest logo (assets/img/logo.png, trimmed + downsized to 212x180 and
 // palette-quantized so it can be inlined here as one self-contained module —
 // no extra file, no network fetch at render time).
@@ -64,6 +71,7 @@ export type Cell = string | { text: string; color: RGB };
 export interface Column {
   header: string;
   width: number;
+  align?: "left" | "right";
 }
 export interface TableSpec {
   columns: Column[];
@@ -165,7 +173,7 @@ function cellColor(cell: Cell): RGB {
  * repeating the header row on the continuation page.
  */
 export function drawTable(doc: Doc, spec: TableSpec): void {
-  const { columns, rows, fontSize = 8.5, repeatHeaderOnBreak = true, noHeader = false } = spec;
+  const { columns, rows, fontSize = CONTENT_SIZE, repeatHeaderOnBreak = true, noHeader = false } = spec;
   const { sans, sansBold } = doc.fonts;
   const lineHeight = fontSize + 3;
   const cellPadX = 4;
@@ -187,12 +195,17 @@ export function drawTable(doc: Doc, spec: TableSpec): void {
     let x = MARGIN;
     cells.forEach((cell, i) => {
       const w = columns[i].width;
+      const align = columns[i].align || "left";
       drawRect(doc, { x, y: topY - h, width: w, height: h });
       const lines = wrapText(cellText(cell), font, fontSize, w - cellPadX * 2);
       const blockH = lines.length * lineHeight;
       let ty = topY - (h - blockH) / 2 - fontSize + 1;
       for (const line of lines) {
-        drawText(doc, line, { x: x + cellPadX, y: ty, font, size: fontSize, color: cellColor(cell) });
+        if (align === "right") {
+          drawTextRight(doc, line, { x: x + w - cellPadX, y: ty, font, size: fontSize, color: cellColor(cell) });
+        } else {
+          drawText(doc, line, { x: x + cellPadX, y: ty, font, size: fontSize, color: cellColor(cell) });
+        }
         ty -= lineHeight;
       }
       x += w;
@@ -219,7 +232,7 @@ export function drawTable(doc: Doc, spec: TableSpec): void {
 // Reserves the vertical space a table would need, without drawing — used to
 // decide whether a "section header + table" pair should jump to a fresh page
 // together (avoids a lone header stranded at the bottom of a page).
-export function estimateTableHeight(doc: Doc, spec: Pick<TableSpec, "columns" | "rows">, fontSize = 8.5): number {
+export function estimateTableHeight(doc: Doc, spec: Pick<TableSpec, "columns" | "rows">, fontSize = CONTENT_SIZE): number {
   const { columns, rows } = spec;
   const { sans, sansBold } = doc.fonts;
   const lineHeight = fontSize + 3;
@@ -297,25 +310,31 @@ export function drawHeaderBlock(
   const { serif, serifBold, sans } = doc.fonts;
   const topY = doc.y;
 
-  // Logo, top-left.
-  const logoDrawW = 74;
+  // Logo, top-left, small.
+  const logoDrawW = 42;
   const logoDims = doc.logoImage.scale(1);
   const logoDrawH = (logoDims.height / logoDims.width) * logoDrawW;
   doc.page.drawImage(doc.logoImage, { x: MARGIN, y: topY - logoDrawH, width: logoDrawW, height: logoDrawH });
 
-  // Title, right-aligned, vertically centered against the logo.
+  // Two columns below the logo: investor name/address on the left,
+  // statement meta info on the right. The title sits on the logo's row,
+  // centered over the right column.
+  const [leftColW, rightColW] = colWidths(BODY_W, [270, 235]);
+  const rightColX = MARGIN + leftColW;
+
   const titleSize = 12.5;
-  drawTextRight(doc, title, {
-    x: PAGE_W - MARGIN,
+  const titleW = serifBold.widthOfTextAtSize(title, titleSize);
+  drawText(doc, title, {
+    x: rightColX + (rightColW - titleW) / 2,
     y: topY - logoDrawH / 2 - titleSize / 2 + 2,
     font: serifBold,
     size: titleSize,
   });
 
-  doc.y = topY - Math.max(logoDrawH, titleSize) - 16;
+  const rowTopY = topY - Math.max(logoDrawH, titleSize) - 14;
 
-  // Investor name + address, left aligned, full width.
-  let ly = doc.y;
+  // Left: investor name + address, stacked.
+  let ly = rowTopY;
   const nameSize = 11;
   drawText(doc, investor.registeredName.toUpperCase(), { x: MARGIN, y: ly - nameSize, font: serif, size: nameSize });
   ly -= nameSize + 4;
@@ -324,33 +343,96 @@ export function drawHeaderBlock(
     drawText(doc, line, { x: MARGIN, y: ly - nameSize, font: serif, size: nameSize });
     ly -= nameSize + 4;
   }
-  doc.y = ly - 8;
 
-  // Meta info: 2 label/value pairs per row, spanning the full body width.
-  const [labelW1, valW1, labelW2] = colWidths(BODY_W, [95, 160, 95, 155]);
-  const metaRows: [string, string, string, string][] = [
-    ["Page No.", "1 of 1", "Issued Date", new Date().toISOString().slice(0, 10).split("-").reverse().join("-")],
-    ["Statement Type", statementType, "Statement Period", periodText],
-    ["Email Address", FUND_EMAIL, "Telephone No.", FUND_PHONE],
+  // Right: meta info, one label/value pair per line (wraps if a value is long).
+  const metaLabelW = 95;
+  const metaRows: [string, string][] = [
+    ["Page No.", "1 of 1"],
+    ["Issued Date", new Date().toISOString().slice(0, 10).split("-").reverse().join("-")],
+    ["Statement Type", statementType],
+    ["Statement Period", periodText],
+    ["Email Address", FUND_EMAIL],
+    ["Telephone No.", FUND_PHONE],
   ];
-  const metaSize = 10;
-  let my = doc.y;
-  for (const [l1, v1, l2, v2] of metaRows) {
-    let x = MARGIN;
-    drawText(doc, l1, { x, y: my - metaSize, font: sans, size: metaSize }); x += labelW1;
-    drawText(doc, `: ${v1}`, { x, y: my - metaSize, font: sans, size: metaSize }); x += valW1;
-    drawText(doc, l2, { x, y: my - metaSize, font: sans, size: metaSize }); x += labelW2;
-    drawText(doc, `: ${v2}`, { x, y: my - metaSize, font: sans, size: metaSize });
-    my -= metaSize + 5.5;
+  const metaSize = CONTENT_SIZE;
+  const metaLineHeight = metaSize + 3;
+  const valueMaxW = rightColW - metaLabelW;
+  let my = rowTopY;
+  for (const [label, value] of metaRows) {
+    drawText(doc, label, { x: rightColX, y: my - metaSize, font: sans, size: metaSize });
+    const lines = wrapText(`: ${value}`, sans, metaSize, valueMaxW);
+    let vy = my - metaSize;
+    for (const line of lines) {
+      drawText(doc, line, { x: rightColX + metaLabelW, y: vy, font: sans, size: metaSize });
+      vy -= metaLineHeight;
+    }
+    my -= Math.max(metaSize + 4.5, (lines.length - 1) * metaLineHeight + metaSize + 4.5);
   }
-  doc.y = my - 12;
+
+  doc.y = Math.min(ly, my) - 12;
+}
+
+const NOTICE_ITEMS: [string, string][] = [
+  ["Confidentiality", "This statement contains personal data and is intended solely for the recipient. Please do not share this document with any third parties."],
+  ["Discrepancies", 'Please review all figures carefully. Any discrepancies or "untally" figures must be reported to us immediately; failure to do so may result in the recipient bearing any associated losses.'],
+  ["Digital Statements", "Effective 1st January 2026, all future portfolio statements will be provided exclusively via App ZY-Invest."],
+];
+
+function estimateNoticesHeight(doc: Doc): number {
+  const { sans, sansBold } = doc.fonts;
+  const size = 9.5;
+  const lineHeight = size + 4;
+  const headingH = 30; // matches drawNoticeHeader's own vertical consumption
+  let itemsH = 0;
+  for (let i = 0; i < NOTICE_ITEMS.length; i++) {
+    const [label, text] = NOTICE_ITEMS[i];
+    const lead = `${i + 1}.  ${label}: `;
+    const leadW = sansBold.widthOfTextAtSize(lead, size);
+    const lines = wrapText(text, sans, size, BODY_W - leadW);
+    itemsH += Math.max(lines.length * lineHeight + 2, lineHeight);
+  }
+  return headingH + itemsH;
+}
+
+// Always sits at the bottom of whichever page ends up being the last page —
+// never immediately trailing the last table with a cramped or awkward gap.
+// If there's blank space left on the current page, that space moves to sit
+// ABOVE the notices instead of below them; if the current page is too full,
+// the whole block moves to a fresh page instead of splitting.
+export function drawImportantNotices(doc: Doc): void {
+  const bottomY = MARGIN + 24;
+  const totalH = estimateNoticesHeight(doc);
+  const targetTopY = bottomY + totalH;
+  if (doc.y < targetTopY) {
+    addPage(doc);
+  }
+  doc.y = targetTopY;
+
+  drawNoticeHeader(doc, "IMPORTANT NOTICES");
+  const { sans, sansBold } = doc.fonts;
+  const size = 9.5;
+  const lineHeight = size + 4;
+  for (let i = 0; i < NOTICE_ITEMS.length; i++) {
+    const [label, text] = NOTICE_ITEMS[i];
+    const lead = `${i + 1}.  ${label}: `;
+    const leadW = sansBold.widthOfTextAtSize(lead, size);
+    const lines = wrapText(text, sans, size, BODY_W - leadW);
+    const itemH = lines.length * lineHeight + 2;
+    drawText(doc, lead, { x: MARGIN, y: doc.y - size, font: sansBold, size });
+    let ty = doc.y;
+    for (const line of lines) {
+      drawText(doc, line, { x: MARGIN + leadW, y: ty - size, font: sans, size });
+      ty -= lineHeight;
+    }
+    doc.y -= Math.max(itemH, lineHeight);
+  }
 }
 
 // rows: [[label, value, label, value], ...] — 4-column grid, 2 label/value pairs per row
 export function drawLabelValueGrid(doc: Doc, rows: [string, string, string, string][]): void {
   const colW = colWidths(BODY_W, [130, 210, 130, 210]);
   const { sans } = doc.fonts;
-  const fontSize = 10;
+  const fontSize = CONTENT_SIZE;
   const lineHeight = fontSize + 3;
   const padY = 7;
   for (const row of rows) {

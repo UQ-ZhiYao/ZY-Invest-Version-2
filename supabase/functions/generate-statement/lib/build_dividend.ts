@@ -1,6 +1,6 @@
 import {
-  newDoc, drawHeaderBlock, drawLabelValueGrid, drawSectionHeader, drawNoticeHeader, drawKeptTogether,
-  drawFooterOnAllPages, drawText, rm, colWidths, BODY_W, InvestorInfo, Cell,
+  newDoc, drawHeaderBlock, drawLabelValueGrid, drawSectionHeader, drawKeptTogether, drawImportantNotices,
+  drawFooterOnAllPages, drawText, rm, colWidths, BODY_W, SECTION_GAP, CONTENT_SIZE, InvestorInfo, Cell,
 } from "./common.ts";
 import { DistributionRow } from "./compute.ts";
 
@@ -25,17 +25,17 @@ export async function buildDividendPdf(
     ["Phone Number", investor.phone, "Bank Name", investor.bankName],
     ["Email Address", investor.email, "Bank Account No.", investor.bankAccountNo],
   ]);
-  doc.y -= 4;
+  doc.y -= SECTION_GAP;
 
   const w = colWidths(BODY_W, [76, 106, 80, 49, 49, 61, 84]);
   const columns = [
     { header: "Date", width: w[0] },
     { header: "Description", width: w[1] },
-    { header: "Holding Units", width: w[2] },
-    { header: "EPS", width: w[3] },
-    { header: "DPR", width: w[4] },
-    { header: "DPS", width: w[5] },
-    { header: "Dividend Amount", width: w[6] },
+    { header: "Holding Units", width: w[2], align: "right" as const },
+    { header: "EPS", width: w[3], align: "right" as const },
+    { header: "DPR", width: w[4], align: "right" as const },
+    { header: "DPS", width: w[5], align: "right" as const },
+    { header: "Dividend Amount", width: w[6], align: "right" as const },
   ];
   let totalDps = 0, totalAmount = 0;
   const rows = distributions.map((d) => {
@@ -53,10 +53,10 @@ export async function buildDividendPdf(
   drawKeptTogether(doc, "Dividend Details", { columns, rows });
   const { sans } = doc.fonts;
   drawText(doc, "Notes: EPS: Earning Per Share ; DPR: Dividend Payout Ratio ; DPS: Dividend Per Share",
-    { x: 45, y: doc.y - 12, font: sans, size: 8.5 });
+    { x: 45, y: doc.y - 12, font: sans, size: CONTENT_SIZE - 1 });
   doc.y -= 20;
 
-  drawNoticeHeader(doc, "IMPORTANT NOTICES");
+  drawImportantNotices(doc);
   drawFooterOnAllPages(doc);
   return doc.pdf.save();
 }

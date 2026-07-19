@@ -20,9 +20,10 @@ from pdf_common import (
     InvestorInfo,
     build_with_footer,
     col_widths,
+    footer_style,
     header_block,
     investor_block_name_first,
-    notice_style,
+    important_notices,
     rm,
     section_header,
     table_cell_style,
@@ -67,6 +68,7 @@ def build_dividend_pdf(out_path, *, distributions: list[dict], investor: Investo
         ("GRID", (0, 0), (-1, -2), 0.6, colors.black),
         ("BOX", (0, 0), (-1, -1), 0.6, colors.black),
         ("LINEABOVE", (0, -1), (-1, -1), 0.6, colors.black),
+        ("ALIGN", (2, 0), (6, -1), "RIGHT"),
         ("SPAN", (0, -1), (4, -1)),
         ("ALIGN", (0, -1), (0, -1), "CENTER"),
         ("FONTNAME", (0, 0), (-1, 0), FONT_SANS_BOLD),
@@ -77,10 +79,10 @@ def build_dividend_pdf(out_path, *, distributions: list[dict], investor: Investo
     flow.append(t)
     flow.append(Paragraph(
         "Notes: EPS: Earning Per Share ; DPR: Dividend Payout Ratio ; DPS: Dividend Per Share",
-        table_cell_style,
+        footer_style,
     ))
 
-    flow.append(Paragraph("IMPORTANT NOTICES", notice_style))
+    flow.extend(important_notices())
     build_with_footer(out_path, flow)
 
 

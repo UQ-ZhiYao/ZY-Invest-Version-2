@@ -26,11 +26,13 @@ from pdf_common import (
     BODY_W_MM,
     FONT_SANS_BOLD,
     InvestorInfo,
+    SECTION_GAP_MM,
     build_with_footer,
     col_widths,
+    footer_style,
     header_block,
     investor_block_with_account_type,
-    notice_style,
+    important_notices,
     red_if_negative,
     rm,
     section_header,
@@ -100,6 +102,7 @@ def build_annual_pdf(
         ("GRID", (0, 0), (-1, -1), 0.6, colors.black),
         ("FONTNAME", (0, 0), (-1, 0), FONT_SANS_BOLD),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("ALIGN", (2, 0), (5, -1), "RIGHT"),
         ("LEFTPADDING", (0, 0), (-1, -1), 4), ("RIGHTPADDING", (0, 0), (-1, -1), 4),
         ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
     ]))
@@ -130,6 +133,7 @@ def build_annual_pdf(
         ("GRID", (0, 0), (-1, -1), 0.6, colors.black),
         ("FONTNAME", (0, 0), (-1, 0), FONT_SANS_BOLD),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("ALIGN", (2, 0), (5, -1), "RIGHT"),
         ("LEFTPADDING", (0, 0), (-1, -1), 4), ("RIGHTPADDING", (0, 0), (-1, -1), 4),
         ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
     ]))
@@ -158,11 +162,12 @@ def build_annual_pdf(
         ("GRID", (0, 0), (-1, -1), 0.6, colors.black),
         ("FONTNAME", (0, 0), (-1, 0), FONT_SANS_BOLD),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("ALIGN", (1, 0), (3, -1), "RIGHT"),
         ("LEFTPADDING", (0, 0), (-1, -1), 4), ("RIGHTPADDING", (0, 0), (-1, -1), 4),
         ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
     ]))
     flow.append(KeepTogether([section_header("Account Summary"), t3]))
-    flow.append(Spacer(1, 3 * mm))
+    flow.append(Spacer(1, SECTION_GAP_MM * mm))
 
     plain_rows = [
         ("( c )  Unrealized Profit & Loss:  ( a ) + ( b )", rm(unrealized_pl)),
@@ -186,10 +191,10 @@ def build_annual_pdf(
     flow.append(Paragraph(
         "*Powered by Financial Formulation of Internal Rate of Return (IRR) &amp; "
         "Mathematical Algorithm Newton's method",
-        table_cell_style,
+        footer_style,
     ))
 
-    flow.append(Paragraph("IMPORTANT NOTICES", notice_style))
+    flow.extend(important_notices())
     build_with_footer(out_path, flow)
 
 
