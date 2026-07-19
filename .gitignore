@@ -1,0 +1,4 @@
+scripts/statements/.env
+scripts/statements/output/
+__pycache__/
+*.pyc
