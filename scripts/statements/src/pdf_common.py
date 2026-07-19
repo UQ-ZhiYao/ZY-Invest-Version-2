@@ -26,11 +26,18 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import mm
 from reportlab.lib.utils import ImageReader
-from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Table, TableStyle
+from reportlab.platypus import Flowable, Image, Paragraph, SimpleDocTemplate, Table, TableStyle
 
 PAGE_SIZE = A4
 MARGIN = 16 * mm
 BODY_W_MM = PAGE_SIZE[0] / mm - 2 * (MARGIN / mm)
+
+# One consistent body font size for every table (transactional tables, the
+# investor info grid) and the header's meta info list — headings
+# (title/section headers) are exempt, they're deliberately larger.
+CONTENT_SIZE = 9.5
+# Vertical gap between one table/section and the next — "1 line" of space.
+SECTION_GAP_MM = 5.6  # ~16pt, matches the TypeScript port's SECTION_GAP
 
 LOGO_PATH = Path(__file__).resolve().parents[3] / "assets" / "img" / "logo.png"
 
@@ -49,14 +56,14 @@ section_style = ParagraphStyle("section", fontName=FONT_SANS, fontSize=12.5, lea
                                 spaceBefore=10, spaceAfter=6)
 notice_style = ParagraphStyle("notice", fontName=FONT_SANS_BOLD, fontSize=11, leading=14,
                                spaceBefore=14)
-notice_item_style = ParagraphStyle("notice_item", fontName=FONT_SANS, fontSize=9.5, leading=13.5,
+notice_item_style = ParagraphStyle("notice_item", fontName=FONT_SANS, fontSize=CONTENT_SIZE, leading=13,
                                     leftIndent=32 * mm, firstLineIndent=-32 * mm, spaceAfter=4)
-meta_label_style = ParagraphStyle("meta_label", fontName=FONT_SANS, fontSize=10, leading=13)
-meta_value_style = ParagraphStyle("meta_value", fontName=FONT_SANS, fontSize=10, leading=13)
-cell_label_style = ParagraphStyle("cell_label", fontName=FONT_SANS, fontSize=10, leading=13)
-cell_value_style = ParagraphStyle("cell_value", fontName=FONT_SANS, fontSize=10, leading=13)
-table_header_style = ParagraphStyle("table_header", fontName=FONT_SANS, fontSize=8.5, leading=11.5)
-table_cell_style = ParagraphStyle("table_cell", fontName=FONT_SANS, fontSize=8.5, leading=11.5)
+meta_label_style = ParagraphStyle("meta_label", fontName=FONT_SANS, fontSize=CONTENT_SIZE, leading=13)
+meta_value_style = ParagraphStyle("meta_value", fontName=FONT_SANS, fontSize=CONTENT_SIZE, leading=13)
+cell_label_style = ParagraphStyle("cell_label", fontName=FONT_SANS, fontSize=CONTENT_SIZE, leading=13)
+cell_value_style = ParagraphStyle("cell_value", fontName=FONT_SANS, fontSize=CONTENT_SIZE, leading=13)
+table_header_style = ParagraphStyle("table_header", fontName=FONT_SANS, fontSize=CONTENT_SIZE, leading=13)
+table_cell_style = ParagraphStyle("table_cell", fontName=FONT_SANS, fontSize=CONTENT_SIZE, leading=13)
 footer_style = ParagraphStyle("footer", fontName=FONT_SANS, fontSize=8.5, leading=11)
 
 
@@ -185,10 +192,53 @@ NOTICE_ITEMS = [
 ]
 
 
+class _BottomAnchorSpacer(Flowable):
+    """Consumes exactly enough of the remaining frame height to push
+    whatever follows down to the bottom of the current page — or, if the
+    remaining space is too small to fit `content_height`, consumes more
+    than what's left so ReportLab bumps the whole thing onto a fresh page,
+    where there's room. Used to keep Important Notices always anchored to
+    the bottom of the last page instead of trailing directly after the
+    last table."""
+
+    def __init__(self, content_height: float):
+        super().__init__()
+        self.content_height = content_height
+        self.width = 0
+        self.height = 0
+
+    def wrap(self, availWidth, availHeight):
+        if availHeight >= self.content_height:
+            self.height = availHeight - self.content_height
+        else:
+            self.height = availHeight + 1  # force a page break
+        return (0, self.height)
+
+    def draw(self):
+        pass
+
+
+def _flowable_height(flowable, width: float) -> float:
+    _, h = flowable.wrap(width, 100000)
+    return h
+
+
+def _estimate_notices_height() -> float:
+    total = notice_style.spaceBefore + _flowable_height(
+        Paragraph("IMPORTANT NOTICES", notice_style), BODY_W_MM * mm,
+    )
+    for i, (label, text) in enumerate(NOTICE_ITEMS, start=1):
+        p = Paragraph(f"{i}.  <b>{label}:</b> {text}", notice_item_style)
+        total += _flowable_height(p, BODY_W_MM * mm) + notice_item_style.spaceAfter
+    return total
+
+
 def important_notices() -> list:
     """"IMPORTANT NOTICES" heading + the numbered notice list, hanging-indented
-    so wrapped continuation lines align under the body text."""
-    flow: list = [Paragraph("IMPORTANT NOTICES", notice_style)]
+    so wrapped continuation lines align under the body text, always anchored
+    to the bottom of whichever page ends up being the last page."""
+    flow: list = [_BottomAnchorSpacer(_estimate_notices_height()),
+                  Paragraph("IMPORTANT NOTICES", notice_style)]
     for i, (label, text) in enumerate(NOTICE_ITEMS, start=1):
         flow.append(Paragraph(f"{i}.  <b>{label}:</b> {text}", notice_item_style))
     return flow

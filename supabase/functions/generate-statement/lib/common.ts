@@ -13,6 +13,13 @@ export const BLACK = rgb(0, 0, 0);
 export const FUND_EMAIL = "nzy.invest@gmail.com";
 export const FUND_PHONE = "(+60)11 - 1121 8085";
 
+// One consistent body font size for every table (transactional tables, the
+// investor info grid) and the header's meta info list — headings
+// (title/section headers) are exempt, they're deliberately larger.
+export const CONTENT_SIZE = 9.5;
+// Vertical gap between one table/section and the next — "1 line" of space.
+export const SECTION_GAP = 16;
+
 // ZY-Invest logo (assets/img/logo.png, trimmed + downsized to 212x180 and
 // palette-quantized so it can be inlined here as one self-contained module —
 // no extra file, no network fetch at render time).
@@ -64,6 +71,7 @@ export type Cell = string | { text: string; color: RGB };
 export interface Column {
   header: string;
   width: number;
+  align?: "left" | "right";
 }
 export interface TableSpec {
   columns: Column[];
@@ -165,7 +173,7 @@ function cellColor(cell: Cell): RGB {
  * repeating the header row on the continuation page.
  */
 export function drawTable(doc: Doc, spec: TableSpec): void {
-  const { columns, rows, fontSize = 8.5, repeatHeaderOnBreak = true, noHeader = false } = spec;
+  const { columns, rows, fontSize = CONTENT_SIZE, repeatHeaderOnBreak = true, noHeader = false } = spec;
   const { sans, sansBold } = doc.fonts;
   const lineHeight = fontSize + 3;
   const cellPadX = 4;
@@ -187,12 +195,17 @@ export function drawTable(doc: Doc, spec: TableSpec): void {
     let x = MARGIN;
     cells.forEach((cell, i) => {
       const w = columns[i].width;
+      const align = columns[i].align || "left";
       drawRect(doc, { x, y: topY - h, width: w, height: h });
       const lines = wrapText(cellText(cell), font, fontSize, w - cellPadX * 2);
       const blockH = lines.length * lineHeight;
       let ty = topY - (h - blockH) / 2 - fontSize + 1;
       for (const line of lines) {
-        drawText(doc, line, { x: x + cellPadX, y: ty, font, size: fontSize, color: cellColor(cell) });
+        if (align === "right") {
+          drawTextRight(doc, line, { x: x + w - cellPadX, y: ty, font, size: fontSize, color: cellColor(cell) });
+        } else {
+          drawText(doc, line, { x: x + cellPadX, y: ty, font, size: fontSize, color: cellColor(cell) });
+        }
         ty -= lineHeight;
       }
       x += w;
@@ -219,7 +232,7 @@ export function drawTable(doc: Doc, spec: TableSpec): void {
 // Reserves the vertical space a table would need, without drawing — used to
 // decide whether a "section header + table" pair should jump to a fresh page
 // together (avoids a lone header stranded at the bottom of a page).
-export function estimateTableHeight(doc: Doc, spec: Pick<TableSpec, "columns" | "rows">, fontSize = 8.5): number {
+export function estimateTableHeight(doc: Doc, spec: Pick<TableSpec, "columns" | "rows">, fontSize = CONTENT_SIZE): number {
   const { columns, rows } = spec;
   const { sans, sansBold } = doc.fonts;
   const lineHeight = fontSize + 3;
@@ -341,7 +354,7 @@ export function drawHeaderBlock(
     ["Email Address", FUND_EMAIL],
     ["Telephone No.", FUND_PHONE],
   ];
-  const metaSize = 10;
+  const metaSize = CONTENT_SIZE;
   const metaLineHeight = metaSize + 3;
   const valueMaxW = rightColW - metaLabelW;
   let my = rowTopY;
@@ -365,10 +378,36 @@ const NOTICE_ITEMS: [string, string][] = [
   ["Digital Statements", "Effective 1st January 2026, all future portfolio statements will be provided exclusively via App ZY-Invest."],
 ];
 
-// Draws the "IMPORTANT NOTICES" heading followed by the numbered notice
-// list, with a hanging indent so wrapped continuation lines align under
-// the body text rather than the number.
+function estimateNoticesHeight(doc: Doc): number {
+  const { sans, sansBold } = doc.fonts;
+  const size = 9.5;
+  const lineHeight = size + 4;
+  const headingH = 30; // matches drawNoticeHeader's own vertical consumption
+  let itemsH = 0;
+  for (let i = 0; i < NOTICE_ITEMS.length; i++) {
+    const [label, text] = NOTICE_ITEMS[i];
+    const lead = `${i + 1}.  ${label}: `;
+    const leadW = sansBold.widthOfTextAtSize(lead, size);
+    const lines = wrapText(text, sans, size, BODY_W - leadW);
+    itemsH += Math.max(lines.length * lineHeight + 2, lineHeight);
+  }
+  return headingH + itemsH;
+}
+
+// Always sits at the bottom of whichever page ends up being the last page —
+// never immediately trailing the last table with a cramped or awkward gap.
+// If there's blank space left on the current page, that space moves to sit
+// ABOVE the notices instead of below them; if the current page is too full,
+// the whole block moves to a fresh page instead of splitting.
 export function drawImportantNotices(doc: Doc): void {
+  const bottomY = MARGIN + 24;
+  const totalH = estimateNoticesHeight(doc);
+  const targetTopY = bottomY + totalH;
+  if (doc.y < targetTopY) {
+    addPage(doc);
+  }
+  doc.y = targetTopY;
+
   drawNoticeHeader(doc, "IMPORTANT NOTICES");
   const { sans, sansBold } = doc.fonts;
   const size = 9.5;
@@ -379,7 +418,6 @@ export function drawImportantNotices(doc: Doc): void {
     const leadW = sansBold.widthOfTextAtSize(lead, size);
     const lines = wrapText(text, sans, size, BODY_W - leadW);
     const itemH = lines.length * lineHeight + 2;
-    ensureSpace(doc, itemH);
     drawText(doc, lead, { x: MARGIN, y: doc.y - size, font: sansBold, size });
     let ty = doc.y;
     for (const line of lines) {
@@ -394,7 +432,7 @@ export function drawImportantNotices(doc: Doc): void {
 export function drawLabelValueGrid(doc: Doc, rows: [string, string, string, string][]): void {
   const colW = colWidths(BODY_W, [130, 210, 130, 210]);
   const { sans } = doc.fonts;
-  const fontSize = 10;
+  const fontSize = CONTENT_SIZE;
   const lineHeight = fontSize + 3;
   const padY = 7;
   for (const row of rows) {

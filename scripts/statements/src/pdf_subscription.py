@@ -73,6 +73,7 @@ def build_subscription_pdf(out_path, *, tx: dict, investor: InvestorInfo,
         ("GRID", (0, 0), (-1, -1), 0.6, colors.black),
         ("FONTNAME", (0, 0), (-1, 0), FONT_SANS_BOLD),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("ALIGN", (2, 0), (5, -1), "RIGHT"),
         ("LEFTPADDING", (0, 0), (-1, -1), 4), ("RIGHTPADDING", (0, 0), (-1, -1), 4),
         ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
     ]

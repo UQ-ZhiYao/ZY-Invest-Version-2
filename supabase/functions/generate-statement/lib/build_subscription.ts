@@ -1,6 +1,6 @@
 import {
   newDoc, drawHeaderBlock, drawLabelValueGrid, drawSectionHeader, drawKeptTogether, drawImportantNotices,
-  drawFooterOnAllPages, rm, redIfNegative, fmt, colWidths, BODY_W, InvestorInfo,
+  drawFooterOnAllPages, rm, redIfNegative, fmt, colWidths, BODY_W, SECTION_GAP, InvestorInfo,
 } from "./common.ts";
 import { CapitalInjectionRow } from "./compute.ts";
 
@@ -39,16 +39,16 @@ export async function buildSubscriptionPdf(
     ["Email Address", investor.email, "Bank Account No.", investor.bankAccountNo],
     [investor.nomineeLabel, investor.nomineeValue, "Total Days Held", investor.totalDaysHeldText],
   ]);
-  doc.y -= 4;
+  doc.y -= SECTION_GAP;
 
   const w = colWidths(BODY_W, [78, 86, 90, 82, 90, 78]);
   const columns = [
     { header: "Date", width: w[0] },
     { header: "Description", width: w[1] },
-    { header: "Investment Value", width: w[2] },
-    { header: `${txType} Price`, width: w[3] },
-    { header: "Unit Balanced", width: w[4] },
-    { header: "Average Cost", width: w[5] },
+    { header: "Investment Value", width: w[2], align: "right" as const },
+    { header: `${txType} Price`, width: w[3], align: "right" as const },
+    { header: "Unit Balanced", width: w[4], align: "right" as const },
+    { header: "Average Cost", width: w[5], align: "right" as const },
   ];
   const rows = [
     [dateStr, "Opening", rm(openingCost), "-", fmt(openingUnits),
