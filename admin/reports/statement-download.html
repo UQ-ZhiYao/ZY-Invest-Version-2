@@ -4,17 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Statement Download — ZY-Invest</title>
-<link rel="stylesheet" href="../assets/css/dashboard.css">
-<link rel="stylesheet" href="../assets/css/dashboard-portfolio.css">
+<link rel="stylesheet" href="../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../assets/css/dashboard-portfolio.css">
 <script>if(location.search.indexOf("embed")!==-1)document.documentElement.classList.add("embed");</script>
 </head>
 <body>
+<script>
+(function(){
+  try{ var s=JSON.parse(localStorage.getItem('zy_admin_session')||'null'); if(!s||s.role!=='admin'){ location.replace('../admin-login.html'); } }
+  catch(e){ location.replace('../admin-login.html'); }
+})();
+</script>
 <div class="app" id="app">
 
   <!-- ===================== TOP NAV — FUND INFORMATION ===================== -->
   <header class="topnav">
-    <a href="../index.html" class="brand">
-      <img src="../assets/img/logo.png" alt="ZY-Invest">
+    <a href="../overview.html" class="brand">
+      <img src="../../assets/img/logo.png" alt="ZY-Invest">
       <span class="bt"><b>ZY-Invest</b><span>Member Portal</span></span>
     </a>
     <nav class="nav-links">
@@ -74,13 +80,13 @@
             <span><b>Nominee</b><span>Beneficiary nomination</span></span>
           </a>
           <div class="um-sep"></div>
-          <a class="um-item danger" href="../login.html">
+          <a class="um-item danger" href="../admin-login.html">
             <span class="um-ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>
             <span><b>Sign out</b></span>
           </a>
         </div>
       </div>
-      <a href="../login.html" class="btn-logout">Logout</a>
+      <a href="../admin-login.html" class="btn-logout">Logout</a>
     </div>
   </header>
 
@@ -152,7 +158,7 @@
         <span class="sb-label">Statements</span>
       </a>
       <div class="sb-spacer"></div>
-      <a class="sb-item logout" href="../login.html">
+      <a class="sb-item logout" href="../admin-login.html">
         <span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>
         <span class="sb-label">Sign out</span>
       </a>
@@ -292,10 +298,10 @@
   document.querySelectorAll('.chat-chip').forEach(function(c){ c.addEventListener('click',function(){ input.value=c.textContent; input.focus(); }); });
 })();
 </script>
-<script src="../assets/js/member-search.js"></script>
-<script src="../assets/js/member-notifications.js"></script>
+<script src="../../assets/js/member-search.js"></script>
+<script src="../../assets/js/member-notifications.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../assets/js/supabase-auth.js"></script>
-<script src="../assets/js/auth-logout.js"></script>
+<script src="../../assets/js/supabase-auth.js"></script>
+<script src="../../assets/js/auth-logout.js"></script>
 </body>
 </html>

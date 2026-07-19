@@ -3,28 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Documents — ZY-Invest</title>
-<link rel="stylesheet" href="../assets/css/dashboard.css">
-<link rel="stylesheet" href="../assets/css/dashboard-portfolio.css">
-<style>
-.st-filt{display:flex;flex-direction:column;gap:5px;}
-.st-filt label{font-size:0.7rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--fg-3);}
-.st-filt select{font:inherit;font-size:0.84rem;color:var(--fg-1);background:#fff;border:1px solid var(--border);border-radius:var(--radius-md);padding:8px 11px;min-width:150px;}
-.tag-purple{font-size:0.74rem;font-weight:600;color:#6d4bb3;background:#f1ecfa;padding:5px 11px;border-radius:var(--radius-pill);white-space:nowrap;}
-</style>
+<title>Factsheet — ZY-Invest</title>
+<link rel="stylesheet" href="../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../assets/css/dashboard-portfolio.css">
+<script>if(location.search.indexOf("embed")!==-1)document.documentElement.classList.add("embed");</script>
 </head>
 <body>
+<script>
+(function(){
+  try{ var s=JSON.parse(localStorage.getItem('zy_admin_session')||'null'); if(!s||s.role!=='admin'){ location.replace('../admin-login.html'); } }
+  catch(e){ location.replace('../admin-login.html'); }
+})();
+</script>
 <div class="app" id="app">
 
   <!-- ===================== TOP NAV — FUND INFORMATION ===================== -->
   <header class="topnav">
-    <a href="../index.html" class="brand">
-      <img src="../assets/img/logo.png" alt="ZY-Invest">
+    <a href="../overview.html" class="brand">
+      <img src="../../assets/img/logo.png" alt="ZY-Invest">
       <span class="bt"><b>ZY-Invest</b><span>Member Portal</span></span>
     </a>
     <nav class="nav-links">
       <div class="nav-group">
-        <button class="nav-top">Fund <span class="caret">▾</span></button>
+        <button class="nav-top active">Fund <span class="caret">▾</span></button>
         <div class="dropdown"><div class="dd-card">
           <a class="dd-item" href="fund-overview.html"><b>Fund Overview</b><span>Mandate, objective &amp; key facts</span></a>
           <a class="dd-item" href="factsheet.html"><b>Factsheet</b><span>Holdings allocation each financial year</span></a>
@@ -79,13 +80,13 @@
             <span><b>Nominee</b><span>Beneficiary nomination</span></span>
           </a>
           <div class="um-sep"></div>
-          <a class="um-item danger" href="../login.html">
+          <a class="um-item danger" href="../admin-login.html">
             <span class="um-ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>
             <span><b>Sign out</b></span>
           </a>
         </div>
       </div>
-      <a href="../login.html" class="btn-logout">Logout</a>
+      <a href="../admin-login.html" class="btn-logout">Logout</a>
     </div>
   </header>
 
@@ -152,12 +153,12 @@
         <span class="sb-label">Distributions</span>
       </a>
       <div class="sb-group">Records</div>
-      <a class="sb-item active" href="documents.html">
+      <a class="sb-item" href="documents.html">
         <span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>
         <span class="sb-label">Statements</span>
       </a>
       <div class="sb-spacer"></div>
-      <a class="sb-item logout" href="../login.html">
+      <a class="sb-item logout" href="../admin-login.html">
         <span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>
         <span class="sb-label">Sign out</span>
       </a>
@@ -166,30 +167,31 @@
     <!-- main -->
     <main class="main">
       <div class="ph-xl">
-        <h1>Your <span class="ph-accent">Statements</span></h1>
-        <p>All your account statements and personal documents — filter by financial year and type, and download any record.</p>
+        <h1><span class="ph-accent">Factsheet</span></h1>
+        <p>Holdings allocation across each financial year, plus the latest downloadable factsheet.</p>
       </div>
-      <div class="metric-row">
-        <div class="mc"><div class="label">Latest Statement</div><div class="value">Mar 2026</div><div class="sub">Issued 01 Apr 2026</div></div>
-        <div class="mc"><div class="label">Total Records</div><div class="value blue" id="stTotal">0</div><div class="sub">statements &amp; documents</div></div>
-        <div class="mc"><div class="label">Delivery</div><div class="value">Email + Portal</div><div class="sub">huimei.tan@…</div></div>
-        <div class="mc"><div class="label">Tax Year</div><div class="value">YA 2025</div><div class="sub">Summary ready</div></div>
-      </div>
-
-      <div class="panel" style="margin-top:16px;">
-        <div class="panel-head" style="flex-wrap:wrap;gap:12px;">
-          <h3>Account Statements</h3>
-          <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
-            <div class="st-filt"><label>Financial Year</label><select id="stFy"><option value="">All FYs</option><option>FY2026</option><option>FY2025</option><option>FY2024</option><option>FY2023</option><option>FY2022</option></select></div>
-            <div class="st-filt"><label>Statement Type</label><select id="stType"><option value="">All Types</option><option>Account Statement</option><option>Subscription</option><option>Redemption</option><option>Personal Statement</option></select></div>
-          </div>
+      <div class="panel"><div class="panel-head"><h3>Holdings Allocation by Financial Year</h3></div>
+        <div style="padding:20px;">
+          <div style="display:flex;flex-wrap:wrap;gap:14px 20px;margin-bottom:18px;font-size:0.8rem;color:var(--fg-2);"><span style="display:flex;align-items:center;gap:7px;"><span style="width:11px;height:11px;border-radius:3px;background:var(--blue)"></span>Healthcare</span><span style="display:flex;align-items:center;gap:7px;"><span style="width:11px;height:11px;border-radius:3px;background:var(--green)"></span>Financials</span><span style="display:flex;align-items:center;gap:7px;"><span style="width:11px;height:11px;border-radius:3px;background:var(--orange)"></span>Technology</span><span style="display:flex;align-items:center;gap:7px;"><span style="width:11px;height:11px;border-radius:3px;background:#7E57C2"></span>Telcos</span><span style="display:flex;align-items:center;gap:7px;"><span style="width:11px;height:11px;border-radius:3px;background:var(--gray-400)"></span>Other &amp; Cash</span></div>
+        <div style="margin-bottom:18px;">
+          <div style="display:flex;justify-content:space-between;font-size:0.84rem;margin-bottom:7px;"><span style="font-weight:600;color:var(--fg-1);">FY2025</span><span style="color:var(--fg-3);">NTA RM 1.0210</span></div>
+          <div class="dist-stack" style="height:18px;"><span style="width:28%;background:var(--blue)"></span><span style="width:22%;background:var(--green)"></span><span style="width:15%;background:var(--orange)"></span><span style="width:11%;background:#7E57C2"></span><span style="width:24%;background:var(--gray-400)"></span></div>
         </div>
-        <table class="tbl">
-          <thead><tr><th>Document</th><th>Type</th><th>FY</th><th class="td-right">Size</th><th class="td-right">Download</th></tr></thead>
-          <tbody id="stBody"></tbody>
-        </table>
-        <div id="stEmpty" style="display:none;padding:30px;text-align:center;color:var(--fg-3);font-size:0.9rem;">No documents match these filters.</div>
+        <div style="margin-bottom:18px;">
+          <div style="display:flex;justify-content:space-between;font-size:0.84rem;margin-bottom:7px;"><span style="font-weight:600;color:var(--fg-1);">FY2024</span><span style="color:var(--fg-3);">NTA RM 0.9920</span></div>
+          <div class="dist-stack" style="height:18px;"><span style="width:25%;background:var(--blue)"></span><span style="width:24%;background:var(--green)"></span><span style="width:12%;background:var(--orange)"></span><span style="width:13%;background:#7E57C2"></span><span style="width:26%;background:var(--gray-400)"></span></div>
+        </div>
+        <div style="margin-bottom:18px;">
+          <div style="display:flex;justify-content:space-between;font-size:0.84rem;margin-bottom:7px;"><span style="font-weight:600;color:var(--fg-1);">FY2023</span><span style="color:var(--fg-3);">NTA RM 0.9710</span></div>
+          <div class="dist-stack" style="height:18px;"><span style="width:22%;background:var(--blue)"></span><span style="width:26%;background:var(--green)"></span><span style="width:9%;background:var(--orange)"></span><span style="width:15%;background:#7E57C2"></span><span style="width:28%;background:var(--gray-400)"></span></div>
+        </div>
+        <div style="margin-bottom:18px;">
+          <div style="display:flex;justify-content:space-between;font-size:0.84rem;margin-bottom:7px;"><span style="font-weight:600;color:var(--fg-1);">FY2022</span><span style="color:var(--fg-3);">NTA RM 0.9650</span></div>
+          <div class="dist-stack" style="height:18px;"><span style="width:18%;background:var(--blue)"></span><span style="width:28%;background:var(--green)"></span><span style="width:6%;background:var(--orange)"></span><span style="width:16%;background:#7E57C2"></span><span style="width:32%;background:var(--gray-400)"></span></div>
+        </div>
+        </div>
       </div>
+      <div class="panel" style="margin-top:16px;"><div class="panel-head"><h3>Download Factsheet</h3></div><div class="res-list" style="padding:8px;"><a class="res-item"><span class="ri-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/></svg></span><span class="ri-t"><b>Fund Factsheet — March 2026</b><span>PDF · 248 KB · updated monthly</span></span><span class="ri-arr">↓</span></a><a class="res-item"><span class="ri-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/></svg></span><span class="ri-t"><b>Fund Factsheet — February 2026</b><span>PDF · 241 KB</span></span><span class="ri-arr">↓</span></a><a class="res-item"><span class="ri-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/></svg></span><span class="ri-t"><b>Fund Factsheet — January 2026</b><span>PDF · 256 KB</span></span><span class="ri-arr">↓</span></a></div></div>
 
     </main>
   </div>
@@ -312,54 +314,12 @@
   send.addEventListener('click',sendMsg);
   input.addEventListener('keydown',function(e){ if(e.key==='Enter') sendMsg(); });
   document.querySelectorAll('.chat-chip').forEach(function(c){ c.addEventListener('click',function(){ input.value=c.textContent; input.focus(); }); });
-
-  // ---- statements table: dropdown multi-filter ----
-  (function(){
-    var body=document.getElementById('stBody'); if(!body) return;
-    var dlSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><path d="M12 3v12M7 11l5 4 5-4"/><path d="M5 21h14"/></svg>';
-    var DOCS=[
-      {name:'March 2026', sub:'Generated 01 Apr 2026', type:'Account Statement', fy:'FY2026', size:'248 KB'},
-      {name:'February 2026', sub:'Generated 01 Mar 2026', type:'Account Statement', fy:'FY2026', size:'241 KB'},
-      {name:'January 2026', sub:'Generated 01 Feb 2026', type:'Account Statement', fy:'FY2026', size:'256 KB'},
-      {name:'Q4 2025 Quarterly', sub:'Generated 15 Jan 2026', type:'Account Statement', fy:'FY2026', size:'402 KB'},
-      {name:'December 2025', sub:'Generated 01 Jan 2026', type:'Account Statement', fy:'FY2026', size:'239 KB'},
-      {name:'FY2025 Annual Statement', sub:'Generated 15 Jan 2026', type:'Account Statement', fy:'FY2025', size:'1.2 MB'},
-      {name:'November 2025', sub:'Generated 01 Dec 2025', type:'Account Statement', fy:'FY2025', size:'244 KB'},
-      {name:'Subscription Confirmation — Mar 2026', sub:'12,345.68 units @ RM 1.0245', type:'Subscription', fy:'FY2026', size:'88 KB'},
-      {name:'Subscription Confirmation — Jun 2022', sub:'Initial subscription', type:'Subscription', fy:'FY2022', size:'86 KB'},
-      {name:'Redemption Advice — Nov 2022', sub:'Partial redemption', type:'Redemption', fy:'FY2023', size:'84 KB'},
-      {name:'Tax Voucher YA2025', sub:'For e-filing', type:'Personal Statement', fy:'FY2025', size:'64 KB'},
-      {name:'Distribution Advice — FY25 Final', sub:'2.10 sen per unit', type:'Personal Statement', fy:'FY2025', size:'72 KB'},
-      {name:'KYC Acknowledgement', sub:'Identity verified', type:'Personal Statement', fy:'FY2024', size:'110 KB'},
-      {name:'Signed Application Form', sub:'Account opening', type:'Personal Statement', fy:'FY2022', size:'540 KB'}
-    ];
-    function typeTag(t){ return t; }
-    document.getElementById('stTotal').textContent=DOCS.length;
-    function render(){
-      var fy=document.getElementById('stFy').value, ty=document.getElementById('stType').value;
-      body.innerHTML='';
-      var n=0;
-      DOCS.forEach(function(d){
-        if(fy && d.fy!==fy) return;
-        if(ty && d.type!==ty) return;
-        n++;
-        var tr=document.createElement('tr');
-        tr.innerHTML='<td class="hold-name"><b>'+d.name+'</b><span>'+d.sub+'</span></td><td>'+typeTag(d.type)+'</td><td>'+d.fy+'</td><td class="td-right">'+d.size+'</td>'
-          +'<td class="td-right"><button class="btn-line" style="padding:7px 14px;display:inline-flex;align-items:center;gap:6px;">'+dlSvg+' PDF</button></td>';
-        body.appendChild(tr);
-      });
-      document.getElementById('stEmpty').style.display=n?'none':'';
-    }
-    document.getElementById('stFy').addEventListener('change',render);
-    document.getElementById('stType').addEventListener('change',render);
-    render();
-  })();
 })();
 </script>
-<script src="../assets/js/member-search.js"></script>
-<script src="../assets/js/member-notifications.js"></script>
+<script src="../../assets/js/member-search.js"></script>
+<script src="../../assets/js/member-notifications.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../assets/js/supabase-auth.js"></script>
-<script src="../assets/js/auth-logout.js"></script>
+<script src="../../assets/js/supabase-auth.js"></script>
+<script src="../../assets/js/auth-logout.js"></script>
 </body>
 </html>
