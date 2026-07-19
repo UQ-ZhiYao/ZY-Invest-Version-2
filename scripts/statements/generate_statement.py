@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
-Generate a ZY-Invest statement PDF from live Supabase data using the
-finance-team's Excel templates, and file it in Supabase Storage + the
-`statements` table.
+Generate a ZY-Invest statement PDF from live Supabase data, and file it in
+Supabase Storage + the `statements` table.
 
 Usage
 -----
@@ -14,6 +13,11 @@ Usage
 Requires SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (env vars, or a .env file
 next to this script — see .env.example). See README.md for the full setup,
 what each subcommand does, and known data gaps.
+
+Pure Python end to end — no LibreOffice, no Excel, no other services to
+install. The statement layout is drawn directly with ReportLab (see
+src/pdf_common.py); the original xlsx templates under templates/ are kept
+only as a design reference, not read at runtime.
 """
 from __future__ import annotations
 
@@ -28,16 +32,13 @@ SRC = Path(__file__).parent / "src"
 sys.path.insert(0, str(SRC))
 
 from compute import InvestorAddress, account_id, net_cost_asof, net_units_asof  # noqa: E402
-from fill_annual import fill_annual_sheet  # noqa: E402
-from fill_common import InvestorInfo, days_held_text  # noqa: E402
-from fill_dividend import fill_dividend_sheet  # noqa: E402
-from fill_subscription import fill_subscription_sheet  # noqa: E402
-from openpyxl import load_workbook  # noqa: E402
-from render_pdf import isolate_sheet_as_pdf  # noqa: E402
+from pdf_annual import build_annual_pdf  # noqa: E402
+from pdf_common import InvestorInfo, days_held_text  # noqa: E402
+from pdf_dividend import build_dividend_pdf  # noqa: E402
+from pdf_subscription import build_subscription_pdf  # noqa: E402
 from storage import store_statement  # noqa: E402
 from supa import Supabase  # noqa: E402
 
-TEMPLATE_PATH = Path(__file__).parent / "templates" / "ZYInvest_Statement_Templates.xlsx"
 OUT_DIR = Path(__file__).parent / "output"
 
 DEFAULT_ACCOUNT_TYPE = "Direct Account"  # `profiles` has no account-type column yet — see README "Known gaps"
@@ -103,16 +104,12 @@ def cmd_subscription_or_redemption(sb: Supabase, args) -> Path:
     issued_date = _profile_issued_date(profile)
     investor = _investor_info(profile, issued_date=issued_date, asof=tx_date)
 
-    wb = load_workbook(TEMPLATE_PATH)
-    ws = wb["Subscription"]
-    fill_subscription_sheet(
-        ws, tx=tx, investor=investor, opening_units=opening_units,
-        opening_cost=opening_cost, issued_date=issued_date,
-    )
-
     out_name = f"{tx['type']}_{tx.get('reference_id') or tx['id']}.pdf"
     out_path = OUT_DIR / out_name
-    isolate_sheet_as_pdf(wb, "Subscription", out_path)
+    build_subscription_pdf(
+        out_path, tx=tx, investor=investor, opening_units=opening_units,
+        opening_cost=opening_cost, issued_date=issued_date,
+    )
 
     if not args.no_upload:
         row = store_statement(
@@ -145,16 +142,12 @@ def cmd_dividend(sb: Supabase, args) -> Path:
     issued_date = _profile_issued_date(profile)
     investor = _investor_info(profile, issued_date=issued_date, asof=fy_end)
 
-    wb = load_workbook(TEMPLATE_PATH)
-    ws = wb["Dividend"]
-    fill_dividend_sheet(
-        ws, distributions=dists, investor=investor, holding_units=holding_units,
-        period_text=fy["label"],
-    )
-
     out_name = f"Dividend_{profile.get('full_name', 'investor').replace(' ', '_')}_{fy['label']}.pdf"
     out_path = OUT_DIR / out_name
-    isolate_sheet_as_pdf(wb, "Dividend", out_path)
+    build_dividend_pdf(
+        out_path, distributions=dists, investor=investor, holding_units=holding_units,
+        period_text=fy["label"],
+    )
 
     if not args.no_upload:
         row = store_statement(
@@ -177,13 +170,24 @@ def cmd_annual(sb: Supabase, args) -> Path:
     fy_end = dt.datetime.strptime(str(fy["end_date"])[:10], "%Y-%m-%d").date()
     day_before_fy = fy_start - dt.timedelta(days=1)
 
-    all_cis = sb.select("capital_injection", {"uid": f"eq.{args.investor_id}", "select": "*"})
+    all_cis = sb.select("capital_injection", {"uid": f"eq.{args.investor_id}", "select": "*",
+                                               "order": "date.asc"})
     opening_units = net_units_asof(all_cis, day_before_fy, args.investor_id)
     opening_cost = net_cost_asof(all_cis, day_before_fy, args.investor_id)
     closing_units = net_units_asof(all_cis, fy_end, args.investor_id)
     closing_cost = net_cost_asof(all_cis, fy_end, args.investor_id)
+    transactions_in_fy = [
+        r for r in all_cis
+        if r.get("status") == "Approved" and r.get("uid") == args.investor_id
+        and fy_start <= dt.datetime.strptime(str(r["date"])[:10], "%Y-%m-%d").date() <= fy_end
+    ]
 
     dists = sb.select("distributions", {"fy": f"eq.{fy['label']}", "select": "*", "order": "ex_date.asc"})
+    distributions_in_fy = [
+        d for d in dists
+        if fy_start <= dt.datetime.strptime(
+            str(d.get("pay_date") or d["ex_date"])[:10], "%Y-%m-%d").date() <= fy_end
+    ]
 
     nta_row = sb.select_one(
         "nta_daily", {"date": f"lte.{fy_end.isoformat()}", "select": "date,nta",
@@ -207,36 +211,30 @@ def cmd_annual(sb: Supabase, args) -> Path:
             continue
         amt = float(r["amount"])
         cashflows.append((d, -amt if r["type"] == "Subscription" else amt))
-    for d in dists:
+    for d in distributions_in_fy:
         pay = d.get("pay_date") or d.get("ex_date")
         pay_date = dt.datetime.strptime(str(pay)[:10], "%Y-%m-%d").date()
-        if fy_start <= pay_date <= fy_end:
-            units_at_ex = net_units_asof(
-                all_cis, dt.datetime.strptime(str(d["ex_date"])[:10], "%Y-%m-%d").date(),
-                args.investor_id,
-            )
-            cashflows.append((pay_date, units_at_ex * float(d["dps"]) / 100.0))
+        units_at_ex = net_units_asof(
+            all_cis, dt.datetime.strptime(str(d["ex_date"])[:10], "%Y-%m-%d").date(),
+            args.investor_id,
+        )
+        cashflows.append((pay_date, units_at_ex * float(d["dps"]) / 100.0))
     cashflows.append((fy_end, closing_units * latest_nav))
 
     issued_date = _profile_issued_date(profile)
     investor = _investor_info(profile, issued_date=issued_date, asof=fy_end)
 
-    wb = load_workbook(TEMPLATE_PATH)
-    ws = wb["Annual"]
-    fill_annual_sheet(
-        ws, investor=investor, issued_date=issued_date, fy_start=fy_start, fy_end=fy_end,
+    out_name = f"Annual_{profile.get('full_name', 'investor').replace(' ', '_')}_{fy['label']}.pdf"
+    out_path = OUT_DIR / out_name
+    build_annual_pdf(
+        out_path, investor=investor, fy_start=fy_start, fy_end=fy_end,
         opening_units=opening_units, opening_cost=opening_cost,
         closing_units=closing_units, closing_cost=closing_cost,
         latest_nav_per_unit=latest_nav,
-        distributions_in_fy=[d for d in dists if fy_start <= dt.datetime.strptime(
-            str(d.get("pay_date") or d["ex_date"])[:10], "%Y-%m-%d").date() <= fy_end],
+        transactions_in_fy=transactions_in_fy, distributions_in_fy=distributions_in_fy,
         cashflows_for_irr=cashflows,
         realized_pl=args.realized_pl, adjustment=args.adjustment,
     )
-
-    out_name = f"Annual_{profile.get('full_name', 'investor').replace(' ', '_')}_{fy['label']}.pdf"
-    out_path = OUT_DIR / out_name
-    isolate_sheet_as_pdf(wb, "Annual", out_path)
 
     if not args.no_upload:
         row = store_statement(

@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
-Exercises the fill + PDF pipeline with synthetic data — no Supabase
-connection needed. Run this after any change to the fill_*/render_pdf
-modules to make sure the cell mapping still produces a valid PDF before
-pointing the real CLI at production data.
+Exercises the compute + PDF-build pipeline with synthetic data — no Supabase
+connection needed. Run this after any change to compute.py/pdf_*.py to make
+sure the output still renders before pointing the real CLI at production data.
 """
 from __future__ import annotations
 
@@ -15,14 +14,11 @@ SRC = Path(__file__).parent / "src"
 sys.path.insert(0, str(SRC))
 
 from compute import InvestorAddress, account_id, net_cost_asof, net_units_asof  # noqa: E402
-from fill_annual import fill_annual_sheet  # noqa: E402
-from fill_common import InvestorInfo, days_held_text  # noqa: E402
-from fill_dividend import fill_dividend_sheet  # noqa: E402
-from fill_subscription import fill_subscription_sheet  # noqa: E402
-from openpyxl import load_workbook  # noqa: E402
-from render_pdf import isolate_sheet_as_pdf  # noqa: E402
+from pdf_annual import build_annual_pdf  # noqa: E402
+from pdf_common import InvestorInfo, days_held_text  # noqa: E402
+from pdf_dividend import build_dividend_pdf  # noqa: E402
+from pdf_subscription import build_subscription_pdf  # noqa: E402
 
-TEMPLATE_PATH = Path(__file__).parent / "templates" / "ZYInvest_Statement_Templates.xlsx"
 OUT_DIR = Path(__file__).parent / "output" / "offline_test"
 
 PROFILE = {
@@ -81,13 +77,11 @@ def test_subscription():
     opening_units = net_units_asof(prior, tx_date)
     opening_cost = net_cost_asof(prior, tx_date, tx["uid"])
 
-    wb = load_workbook(TEMPLATE_PATH)
-    ws = wb["Subscription"]
-    fill_subscription_sheet(
-        ws, tx=tx, investor=_investor_info(tx_date), opening_units=opening_units,
+    out = OUT_DIR / "subscription.pdf"
+    build_subscription_pdf(
+        out, tx=tx, investor=_investor_info(tx_date), opening_units=opening_units,
         opening_cost=opening_cost, issued_date=dt.date(2023, 8, 17),
     )
-    out = isolate_sheet_as_pdf(wb, "Subscription", OUT_DIR / "subscription.pdf")
     print("wrote", out, out.stat().st_size, "bytes")
 
 
@@ -98,26 +92,22 @@ def test_redemption():
     opening_units = net_units_asof(prior, tx_date)
     opening_cost = net_cost_asof(prior, tx_date, tx["uid"])
 
-    wb = load_workbook(TEMPLATE_PATH)
-    ws = wb["Subscription"]
-    fill_subscription_sheet(
-        ws, tx=tx, investor=_investor_info(tx_date), opening_units=opening_units,
+    out = OUT_DIR / "redemption.pdf"
+    build_subscription_pdf(
+        out, tx=tx, investor=_investor_info(tx_date), opening_units=opening_units,
         opening_cost=opening_cost, issued_date=dt.date(2023, 8, 17),
     )
-    out = isolate_sheet_as_pdf(wb, "Subscription", OUT_DIR / "redemption.pdf")
     print("wrote", out, out.stat().st_size, "bytes")
 
 
 def test_dividend():
     fy_end = dt.date(2025, 11, 30)
     holding_units = net_units_asof(CIS, fy_end, PROFILE["id"])
-    wb = load_workbook(TEMPLATE_PATH)
-    ws = wb["Dividend"]
-    fill_dividend_sheet(
-        ws, distributions=DISTS, investor=_investor_info(fy_end),
+    out = OUT_DIR / "dividend.pdf"
+    build_dividend_pdf(
+        out, distributions=DISTS, investor=_investor_info(fy_end),
         holding_units=holding_units, period_text=FY["label"],
     )
-    out = isolate_sheet_as_pdf(wb, "Dividend", OUT_DIR / "dividend.pdf")
     print("wrote", out, out.stat().st_size, "bytes")
 
 
@@ -128,6 +118,10 @@ def test_annual():
     opening_cost = net_cost_asof(CIS, day_before, PROFILE["id"])
     closing_units = net_units_asof(CIS, fy_end, PROFILE["id"])
     closing_cost = net_cost_asof(CIS, fy_end, PROFILE["id"])
+    transactions_in_fy = [
+        r for r in CIS
+        if fy_start <= dt.datetime.strptime(r["date"], "%Y-%m-%d").date() <= fy_end
+    ]
 
     cashflows = []
     for r in CIS:
@@ -146,17 +140,14 @@ def test_annual():
     latest_nav = 1.11254828669048
     cashflows.append((fy_end, closing_units * latest_nav))
 
-    wb = load_workbook(TEMPLATE_PATH)
-    ws = wb["Annual"]
-    fill_annual_sheet(
-        ws, investor=_investor_info(fy_end), issued_date=dt.date(2023, 8, 17),
-        fy_start=fy_start, fy_end=fy_end,
+    out = OUT_DIR / "annual.pdf"
+    build_annual_pdf(
+        out, investor=_investor_info(fy_end), fy_start=fy_start, fy_end=fy_end,
         opening_units=opening_units, opening_cost=opening_cost,
         closing_units=closing_units, closing_cost=closing_cost,
-        latest_nav_per_unit=latest_nav, distributions_in_fy=dists_in_fy,
-        cashflows_for_irr=cashflows,
+        latest_nav_per_unit=latest_nav, transactions_in_fy=transactions_in_fy,
+        distributions_in_fy=dists_in_fy, cashflows_for_irr=cashflows,
     )
-    out = isolate_sheet_as_pdf(wb, "Annual", OUT_DIR / "annual.pdf")
     print("wrote", out, out.stat().st_size, "bytes")
 
 
