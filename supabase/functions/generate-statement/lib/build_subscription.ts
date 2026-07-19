@@ -1,6 +1,6 @@
 import {
   newDoc, drawHeaderBlock, drawLabelValueGrid, drawSectionHeader, drawNoticeHeader, drawKeptTogether,
-  drawFooterOnAllPages, rm, redIfNegative, fmt, InvestorInfo,
+  drawFooterOnAllPages, rm, redIfNegative, fmt, colWidths, BODY_W, InvestorInfo,
 } from "./common.ts";
 import { CapitalInjectionRow } from "./compute.ts";
 
@@ -41,13 +41,14 @@ export async function buildSubscriptionPdf(
   ]);
   doc.y -= 4;
 
+  const w = colWidths(BODY_W, [78, 86, 90, 82, 90, 78]);
   const columns = [
-    { header: "Date", width: 100 },
-    { header: "Description", width: 110 },
-    { header: "Investment Value", width: 115 },
-    { header: `${txType} Price`, width: 105 },
-    { header: "Unit Balanced", width: 115 },
-    { header: "Average Cost", width: 100 },
+    { header: "Date", width: w[0] },
+    { header: "Description", width: w[1] },
+    { header: "Investment Value", width: w[2] },
+    { header: `${txType} Price`, width: w[3] },
+    { header: "Unit Balanced", width: w[4] },
+    { header: "Average Cost", width: w[5] },
   ];
   const rows = [
     [dateStr, "Opening", rm(openingCost), "-", fmt(openingUnits),

@@ -23,9 +23,11 @@ from reportlab.platypus import KeepTogether, Paragraph, Spacer, Table, TableStyl
 
 from compute import xirr
 from pdf_common import (
+    BODY_W_MM,
     FONT_SANS_BOLD,
     InvestorInfo,
     build_with_footer,
+    col_widths,
     header_block,
     investor_block_with_account_type,
     notice_style,
@@ -93,12 +95,12 @@ def build_annual_pdf(
         rm(closing_cost / closing_units, 4) if closing_units > 0 else "-", "-",
         f"{closing_units:,.4f}",
     )])
-    t1 = Table(data, colWidths=[26 * mm, 24 * mm, 42 * mm, 30 * mm, 28 * mm, 28 * mm], hAlign="LEFT")
+    t1 = Table(data, colWidths=col_widths(BODY_W_MM, [74, 70, 118, 86, 78, 78]), hAlign="LEFT")
     t1.setStyle(TableStyle([
         ("GRID", (0, 0), (-1, -1), 0.6, colors.black),
         ("FONTNAME", (0, 0), (-1, 0), FONT_SANS_BOLD),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("LEFTPADDING", (0, 0), (-1, -1), 5), ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+        ("LEFTPADDING", (0, 0), (-1, -1), 4), ("RIGHTPADDING", (0, 0), (-1, -1), 4),
         ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
     ]))
     flow.append(KeepTogether([section_header("Principal Transaction"), t1]))
@@ -123,12 +125,12 @@ def build_annual_pdf(
     data2.append([Paragraph(c, table_cell_style) for c in (
         fy_end.strftime("%d - %m - %Y"), "Closing", "", "", "", rm(dividend_received),
     )])
-    t2 = Table(data2, colWidths=[26 * mm, 32 * mm, 20 * mm, 30 * mm, 32 * mm, 30 * mm], hAlign="LEFT")
+    t2 = Table(data2, colWidths=col_widths(BODY_W_MM, [76, 96, 60, 88, 96, 92]), hAlign="LEFT")
     t2.setStyle(TableStyle([
         ("GRID", (0, 0), (-1, -1), 0.6, colors.black),
         ("FONTNAME", (0, 0), (-1, 0), FONT_SANS_BOLD),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("LEFTPADDING", (0, 0), (-1, -1), 5), ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+        ("LEFTPADDING", (0, 0), (-1, -1), 4), ("RIGHTPADDING", (0, 0), (-1, -1), 4),
         ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
     ]))
     flow.append(KeepTogether([section_header("Dividend Transaction"), t2]))
@@ -151,12 +153,12 @@ def build_annual_pdf(
     ]
     data3 = [[Paragraph(c, table_header_style if i == 0 else table_cell_style) for c in row]
              for i, row in enumerate(summary_rows)]
-    t3 = Table(data3, colWidths=[55 * mm, 32 * mm, 32 * mm, 40 * mm], hAlign="LEFT")
+    t3 = Table(data3, colWidths=col_widths(BODY_W_MM, [174, 103, 103, 126]), hAlign="LEFT")
     t3.setStyle(TableStyle([
         ("GRID", (0, 0), (-1, -1), 0.6, colors.black),
         ("FONTNAME", (0, 0), (-1, 0), FONT_SANS_BOLD),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("LEFTPADDING", (0, 0), (-1, -1), 5), ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+        ("LEFTPADDING", (0, 0), (-1, -1), 4), ("RIGHTPADDING", (0, 0), (-1, -1), 4),
         ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
     ]))
     flow.append(KeepTogether([section_header("Account Summary"), t3]))
@@ -172,12 +174,12 @@ def build_annual_pdf(
         ("Annualized Performance* %", f"{irr * 100:.2f} %" if irr is not None else "-"),
     ]
     data4 = [[Paragraph(a, table_cell_style), Paragraph(b, table_cell_style)] for a, b in plain_rows]
-    t4 = Table(data4, colWidths=[119 * mm, 40 * mm], hAlign="LEFT")
+    t4 = Table(data4, colWidths=col_widths(BODY_W_MM, [376, 130]), hAlign="LEFT")
     t4.setStyle(TableStyle([
         ("GRID", (0, 0), (-1, -1), 0.6, colors.black),
         ("ALIGN", (1, 0), (1, -1), "RIGHT"),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("LEFTPADDING", (0, 0), (-1, -1), 5), ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+        ("LEFTPADDING", (0, 0), (-1, -1), 4), ("RIGHTPADDING", (0, 0), (-1, -1), 4),
         ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
     ]))
     flow.append(t4)

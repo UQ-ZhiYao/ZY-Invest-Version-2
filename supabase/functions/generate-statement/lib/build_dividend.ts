@@ -1,6 +1,6 @@
 import {
   newDoc, drawHeaderBlock, drawLabelValueGrid, drawSectionHeader, drawNoticeHeader, drawKeptTogether,
-  drawFooterOnAllPages, drawText, rm, InvestorInfo, Cell,
+  drawFooterOnAllPages, drawText, rm, colWidths, BODY_W, InvestorInfo, Cell,
 } from "./common.ts";
 import { DistributionRow } from "./compute.ts";
 
@@ -27,14 +27,15 @@ export async function buildDividendPdf(
   ]);
   doc.y -= 4;
 
+  const w = colWidths(BODY_W, [76, 106, 80, 49, 49, 61, 84]);
   const columns = [
-    { header: "Date", width: 100 },
-    { header: "Description", width: 140 },
-    { header: "Holding Units", width: 105 },
-    { header: "EPS", width: 65 },
-    { header: "DPR", width: 65 },
-    { header: "DPS", width: 80 },
-    { header: "Dividend Amount", width: 110 },
+    { header: "Date", width: w[0] },
+    { header: "Description", width: w[1] },
+    { header: "Holding Units", width: w[2] },
+    { header: "EPS", width: w[3] },
+    { header: "DPR", width: w[4] },
+    { header: "DPS", width: w[5] },
+    { header: "Dividend Amount", width: w[6] },
   ];
   let totalDps = 0, totalAmount = 0;
   const rows = distributions.map((d) => {
@@ -52,7 +53,7 @@ export async function buildDividendPdf(
   drawKeptTogether(doc, "Dividend Details", { columns, rows });
   const { sans } = doc.fonts;
   drawText(doc, "Notes: EPS: Earning Per Share ; DPR: Dividend Payout Ratio ; DPS: Dividend Per Share",
-    { x: 45, y: doc.y - 12, font: sans, size: 9 });
+    { x: 45, y: doc.y - 12, font: sans, size: 8.5 });
   doc.y -= 20;
 
   drawNoticeHeader(doc, "IMPORTANT NOTICES");

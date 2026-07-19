@@ -15,9 +15,11 @@ from reportlab.lib.units import mm
 from reportlab.platypus import Paragraph, Table, TableStyle
 
 from pdf_common import (
+    BODY_W_MM,
     FONT_SANS_BOLD,
     InvestorInfo,
     build_with_footer,
+    col_widths,
     header_block,
     investor_block_name_first,
     notice_style,
@@ -59,7 +61,7 @@ def build_dividend_pdf(out_path, *, distributions: list[dict], investor: Investo
     total_row = ["Total", "", "", "", "", f"{total_dps:,.4f}", rm(total_amount)]
     data.append([Paragraph(str(c), table_cell_style) for c in total_row])
 
-    t = Table(data, colWidths=[28 * mm, 42 * mm, 30 * mm, 18 * mm, 18 * mm, 22 * mm, 32 * mm],
+    t = Table(data, colWidths=col_widths(BODY_W_MM, [76, 106, 80, 49, 49, 61, 84]),
               hAlign="LEFT")
     t.setStyle(TableStyle([
         ("GRID", (0, 0), (-1, -2), 0.6, colors.black),
@@ -69,8 +71,8 @@ def build_dividend_pdf(out_path, *, distributions: list[dict], investor: Investo
         ("ALIGN", (0, -1), (0, -1), "CENTER"),
         ("FONTNAME", (0, 0), (-1, 0), FONT_SANS_BOLD),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("LEFTPADDING", (0, 0), (-1, -1), 6), ("RIGHTPADDING", (0, 0), (-1, -1), 6),
-        ("TOPPADDING", (0, 0), (-1, -1), 5), ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+        ("LEFTPADDING", (0, 0), (-1, -1), 4), ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+        ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
     ]))
     flow.append(t)
     flow.append(Paragraph(

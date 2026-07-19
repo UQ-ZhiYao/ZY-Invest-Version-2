@@ -8,20 +8,31 @@ for everything else (the template used "Aptos Narrow", a Windows-only font;
 Helvetica is ReportLab's built-in equivalent and needs no font embedding),
 thin black borders, no fills. Kept here so all three statements stay visually
 consistent without duplicating the constants three times.
+
+Layout is A4 portrait with the ZY-Invest logo top-left (assets/img/logo.png)
+and every table/grid sized to exactly fill the page body width via
+`col_widths()` — mirrors the TypeScript port in
+supabase/functions/generate-statement/lib/common.ts, which the two
+implementations need to stay in sync with by hand if either changes.
 """
 from __future__ import annotations
 
 import datetime as dt
 from dataclasses import dataclass
+from pathlib import Path
 
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import mm
-from reportlab.platypus import Paragraph, SimpleDocTemplate, Table, TableStyle
+from reportlab.lib.utils import ImageReader
+from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Table, TableStyle
 
-PAGE_SIZE = landscape(A4)
+PAGE_SIZE = A4
 MARGIN = 16 * mm
+BODY_W_MM = PAGE_SIZE[0] / mm - 2 * (MARGIN / mm)
+
+LOGO_PATH = Path(__file__).resolve().parents[3] / "assets" / "img" / "logo.png"
 
 FONT_SERIF = "Times-Roman"
 FONT_SERIF_BOLD = "Times-Bold"
@@ -31,7 +42,7 @@ FONT_SANS_BOLD = "Helvetica-Bold"
 RED = colors.HexColor("#C00000")
 BORDER = colors.black
 
-title_style = ParagraphStyle("title", fontName=FONT_SERIF_BOLD, fontSize=13, leading=16,
+title_style = ParagraphStyle("title", fontName=FONT_SERIF_BOLD, fontSize=12.5, leading=15,
                              alignment=2)  # right-aligned
 name_style = ParagraphStyle("name", fontName=FONT_SERIF, fontSize=11, leading=15)
 section_style = ParagraphStyle("section", fontName=FONT_SANS, fontSize=12.5, leading=16,
@@ -42,9 +53,22 @@ meta_label_style = ParagraphStyle("meta_label", fontName=FONT_SANS, fontSize=10,
 meta_value_style = ParagraphStyle("meta_value", fontName=FONT_SANS, fontSize=10, leading=13)
 cell_label_style = ParagraphStyle("cell_label", fontName=FONT_SANS, fontSize=10, leading=13)
 cell_value_style = ParagraphStyle("cell_value", fontName=FONT_SANS, fontSize=10, leading=13)
-table_header_style = ParagraphStyle("table_header", fontName=FONT_SANS, fontSize=10, leading=13)
-table_cell_style = ParagraphStyle("table_cell", fontName=FONT_SANS, fontSize=10, leading=13)
+table_header_style = ParagraphStyle("table_header", fontName=FONT_SANS, fontSize=8.5, leading=11.5)
+table_cell_style = ParagraphStyle("table_cell", fontName=FONT_SANS, fontSize=8.5, leading=11.5)
 footer_style = ParagraphStyle("footer", fontName=FONT_SANS, fontSize=8.5, leading=11)
+
+
+def col_widths(total_mm: float, weights: list[float]) -> list[float]:
+    """Splits `total_mm` into widths proportional to `weights`, forced to sum
+    to exactly `total_mm` (remainder folded into the last column), returned
+    already multiplied by `mm` so the result can be passed straight to a
+    Table's colWidths= — every table this feeds is therefore exactly as wide
+    as the page body, never more, never less."""
+    s = sum(weights)
+    widths = [round(total_mm * w / s, 2) for w in weights]
+    used = sum(widths)
+    widths[-1] = round(widths[-1] + (total_mm - used), 2)
+    return [w * mm for w in widths]
 
 
 def red_if_negative(value: float, decimals: int) -> str:
@@ -88,48 +112,52 @@ FUND_PHONE = "(+60)11 - 1121 8085"
 
 
 def header_block(*, title: str, investor: InvestorInfo, statement_type: str,
-                  issued_date: dt.date, period_text: str) -> Table:
-    """Two-column header: investor name/address (serif, left) beside the
-    Page No./Issued Date/Statement Type/... meta block (sans, right) —
-    mirrors the template's A8:A11 / L7:O12 layout."""
-    left = [Paragraph(investor.registered_name.upper(), name_style)]
+                  issued_date: dt.date, period_text: str) -> list:
+    """Logo top-left + title top-right, investor name/address below (full
+    width), then a 2-pair-per-row meta grid (Page No./Issued Date,
+    Statement Type/Period, Email/Telephone) spanning the full body width."""
+    logo_w = 26.0  # mm
+    logo_h = logo_w  # placeholder, replaced below once we know the real aspect ratio
+    if LOGO_PATH.exists():
+        img_w, img_h = ImageReader(str(LOGO_PATH)).getSize()
+        logo_h = logo_w * img_h / img_w
+        logo = Image(str(LOGO_PATH), width=logo_w * mm, height=logo_h * mm)
+    else:
+        logo = Paragraph("", name_style)
+
+    title_para = Paragraph(title, title_style)
+    top_row = Table([[logo, title_para]], colWidths=[logo_w * mm, None])
+    top_row.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("ALIGN", (1, 0), (1, 0), "RIGHT"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+    ]))
+
+    flow: list = [top_row, Paragraph(investor.registered_name.upper(), name_style)]
     for line in (investor.address_line1, investor.address_line2, investor.address_line3):
         if line:
-            left.append(Paragraph(line, name_style))
+            flow.append(Paragraph(line, name_style))
 
+    label_w1, val_w1, label_w2, val_w2 = col_widths(BODY_W_MM, [95, 160, 95, 155])
     meta_rows = [
-        ("Page No.", ":  1 of 1"),
-        ("Issued Date", f":  {dt.date.today().strftime('%d-%m-%Y')}"),
-        ("Statement Type", f":  {statement_type}"),
-        ("Statement Period", f":  {period_text}"),
-        ("Email Address", f":  {FUND_EMAIL}"),
-        ("Telephone No.", f":  {FUND_PHONE}"),
+        ("Page No.", ":  1 of 1", "Issued Date", f":  {dt.date.today().strftime('%d-%m-%Y')}"),
+        ("Statement Type", f":  {statement_type}", "Statement Period", f":  {period_text}"),
+        ("Email Address", f":  {FUND_EMAIL}", "Telephone No.", f":  {FUND_PHONE}"),
     ]
     meta_table = Table(
-        [[Paragraph(k, meta_label_style), Paragraph(v, meta_value_style)] for k, v in meta_rows],
-        colWidths=[38 * mm, 55 * mm], hAlign="RIGHT",
+        [[Paragraph(l1, meta_label_style), Paragraph(v1, meta_value_style),
+          Paragraph(l2, meta_label_style), Paragraph(v2, meta_value_style)]
+         for l1, v1, l2, v2 in meta_rows],
+        colWidths=[label_w1, val_w1, label_w2, val_w2], hAlign="LEFT",
     )
     meta_table.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-        ("TOPPADDING", (0, 0), (-1, -1), 1), ("BOTTOMPADDING", (0, 0), (-1, -1), 1),
+        ("TOPPADDING", (0, 0), (-1, -1), 3), ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
     ]))
-
-    outer = Table([[left, meta_table]], colWidths=[130 * mm, None])
-    outer.setStyle(TableStyle([
-        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-        ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-        ("TOPPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
-    ]))
-
-    title_para = Paragraph(title, title_style)
-    wrapper = Table([[title_para]], colWidths=[None])
-    wrapper.setStyle(TableStyle([
-        ("ALIGN", (0, 0), (-1, -1), "RIGHT"),
-        ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
-    ]))
-    return [wrapper, outer]
+    flow.append(meta_table)
+    return flow
 
 
 def investor_block_with_account_type(investor: InvestorInfo) -> Table:
@@ -161,7 +189,7 @@ def _label_value_grid(rows: list[tuple[str, str, str, str]]) -> Table:
          Paragraph(c, cell_label_style), Paragraph(str(d), cell_value_style)]
         for a, b, c, d in rows
     ]
-    t = Table(data, colWidths=[45 * mm, 75 * mm, 45 * mm, 75 * mm], hAlign="LEFT")
+    t = Table(data, colWidths=col_widths(BODY_W_MM, [130, 210, 130, 210]), hAlign="LEFT")
     t.setStyle(TableStyle([
         ("GRID", (0, 0), (-1, -1), 0.6, BORDER),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
