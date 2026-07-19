@@ -1,0 +1,12 @@
+[functions.generate-statement]
+# Supabase's platform gateway verifies a JWT on every request by default —
+# including the browser's CORS preflight (OPTIONS) request, which never
+# carries an Authorization header per the CORS spec. That makes the gateway
+# reject the preflight with 401 before it reaches our code, which the
+# browser reports as a blocked CORS request (this is exactly the error this
+# setting fixes: "preflight ... does not have HTTP ok status").
+#
+# generate-statement does its own (stricter) auth check inside index.ts —
+# it verifies the caller's JWT AND that profiles.role = 'admin' — so it's
+# safe, and necessary, to turn off the platform's blanket check here.
+verify_jwt = false

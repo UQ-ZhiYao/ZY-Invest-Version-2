@@ -22,6 +22,22 @@ supabase link --project-ref <your-project-ref>
 supabase functions deploy generate-statement
 ```
 
+**Important — CORS preflight will fail without this:** Supabase's platform
+gateway verifies a JWT on every request by default, including the browser's
+CORS preflight (`OPTIONS`), which never carries an Authorization header per
+the CORS spec. That makes the gateway reject the preflight with 401 before
+it reaches this function's own code, which the browser reports as a blocked
+CORS request ("preflight ... does not have HTTP ok status"). The repo's
+`supabase/config.toml` sets `verify_jwt = false` for this function to fix
+that — this function does its own (stricter) check inside `index.ts`
+anyway (valid JWT **and** `profiles.role = 'admin'`), so the platform's
+blanket check isn't needed. If your Supabase CLI version doesn't pick up
+`config.toml` automatically, deploy with the flag explicitly instead:
+
+```bash
+supabase functions deploy generate-statement --no-verify-jwt
+```
+
 Run `sql/001_statements_table.sql` (in `scripts/statements/sql/`) first if
 you haven't already — this function writes to the same `statements` table
 and `statements` Storage bucket the Python CLI uses.
