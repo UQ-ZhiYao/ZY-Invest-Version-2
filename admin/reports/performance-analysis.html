@@ -11,8 +11,8 @@
 <body>
 <script>
 (function(){
-  try{ var s=JSON.parse(localStorage.getItem('zy_admin_session')||'null'); if(!s||s.role!=='admin'){ location.replace('../admin-login.html'); } }
-  catch(e){ location.replace('../admin-login.html'); }
+  try{ var s=JSON.parse(localStorage.getItem('zy_admin_session')||'null'); if(!s||s.role!=='admin'){ location.replace('../../index.html'); } }
+  catch(e){ location.replace('../../index.html'); }
 })();
 </script>
 <div class="app" id="app">
@@ -80,13 +80,13 @@
             <span><b>Nominee</b><span>Beneficiary nomination</span></span>
           </a>
           <div class="um-sep"></div>
-          <a class="um-item danger" href="../admin-login.html">
+          <a class="um-item danger" href="../../index.html">
             <span class="um-ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>
             <span><b>Sign out</b></span>
           </a>
         </div>
       </div>
-      <a href="../admin-login.html" class="btn-logout">Logout</a>
+      <a href="../../index.html" class="btn-logout">Logout</a>
     </div>
   </header>
 
@@ -158,7 +158,7 @@
         <span class="sb-label">Statements</span>
       </a>
       <div class="sb-spacer"></div>
-      <a class="sb-item logout" href="../admin-login.html">
+      <a class="sb-item logout" href="../../index.html">
         <span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>
         <span class="sb-label">Sign out</span>
       </a>

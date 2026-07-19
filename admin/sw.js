@@ -1,9 +1,9 @@
 /* ZY-Invest Admin — service worker (offline shell for installability) */
 const CACHE = 'zy-admin-v1';
 const ASSETS = [
-  'admin-login.html',
   'admin.html',
   'manifest.webmanifest',
+  '../index.html',
   '../assets/css/dashboard.css',
   '../assets/css/dashboard-portfolio.css',
   '../assets/img/logo.png',
@@ -37,6 +37,6 @@ self.addEventListener('fetch', (e) => {
         caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
         return res;
       })
-      .catch(() => caches.match(req).then((hit) => hit || caches.match('admin-login.html')))
+      .catch(() => caches.match(req).then((hit) => hit || caches.match('../index.html')))
   );
 });

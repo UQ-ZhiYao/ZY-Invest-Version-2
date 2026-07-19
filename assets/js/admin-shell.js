@@ -22,7 +22,7 @@
   tick(); setInterval(tick,30000);
 
   // logout buttons (also handled by admin-supabase.js, but keep a fallback)
-  function fallbackLogout(){ try{ localStorage.removeItem('zy_admin_session'); }catch(e){} location.replace('admin-login.html'); }
+  function fallbackLogout(){ try{ localStorage.removeItem('zy_admin_session'); }catch(e){} location.replace('../index.html'); }
   var lo=document.getElementById('logout');
   if(lo && !lo._wired){ lo.addEventListener('click',function(e){ if(typeof sb==='undefined'){ e.preventDefault(); fallbackLogout(); } }); }
 
