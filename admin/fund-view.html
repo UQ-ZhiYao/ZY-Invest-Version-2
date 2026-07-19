@@ -124,7 +124,7 @@
   document.getElementById('fvTitle').textContent=title;
   document.title=title+' — ZY-Invest Admin';
   var fr=document.getElementById('fvFrame');
-  fr.src='../members/'+src+'?embed=1';
+  fr.src='reports/'+src+'?embed=1';
   function size(){ try{ var d=fr.contentDocument; if(d&&d.documentElement){ fr.style.height=Math.max(d.documentElement.scrollHeight, window.innerHeight-230)+'px'; } }catch(e){} }
   fr.addEventListener('load',function(){ size(); setTimeout(size,300); setTimeout(size,800); });
   window.addEventListener('resize',size);

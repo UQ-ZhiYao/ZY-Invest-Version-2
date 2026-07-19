@@ -3,23 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Factsheet — ZY-Invest</title>
-<link rel="stylesheet" href="../assets/css/dashboard.css">
-<link rel="stylesheet" href="../assets/css/dashboard-portfolio.css">
+<title>NTA History — ZY-Invest</title>
+<link rel="stylesheet" href="../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../assets/css/dashboard-portfolio.css">
 <script>if(location.search.indexOf("embed")!==-1)document.documentElement.classList.add("embed");</script>
 </head>
 <body>
+<script>
+(function(){
+  try{ var s=JSON.parse(localStorage.getItem('zy_admin_session')||'null'); if(!s||s.role!=='admin'){ location.replace('../admin-login.html'); } }
+  catch(e){ location.replace('../admin-login.html'); }
+})();
+</script>
 <div class="app" id="app">
 
   <!-- ===================== TOP NAV — FUND INFORMATION ===================== -->
   <header class="topnav">
-    <a href="../index.html" class="brand">
-      <img src="../assets/img/logo.png" alt="ZY-Invest">
+    <a href="../overview.html" class="brand">
+      <img src="../../assets/img/logo.png" alt="ZY-Invest">
       <span class="bt"><b>ZY-Invest</b><span>Member Portal</span></span>
     </a>
     <nav class="nav-links">
       <div class="nav-group">
-        <button class="nav-top active">Fund <span class="caret">▾</span></button>
+        <button class="nav-top">Fund <span class="caret">▾</span></button>
         <div class="dropdown"><div class="dd-card">
           <a class="dd-item" href="fund-overview.html"><b>Fund Overview</b><span>Mandate, objective &amp; key facts</span></a>
           <a class="dd-item" href="factsheet.html"><b>Factsheet</b><span>Holdings allocation each financial year</span></a>
@@ -27,7 +33,7 @@
         </div></div>
       </div>
       <div class="nav-group">
-        <button class="nav-top">Performance <span class="caret">▾</span></button>
+        <button class="nav-top active">Performance <span class="caret">▾</span></button>
         <div class="dropdown"><div class="dd-card">
           <a class="dd-item" href="financial-result.html"><b>Financial Result</b><span>Income statement, balance sheet &amp; cash flow</span></a>
           <a class="dd-item" href="performance-analysis.html"><b>Performance Analysis</b><span>Returns &amp; benchmark comparison (FBM KLCI)</span></a>
@@ -74,13 +80,13 @@
             <span><b>Nominee</b><span>Beneficiary nomination</span></span>
           </a>
           <div class="um-sep"></div>
-          <a class="um-item danger" href="../login.html">
+          <a class="um-item danger" href="../admin-login.html">
             <span class="um-ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>
             <span><b>Sign out</b></span>
           </a>
         </div>
       </div>
-      <a href="../login.html" class="btn-logout">Logout</a>
+      <a href="../admin-login.html" class="btn-logout">Logout</a>
     </div>
   </header>
 
@@ -152,7 +158,7 @@
         <span class="sb-label">Statements</span>
       </a>
       <div class="sb-spacer"></div>
-      <a class="sb-item logout" href="../login.html">
+      <a class="sb-item logout" href="../admin-login.html">
         <span class="sb-ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>
         <span class="sb-label">Sign out</span>
       </a>
@@ -161,31 +167,11 @@
     <!-- main -->
     <main class="main">
       <div class="ph-xl">
-        <h1><span class="ph-accent">Factsheet</span></h1>
-        <p>Holdings allocation across each financial year, plus the latest downloadable factsheet.</p>
+        <h1><span class="ph-accent">NTA History</span></h1>
+        <p>NTA per unit over time, with daily NTA and Net Asset Value history.</p>
       </div>
-      <div class="panel"><div class="panel-head"><h3>Holdings Allocation by Financial Year</h3></div>
-        <div style="padding:20px;">
-          <div style="display:flex;flex-wrap:wrap;gap:14px 20px;margin-bottom:18px;font-size:0.8rem;color:var(--fg-2);"><span style="display:flex;align-items:center;gap:7px;"><span style="width:11px;height:11px;border-radius:3px;background:var(--blue)"></span>Healthcare</span><span style="display:flex;align-items:center;gap:7px;"><span style="width:11px;height:11px;border-radius:3px;background:var(--green)"></span>Financials</span><span style="display:flex;align-items:center;gap:7px;"><span style="width:11px;height:11px;border-radius:3px;background:var(--orange)"></span>Technology</span><span style="display:flex;align-items:center;gap:7px;"><span style="width:11px;height:11px;border-radius:3px;background:#7E57C2"></span>Telcos</span><span style="display:flex;align-items:center;gap:7px;"><span style="width:11px;height:11px;border-radius:3px;background:var(--gray-400)"></span>Other &amp; Cash</span></div>
-        <div style="margin-bottom:18px;">
-          <div style="display:flex;justify-content:space-between;font-size:0.84rem;margin-bottom:7px;"><span style="font-weight:600;color:var(--fg-1);">FY2025</span><span style="color:var(--fg-3);">NTA RM 1.0210</span></div>
-          <div class="dist-stack" style="height:18px;"><span style="width:28%;background:var(--blue)"></span><span style="width:22%;background:var(--green)"></span><span style="width:15%;background:var(--orange)"></span><span style="width:11%;background:#7E57C2"></span><span style="width:24%;background:var(--gray-400)"></span></div>
-        </div>
-        <div style="margin-bottom:18px;">
-          <div style="display:flex;justify-content:space-between;font-size:0.84rem;margin-bottom:7px;"><span style="font-weight:600;color:var(--fg-1);">FY2024</span><span style="color:var(--fg-3);">NTA RM 0.9920</span></div>
-          <div class="dist-stack" style="height:18px;"><span style="width:25%;background:var(--blue)"></span><span style="width:24%;background:var(--green)"></span><span style="width:12%;background:var(--orange)"></span><span style="width:13%;background:#7E57C2"></span><span style="width:26%;background:var(--gray-400)"></span></div>
-        </div>
-        <div style="margin-bottom:18px;">
-          <div style="display:flex;justify-content:space-between;font-size:0.84rem;margin-bottom:7px;"><span style="font-weight:600;color:var(--fg-1);">FY2023</span><span style="color:var(--fg-3);">NTA RM 0.9710</span></div>
-          <div class="dist-stack" style="height:18px;"><span style="width:22%;background:var(--blue)"></span><span style="width:26%;background:var(--green)"></span><span style="width:9%;background:var(--orange)"></span><span style="width:15%;background:#7E57C2"></span><span style="width:28%;background:var(--gray-400)"></span></div>
-        </div>
-        <div style="margin-bottom:18px;">
-          <div style="display:flex;justify-content:space-between;font-size:0.84rem;margin-bottom:7px;"><span style="font-weight:600;color:var(--fg-1);">FY2022</span><span style="color:var(--fg-3);">NTA RM 0.9650</span></div>
-          <div class="dist-stack" style="height:18px;"><span style="width:18%;background:var(--blue)"></span><span style="width:28%;background:var(--green)"></span><span style="width:6%;background:var(--orange)"></span><span style="width:16%;background:#7E57C2"></span><span style="width:32%;background:var(--gray-400)"></span></div>
-        </div>
-        </div>
-      </div>
-      <div class="panel" style="margin-top:16px;"><div class="panel-head"><h3>Download Factsheet</h3></div><div class="res-list" style="padding:8px;"><a class="res-item"><span class="ri-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/></svg></span><span class="ri-t"><b>Fund Factsheet — March 2026</b><span>PDF · 248 KB · updated monthly</span></span><span class="ri-arr">↓</span></a><a class="res-item"><span class="ri-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/></svg></span><span class="ri-t"><b>Fund Factsheet — February 2026</b><span>PDF · 241 KB</span></span><span class="ri-arr">↓</span></a><a class="res-item"><span class="ri-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/></svg></span><span class="ri-t"><b>Fund Factsheet — January 2026</b><span>PDF · 256 KB</span></span><span class="ri-arr">↓</span></a></div></div>
+      <div class="panel"><div class="panel-head"><h3>NTA per Unit</h3><div class="seg-ctrl"><button>1Y</button><button class="on">3Y</button><button>Max</button></div></div><div class="chart-flex"><div class="chart-main"><svg class="chart-svg" viewBox="0 0 560 215" preserveAspectRatio="none"><defs><linearGradient id="ntaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1565C0" stop-opacity="0.18"/><stop offset="1" stop-color="#1565C0" stop-opacity="0"/></linearGradient></defs><g class="grid"><line x1="0" y1="44" x2="560" y2="44"/><line x1="0" y1="94" x2="560" y2="94"/><line x1="0" y1="144" x2="560" y2="144"/><line x1="0" y1="193" x2="560" y2="193"/></g><path class="area" d="M0,172 C50,164 80,168 120,150 C170,128 200,138 250,116 C300,94 330,108 380,86 C430,62 470,74 520,48 C540,38 552,42 560,32 L560,215 L0,215 Z"/><path class="line" d="M0,172 C50,164 80,168 120,150 C170,128 200,138 250,116 C300,94 330,108 380,86 C430,62 470,74 520,48 C540,38 552,42 560,32"/><circle class="dot" cx="560" cy="32" r="4.5"/></svg><div class="float-tip" id="ntaTip" style="left:54%;top:32%;display:none;"><div class="ft-d">19 Mar 2026</div><div class="ft-v">RM 1.0245</div></div><div class="chart-xaxis"><span>FY23</span><span>FY24</span><span>FY25</span><span>FY26</span></div></div><div class="chart-side"><div class="cside"><div class="ck">Current NTA</div><div class="cv blue">RM 1.0245</div></div><div class="cside"><div class="ck">Inception NTA</div><div class="cv">RM 1.0000</div></div><div class="cside"><div class="ck">All-time High</div><div class="cv">RM 1.0258</div></div></div></div></div>
+      <div class="panel" style="margin-top:16px;"><div class="panel-head"><h3>Daily NTA &amp; Net Asset Value</h3><a>Download CSV →</a></div><table class="tbl"><thead><tr><th>Date</th><th class="td-right">NTA / Unit (RM)</th><th class="td-right">Net Asset Value (RM)</th><th class="td-right">Daily Change</th></tr></thead><tbody><tr><td>19 Mar 2026</td><td class="td-right">1.0245</td><td class="td-right">981,707</td><td class="td-right pos">+0.42%</td></tr><tr><td>18 Mar 2026</td><td class="td-right">1.0202</td><td class="td-right">977,586</td><td class="td-right pos">+0.18%</td></tr><tr><td>17 Mar 2026</td><td class="td-right">1.0184</td><td class="td-right">975,861</td><td class="td-right neg">−0.11%</td></tr><tr><td>16 Mar 2026</td><td class="td-right">1.0195</td><td class="td-right">976,915</td><td class="td-right pos">+0.27%</td></tr><tr><td>15 Mar 2026</td><td class="td-right">1.0168</td><td class="td-right">974,328</td><td class="td-right pos">+0.33%</td></tr><tr><td>14 Mar 2026</td><td class="td-right">1.0134</td><td class="td-right">971,070</td><td class="td-right neg">−0.08%</td></tr><tr><td>13 Mar 2026</td><td class="td-right">1.0142</td><td class="td-right">971,837</td><td class="td-right pos">+0.21%</td></tr></tbody></table></div>
 
     </main>
   </div>
@@ -310,10 +296,10 @@
   document.querySelectorAll('.chat-chip').forEach(function(c){ c.addEventListener('click',function(){ input.value=c.textContent; input.focus(); }); });
 })();
 </script>
-<script src="../assets/js/member-search.js"></script>
-<script src="../assets/js/member-notifications.js"></script>
+<script src="../../assets/js/member-search.js"></script>
+<script src="../../assets/js/member-notifications.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../assets/js/supabase-auth.js"></script>
-<script src="../assets/js/auth-logout.js"></script>
+<script src="../../assets/js/supabase-auth.js"></script>
+<script src="../../assets/js/auth-logout.js"></script>
 </body>
 </html>
