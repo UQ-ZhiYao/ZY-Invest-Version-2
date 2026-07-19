@@ -116,22 +116,29 @@
   <tbody id="dmBody"></tbody></table>
 </div>
 <div class="modal trade-modal" id="duModal">
-  <div class="modal-head"><div><h3>Upload Document</h3><div class="sub">Add a factsheet or investor statement to the library.</div></div><button class="modal-x" data-close>✕</button></div>
+  <div class="modal-head"><div><h3 id="du-modal-title">Upload Document</h3><div class="sub" id="du-modal-sub">Add a factsheet, or generate a real investor statement.</div></div><button class="modal-x" data-close>✕</button></div>
   <div class="modal-body">
     <div class="trade-cols">
       <div class="trade-col">
-        <div class="field"><label>Document Type</label><select id="du-type"><option value="Factsheet">Factsheet</option><option value="Account Statement">Account Statement</option><option value="Dividend Statement">Dividend Statement</option><option value="Subscription Statement">Subscription Statement</option></select></div>
-        <div class="field" id="du-scope-wrap"><label>Investor</label><select id="du-scope"></select></div>
-        <div class="two-up">
-          <div class="field"><label>Period / As-at</label><input type="date" id="du-period" value="2026-05-31"></div>
-          <div class="field"><label>Financial Year</label><select id="du-fy"><option>—</option><option>FY2026</option><option>FY2025</option><option>FY2024</option></select></div>
+        <div class="field"><label>Document Type</label>
+          <select id="du-type">
+            <option value="Factsheet">Factsheet</option>
+            <option value="Account Statement">Account Statement (Annual)</option>
+            <option value="Dividend Statement">Dividend Statement</option>
+            <option value="Subscription Statement">Subscription Statement</option>
+            <option value="Redemption Statement">Redemption Statement</option>
+          </select>
         </div>
-        <div class="field"><label>Status</label><select id="du-status"><option>Published</option><option>Draft</option></select></div>
-        <div class="field"><label>File</label><div class="file-drop" id="du-file"><span class="fd-ic">⤓</span><span id="du-fname">Click to attach PDF</span></div></div>
+        <div class="field" id="du-scope-wrap"><label>Investor</label><select id="du-scope"></select></div>
+        <div class="field" id="du-tx-wrap" style="display:none;"><label>Transaction</label><select id="du-tx"></select></div>
+        <div class="field" id="du-fy-wrap" style="display:none;"><label>Financial Year</label><select id="du-fy"></select></div>
+        <div class="field" id="du-period-wrap"><label>Period / As-at</label><input type="date" id="du-period" value="2026-05-31"></div>
+        <div class="field" id="du-status-wrap"><label>Status</label><select id="du-status"><option>Published</option><option>Draft</option></select></div>
+        <div class="field" id="du-file-wrap"><label>File</label><div class="file-drop" id="du-file"><span class="fd-ic">⤓</span><span id="du-fname">Click to attach PDF</span></div></div>
       </div>
       <div class="trade-col">
-        <div class="cmp-head"><span>Statement Data</span><button type="button" class="btn-mini" id="du-compute">⚙ Compute</button></div>
-        <div class="cmp-box" id="du-cmp"><div class="cmp-empty">For statements, click <b>Compute</b> to pull the investor's figures needed for this document.</div></div>
+        <div class="cmp-head"><span id="du-panel-title">Statement Data</span></div>
+        <div class="cmp-box" id="du-cmp"><div class="cmp-empty">Pick an investor (and transaction / financial year) to see its details, then generate the real PDF.</div></div>
       </div>
     </div>
   </div>
@@ -146,9 +153,9 @@
 <script src="../assets/js/auth-logout.js"></script>
 <script src="../assets/js/admin-shell.js"></script>
 <script src="../assets/js/admin-supabase.js"></script>
+<script src="../assets/js/statements-admin.js"></script>
 <script>
 (function(){
-  var INVESTOR_NAMES=['Ng Zhi Yao','Tan Hui Mei','Lim Wealth Trust','Cheah Boon Hwa','Wong Mei Ling'];
   var DOCS=[
     {date:'15 Jun 2026',name:'ZY-Invest Monthly Factsheet — 30 May 2026',file:'ZY-Invest_Monthly_Factsheet_-_30_May_2026.pdf',type:'Factsheet',scope:'Fund-wide',fy:'—',vis:'Fund',size:'212 KB'},
     {date:'04 May 2026',name:'ZY-Invest Monthly Factsheet — 29 April 2026',file:'ZY-Invest_Monthly_Factsheet_-_29_April_2026.pdf',type:'Factsheet',scope:'Fund-wide',fy:'—',vis:'Fund',size:'212 KB'},
@@ -184,16 +191,125 @@
   document.getElementById('dmBulkClear').addEventListener('click',function(){ dmSel.clear(); render(); });
   document.getElementById('dmBulkDownload').addEventListener('click',function(){ zyToast('Downloading '+dmSel.size+' document'+(dmSel.size>1?'s':'')+'…'); });
   document.getElementById('dmBulkDelete').addEventListener('click',function(){ var n=dmSel.size,keep=[]; DOCS.forEach(function(d,i){ if(!dmSel.has(i)) keep.push(d); }); DOCS.length=0; keep.forEach(function(d){DOCS.push(d);}); dmSel.clear(); render(); zyToast('Deleted '+n+' document'+(n>1?'s':'')); });
-  var duType=document.getElementById('du-type'),duScope=document.getElementById('du-scope'),duScopeWrap=document.getElementById('du-scope-wrap'),duFile=document.getElementById('du-file');
-  function fillScope(){ duScope.innerHTML=''; INVESTOR_NAMES.forEach(function(n){ var o=document.createElement('option'); o.value=n; o.textContent=n; duScope.appendChild(o); }); }
-  fillScope();
-  function syncScope(){ duScopeWrap.style.display=duType.value==='Factsheet'?'none':''; reset(); }
-  duType.addEventListener('change',syncScope);
-  function reset(){ document.getElementById('du-cmp').innerHTML='<div class="cmp-empty">For statements, click <b>Compute</b> to pull the investor\u2019s figures needed for this document.</div>'; }
+  // ── Statement generation (real Supabase data + the generate-statement Edge Function) ──
+  // Factsheet stays a manual mock upload (out of scope for the generator — it's
+  // fund-level, not tied to an investor/transaction). Every other Document Type
+  // below calls the real generate-statement function and lists the real result.
+  var duType=document.getElementById('du-type'),
+      duScope=document.getElementById('du-scope'), duScopeWrap=document.getElementById('du-scope-wrap'),
+      duTx=document.getElementById('du-tx'), duTxWrap=document.getElementById('du-tx-wrap'),
+      duFy=document.getElementById('du-fy'), duFyWrap=document.getElementById('du-fy-wrap'),
+      duPeriodWrap=document.getElementById('du-period-wrap'),
+      duStatusWrap=document.getElementById('du-status-wrap'),
+      duFileWrap=document.getElementById('du-file-wrap'),
+      duFile=document.getElementById('du-file'),
+      duSave=document.getElementById('du-save'),
+      duCmp=document.getElementById('du-cmp');
+
+  var REAL_INVESTORS=[], REAL_FY=[];
+
+  function stmtEdgeType(t){ return {'Subscription Statement':'Subscription','Redemption Statement':'Redemption','Dividend Statement':'Dividend','Account Statement':'Annual'}[t]||null; }
+  function investorName(id){ var p=REAL_INVESTORS.filter(function(x){return x.id===id;})[0]; return p?(p.full_name||id):'—'; }
+
+  async function loadRealInvestors(){
+    if(typeof sb==='undefined'||!sb) return;
+    var res=await sb.from('profiles').select('id,full_name').order('full_name');
+    if(res.error||!res.data) return;
+    REAL_INVESTORS=res.data;
+    duScope.innerHTML='';
+    REAL_INVESTORS.forEach(function(p){ var o=document.createElement('option'); o.value=p.id; o.textContent=p.full_name||p.id; duScope.appendChild(o); });
+  }
+  async function loadRealFY(){
+    if(typeof sb==='undefined'||!sb) return;
+    var res=await sb.from('fy_settings').select('*').order('start_date',{ascending:false});
+    if(res.error||!res.data) return;
+    REAL_FY=res.data;
+    duFy.innerHTML='';
+    REAL_FY.forEach(function(fy){ var o=document.createElement('option'); o.value=fy.id; o.textContent=fy.label; duFy.appendChild(o); });
+  }
+  loadRealInvestors(); loadRealFY();
+
+  async function loadTxOptions(){
+    var edgeType=stmtEdgeType(duType.value), investorId=duScope.value;
+    if(!investorId||(edgeType!=='Subscription'&&edgeType!=='Redemption')){ duTx.innerHTML=''; updatePreview(); return; }
+    duTx.innerHTML='<option value="">Loading…</option>';
+    var res=await sb.from('capital_injection').select('*').eq('uid',investorId).eq('type',edgeType).eq('status','Approved').order('date',{ascending:false});
+    duTx.innerHTML='';
+    if(res.error||!res.data||!res.data.length){ duTx.innerHTML='<option value="">No approved '+edgeType.toLowerCase()+' transactions</option>'; updatePreview(); return; }
+    res.data.forEach(function(tx){
+      var o=document.createElement('option'); o.value=tx.id;
+      o.textContent=(new Date(tx.date)).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+' · RM '+parseFloat(tx.amount).toLocaleString('en-MY',{minimumFractionDigits:2})+' · '+(tx.reference_id||tx.id);
+      duTx.appendChild(o);
+    });
+    updatePreview();
+  }
+
+  function updatePreview(){
+    var type=duType.value, edgeType=stmtEdgeType(type);
+    if(type==='Factsheet'){ duCmp.innerHTML='<div class="cmp-empty">Factsheets are uploaded manually — attach the PDF and save.</div>'; return; }
+    var investorId=duScope.value;
+    if(!investorId){ duCmp.innerHTML='<div class="cmp-empty">Select an investor.</div>'; return; }
+    if(edgeType==='Subscription'||edgeType==='Redemption'){
+      if(!duTx.value){ duCmp.innerHTML='<div class="cmp-empty">No transaction selected.</div>'; return; }
+      duCmp.innerHTML='<div class="cmp-row"><span class="ck">Investor</span><span class="cv">'+investorName(investorId)+'</span></div><div class="cmp-row"><span class="ck">Transaction</span><span class="cv">'+duTx.options[duTx.selectedIndex].textContent+'</span></div>';
+    } else {
+      var fy=REAL_FY.filter(function(f){return f.id===duFy.value;})[0];
+      duCmp.innerHTML='<div class="cmp-row"><span class="ck">Investor</span><span class="cv">'+investorName(investorId)+'</span></div><div class="cmp-row"><span class="ck">Financial Year</span><span class="cv">'+(fy?fy.label:'—')+'</span></div>';
+    }
+  }
+
+  function syncFields(){
+    var type=duType.value, edgeType=stmtEdgeType(type), isFactsheet=(type==='Factsheet');
+    duScopeWrap.style.display=isFactsheet?'none':'';
+    duTxWrap.style.display=(edgeType==='Subscription'||edgeType==='Redemption')?'':'none';
+    duFyWrap.style.display=(edgeType==='Dividend'||edgeType==='Annual')?'':'none';
+    duPeriodWrap.style.display=isFactsheet?'':'none';
+    duStatusWrap.style.display=isFactsheet?'':'none';
+    duFileWrap.style.display=isFactsheet?'':'none';
+    duSave.textContent=isFactsheet?'Upload Document':'Generate Statement';
+    document.getElementById('du-panel-title').textContent=isFactsheet?'Factsheet Data':'Statement Data';
+    if(edgeType==='Subscription'||edgeType==='Redemption') loadTxOptions(); else updatePreview();
+  }
+  duType.addEventListener('change',syncFields);
+  duScope.addEventListener('change',function(){ var edgeType=stmtEdgeType(duType.value); if(edgeType==='Subscription'||edgeType==='Redemption') loadTxOptions(); else updatePreview(); });
+  duTx.addEventListener('change',updatePreview);
+  duFy.addEventListener('change',updatePreview);
   duFile.addEventListener('click',function(){ duFile.classList.add('filled'); document.getElementById('du-fname').textContent='statement-draft.pdf · attached'; });
-  document.getElementById('du-compute').addEventListener('click',function(){ var box=document.getElementById('du-cmp'); if(duType.value==='Factsheet'){ box.innerHTML='<div class="cmp-row"><span class="ck">Fund NAV / unit</span><span class="cv">RM 1.0245</span></div><div class="cmp-row"><span class="ck">Fund Size (AUM)</span><span class="cv">RM 981,707</span></div><div class="cmp-row"><span class="ck">Units in Circulation</span><span class="cv">958,300</span></div>'; zyToast('Fund-level figures computed'); return; } var m=duScope.value; box.innerHTML='<div class="cmp-row"><span class="ck">Investor</span><span class="cv">'+m+'</span></div><div class="cmp-row"><span class="ck">NAV / Unit</span><span class="cv">RM 1.0245</span></div><div class="cmp-row tot"><span class="ck">Current Value</span><span class="cv">RM 99,171.60</span></div>'; zyToast('Statement figures computed for '+m); });
-  document.getElementById('openDuModal').addEventListener('click',function(){ duType.value='Factsheet'; syncScope(); duFile.classList.remove('filled'); document.getElementById('du-fname').textContent='Click to attach PDF'; zyModalOpen('duModal'); });
-  document.getElementById('du-save').addEventListener('click',function(){ var type=duType.value,scope=type==='Factsheet'?'Fund-wide':duScope.value; var d=new Date(document.getElementById('du-period').value); var per=isNaN(d)?'May 2026':d.toLocaleDateString('en-GB',{month:'short',year:'numeric'}); var name=type==='Factsheet'?('ZY-Invest Monthly Factsheet — '+per):(type.replace(' Statement','')+' Statement — '+scope); var fy=document.getElementById('du-fy').value; DOCS.unshift({date:'19 Jun 2026',name:name,file:us(name)+'.pdf',type:type,scope:scope,fy:(type==='Factsheet'?'—':(fy||'FY2026')),vis:(type==='Factsheet'?'Fund':'Member'),size:(Math.round(80+Math.random()*180))+' KB'}); render(); zyModalClose(); zyToast('Uploaded — '+name); });
+
+  document.getElementById('openDuModal').addEventListener('click',function(){ duType.value='Factsheet'; syncFields(); duFile.classList.remove('filled'); document.getElementById('du-fname').textContent='Click to attach PDF'; zyModalOpen('duModal'); });
+
+  duSave.addEventListener('click', async function(){
+    var type=duType.value, edgeType=stmtEdgeType(type);
+    if(type==='Factsheet'){
+      var d=new Date(document.getElementById('du-period').value);
+      var per=isNaN(d)?'May 2026':d.toLocaleDateString('en-GB',{month:'short',year:'numeric'});
+      var name='ZY-Invest Monthly Factsheet — '+per;
+      DOCS.unshift({date:'19 Jun 2026',name:name,file:us(name)+'.pdf',type:type,scope:'Fund-wide',fy:'—',vis:'Fund',size:(Math.round(80+Math.random()*180))+' KB'});
+      render(); zyModalClose(); zyToast('Uploaded — '+name);
+      return;
+    }
+    if(!window.zyGenerateStatement){ zyToast('Statement generator not loaded'); return; }
+    var investorId=duScope.value;
+    if(!investorId){ zyToast('Select an investor'); return; }
+    var payload;
+    if(edgeType==='Subscription'||edgeType==='Redemption'){
+      if(!duTx.value){ zyToast('Select a transaction'); return; }
+      payload={ type:edgeType, txId:duTx.value };
+    } else {
+      if(!duFy.value){ zyToast('Select a financial year'); return; }
+      payload={ type:edgeType, investorId:investorId, fyId:duFy.value };
+    }
+    try{
+      var result=await zyGenerateStatement(payload, { button:this });
+      DOCS.unshift({
+        date:(new Date()).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}),
+        name:type+' — '+investorName(investorId),
+        file:result.file_name, type:type, scope:investorName(investorId),
+        fy:result.period_label||'—', vis:'Member', size:'—'
+      });
+      render(); zyModalClose();
+    }catch(ex){ /* zyGenerateStatement already toasts the error */ }
+  });
 })();
 </script>
 

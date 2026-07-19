@@ -240,31 +240,6 @@
       curInv.status='Suspended';
       renderInvestors(); zyModalClose(); if(window.zyToast) zyToast('Investor suspended — '+(curInv.name||''));
     });
-
-    // Statements — Dividend / Annual generation for the selected investor
-    (async function loadStmtFyOptions(){
-      var sel=document.getElementById('dw-stmt-fy');
-      if(!sel || typeof sb==='undefined' || !sb) return;
-      var res=await sb.from('fy_settings').select('*').order('start_date',{ascending:false});
-      if(res.error||!res.data) return;
-      res.data.forEach(function(fy){ var o=document.createElement('option'); o.value=fy.id; o.textContent=fy.label; sel.appendChild(o); });
-    })();
-
-    document.getElementById('dw-gen-dividend').addEventListener('click', async function(){
-      if(!curInv||!curInv._sbId) return;
-      var fyId=document.getElementById('dw-stmt-fy').value;
-      if(!fyId){ if(window.zyToast) zyToast('Select a financial year first'); return; }
-      if(!window.zyGenerateStatement) return;
-      try{ await zyGenerateStatement({ type:'Dividend', investorId:curInv._sbId, fyId:fyId }, { button:this }); }catch(ex){}
-    });
-
-    document.getElementById('dw-gen-annual').addEventListener('click', async function(){
-      if(!curInv||!curInv._sbId) return;
-      var fyId=document.getElementById('dw-stmt-fy').value;
-      if(!fyId){ if(window.zyToast) zyToast('Select a financial year first'); return; }
-      if(!window.zyGenerateStatement) return;
-      try{ await zyGenerateStatement({ type:'Annual', investorId:curInv._sbId, fyId:fyId }, { button:this }); }catch(ex){}
-    });
   }
 
 })();
