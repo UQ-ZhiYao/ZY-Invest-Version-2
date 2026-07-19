@@ -3,7 +3,7 @@
   "short_name": "ZY Admin",
   "description": "ZY-Invest fund management admin console.",
   "start_url": "overview.html",
-  "scope": "./",
+  "scope": "../",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#0B1220",
