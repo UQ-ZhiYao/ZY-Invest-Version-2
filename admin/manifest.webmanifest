@@ -2,7 +2,7 @@
   "name": "ZY-Invest Admin Console",
   "short_name": "ZY Admin",
   "description": "ZY-Invest fund management admin console.",
-  "start_url": "admin-login.html",
+  "start_url": "overview.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",

@@ -18,11 +18,11 @@
 
     // ---- session guard ----
     var sres=await sb.auth.getSession();
-    if(!sres.data || !sres.data.session){ localStorage.removeItem('zy_admin_session'); location.replace('admin-login.html'); return; }
+    if(!sres.data || !sres.data.session){ localStorage.removeItem('zy_admin_session'); location.replace('../index.html'); return; }
     var userId=sres.data.session.user.id;
 
     var pres=await sb.from('profiles').select('role,full_name,preferred_name').eq('id',userId).single();
-    if(!pres.data || pres.data.role!=='admin'){ await sb.auth.signOut(); localStorage.removeItem('zy_admin_session'); location.replace('admin-login.html'); return; }
+    if(!pres.data || pres.data.role!=='admin'){ await sb.auth.signOut(); localStorage.removeItem('zy_admin_session'); location.replace('../index.html'); return; }
 
     // ---- top bar name ----
     var adminName=pres.data.preferred_name||pres.data.full_name||sres.data.session.user.email;
@@ -31,7 +31,7 @@
     var avEl=document.querySelector('.adm-user .av'); if(avEl) avEl.textContent=av;
 
     // ---- logout (both buttons) ----
-    async function doAdminLogout(e){ if(e) e.preventDefault(); try{ await sb.auth.signOut(); }catch(x){} localStorage.removeItem('zy_admin_session'); location.replace('admin-login.html'); }
+    async function doAdminLogout(e){ if(e) e.preventDefault(); try{ await sb.auth.signOut(); }catch(x){} localStorage.removeItem('zy_admin_session'); location.replace('../index.html'); }
     var lo=document.getElementById('logout'); if(lo){ lo.onclick=doAdminLogout; }
     var so=document.getElementById('admSignout'); if(so){ so.onclick=doAdminLogout; }
 

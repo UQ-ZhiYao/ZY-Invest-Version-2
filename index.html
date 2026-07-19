@@ -4,15 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Console — ZY-Invest</title>
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" href="admin/manifest.webmanifest">
 <meta name="theme-color" content="#0D2A52">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ZY Admin">
 <meta name="application-name" content="ZY Admin">
-<link rel="icon" type="image/png" href="../assets/img/favicon.png">
-<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="assets/img/favicon.png">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -91,7 +91,7 @@ body{font-family:var(--font-body);color:var(--ink);background:#0B1220;-webkit-fo
   <div class="card-top">
     <span class="lock-pill">🔒 Restricted</span>
     <div class="brand">
-      <img src="../assets/img/logo.png" alt="ZY-Invest">
+      <img src="assets/img/logo.png" alt="ZY-Invest">
       <span><b style="display:block;">ZY-Invest</b><span class="sub">Admin Console</span></span>
     </div>
     <h1>Fund Management</h1>
@@ -113,9 +113,9 @@ body{font-family:var(--font-body);color:var(--ink);background:#0B1220;-webkit-fo
       </div>
       <button type="submit" class="submit" id="submitBtn"><span id="btnText">Sign In to Console</span><span class="spin" id="spin"></span></button>
     </form>
-    <div class="back"><a href="zy-invest.com">← Member login</a></div>
+    <div class="back"><a href="https://zy-invest.com" target="_blank" rel="noopener">← Member login</a></div>
     <div class="install-row" id="installRow">
-      <button class="install-btn" id="installBtn"><img src="../assets/img/icon-192.png" alt=""> Install Admin App</button>
+      <button class="install-btn" id="installBtn"><img src="assets/img/icon-192.png" alt=""> Install Admin App</button>
       <div class="install-hint" id="installHint"></div>
     </div>
   </div>
@@ -124,14 +124,14 @@ body{font-family:var(--font-body);color:var(--ink);background:#0B1220;-webkit-fo
 <div id="prog">
   <div class="prog-mark">
     <svg class="prog-ring" viewBox="0 0 120 120"><circle class="trk" cx="60" cy="60" r="54"/><circle class="prg" id="progRing" cx="60" cy="60" r="54"/></svg>
-    <img src="../assets/img/logo.png" alt="ZY-Invest">
+    <img src="assets/img/logo.png" alt="ZY-Invest">
   </div>
   <div class="prog-txt">Entering Admin Console</div>
   <div class="prog-pct" id="progPct">0%</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../assets/js/supabase-auth.js"></script>
+<script src="assets/js/supabase-auth.js"></script>
 <script>
 (function(){
   var pw=document.getElementById('password'), tog=document.getElementById('pwToggle');
@@ -178,7 +178,7 @@ body{font-family:var(--font-body);color:var(--ink);background:#0B1220;-webkit-fo
 
       try{ localStorage.setItem('zy_admin_session', JSON.stringify({ name:pr.data.full_name||email, role:'admin', email:email, ts:Date.now() })); }catch(ex){}
 
-      runProgress(function(){ window.location.href='admin.html'; });
+      runProgress(function(){ window.location.href='admin/admin.html'; });
     }catch(ex){
       var m=(ex&&ex.message)||'Login failed.';
       if(/invalid login/i.test(m)||/invalid credentials/i.test(m)) m='Incorrect email or password.';
@@ -189,7 +189,7 @@ body{font-family:var(--font-body);color:var(--ink);background:#0B1220;-webkit-fo
 
   /* ── PWA install ──────────────────────────────────────────── */
   (function(){
-    if('serviceWorker' in navigator){ window.addEventListener('load',function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
+    if('serviceWorker' in navigator){ window.addEventListener('load',function(){ navigator.serviceWorker.register('admin/sw.js').catch(function(){}); }); }
     var row=document.getElementById('installRow'), ibtn=document.getElementById('installBtn'), hint=document.getElementById('installHint');
     var deferred=null;
     var standalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;

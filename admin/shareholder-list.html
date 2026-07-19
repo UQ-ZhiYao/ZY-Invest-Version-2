@@ -33,8 +33,8 @@
 <script>
 (function(){
   if('serviceWorker' in navigator){ window.addEventListener('load',function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
-  try{ var s=JSON.parse(localStorage.getItem('zy_admin_session')||'null'); if(!s||s.role!=='admin'){ location.replace('admin-login.html'); } }
-  catch(e){ location.replace('admin-login.html'); }
+  try{ var s=JSON.parse(localStorage.getItem('zy_admin_session')||'null'); if(!s||s.role!=='admin'){ location.replace('../index.html'); } }
+  catch(e){ location.replace('../index.html'); }
 })();
 </script>
 
