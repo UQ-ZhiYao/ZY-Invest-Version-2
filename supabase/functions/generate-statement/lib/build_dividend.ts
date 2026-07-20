@@ -1,5 +1,5 @@
 import {
-  newDoc, drawHeaderBlock, drawLabelValueGrid, drawSectionHeader, drawKeptTogether, drawImportantNotices,
+  newDoc, drawHeaderBlock, drawInfoCard, drawSectionHeader, drawKeptTogether, drawImportantNotices,
   drawFooterOnAllPages, drawText, rm, colWidths, BODY_W, SECTION_GAP, CONTENT_SIZE, InvestorInfo, Cell,
 } from "./common.ts";
 import { DistributionRow } from "./compute.ts";
@@ -19,11 +19,12 @@ export async function buildDividendPdf(
     title: "DIVIDEND  PAYMENT  STATEMENT", investor,
     statementType: "Dividend Statement", periodText,
   });
-  drawSectionHeader(doc, "Investor's Information");
-  drawLabelValueGrid(doc, [
-    ["Investor's Name", investor.registeredName, "Settlement Type", investor.settlementType],
-    ["Phone Number", investor.phone, "Bank Name", investor.bankName],
-    ["Email Address", investor.email, "Bank Account No.", investor.bankAccountNo],
+  drawSectionHeader(doc, "Investor's Profile");
+  drawInfoCard(doc, [
+    ["Account Type", investor.accountType, "Account ID", investor.accountId],
+    ["Registered Name", investor.registeredName, "Settlement Type", investor.settlementType],
+    ["Reference No.", investor.referenceNo, "Bank Name", investor.bankName],
+    ["Bank Account No.", investor.bankAccountNo, "", ""],
   ]);
   doc.y -= SECTION_GAP;
 
@@ -35,7 +36,7 @@ export async function buildDividendPdf(
     { header: "EPS", width: w[3], align: "right" as const },
     { header: "DPR", width: w[4], align: "right" as const },
     { header: "DPS", width: w[5], align: "right" as const },
-    { header: "Dividend Amount", width: w[6], align: "right" as const },
+    { header: "Dividend Amount (RM)", width: w[6], align: "right" as const },
   ];
   let totalDps = 0, totalAmount = 0;
   const rows = distributions.map((d) => {
