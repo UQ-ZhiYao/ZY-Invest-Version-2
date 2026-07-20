@@ -40,13 +40,13 @@ function json(body: unknown, status = 200) {
 
 function investorInfo(profile: Record<string, any>) {
   const addr = addressFromProfile(profile);
-  const referenceNo = String(profile.id || "");
   return {
     accountType: profile.joint_account_id ? "Joint Account" : "Personal Account",
-    accountId: referenceNo.slice(0, 8),
-    referenceNo,
+    accountId: String(profile.id || "").slice(0, 8),
     registeredName: profile.full_name || "-",
     settlementType: DEFAULT_SETTLEMENT_TYPE,
+    phone: profile.phone || "-",
+    email: profile.email || "-",
     bankName: profile.bank_name || "-",
     bankAccountNo: profile.bank_account_no || "-",
     addressLine1: addr.line1,

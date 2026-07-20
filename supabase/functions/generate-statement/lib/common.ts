@@ -13,9 +13,14 @@ export const BLACK = rgb(0, 0, 0);
 export const FUND_EMAIL = "nzy.invest@gmail.com";
 export const FUND_PHONE = "(+60)11 - 1121 8085";
 
-// One uniform font size for the entire document — titles, section headers,
-// table content, the investor info card, notices, footer, all of it.
+// Base font size — tables, the investor info card, section headers, footer.
 export const CONTENT_SIZE = 7.5;
+// Larger sizes used for a few call-outs: the big statement title, the
+// investor's name/address (it doubles as the postal/letter address), and
+// the important-notices block (title + body).
+export const TITLE_SIZE = 10;
+export const NAME_SIZE = 10;
+export const NOTICE_SIZE = 10;
 // Vertical gap between one table/section and the next — "1 line" of space.
 export const SECTION_GAP = 16;
 
@@ -50,10 +55,11 @@ export interface Doc {
 
 export interface InvestorInfo {
   accountType: string; // "Personal Account" | "Joint Account"
-  accountId: string; // first 8 characters of referenceNo
-  referenceNo: string; // the investor's profile id
+  accountId: string; // first 8 characters of the investor's profile id
   registeredName: string;
   settlementType: string;
+  phone: string;
+  email: string;
   bankName: string;
   bankAccountNo: string;
   addressLine1: string;
@@ -66,6 +72,10 @@ export interface Column {
   header: string;
   width: number;
   align?: "left" | "right";
+  // Data cells (not the header) render as "RM" pinned to the cell's left
+  // edge and the figure pinned to the right edge, instead of the currency
+  // symbol living in the header — "-" placeholder cells skip the "RM".
+  currency?: boolean;
 }
 export interface TableSpec {
   columns: Column[];
@@ -214,19 +224,31 @@ export function drawTable(doc: Doc, spec: TableSpec): void {
   }
 
   // Header cells are always centered, regardless of the column's own
-  // (left/right) data alignment — data rows keep that alignment.
+  // (left/right) data alignment — data rows keep that alignment. A
+  // "currency" column's data cells are the exception: "RM" is pinned to
+  // the cell's left edge and the figure to its right edge, in the same
+  // cell, on the cell's first line only.
   function drawRow(cells: Cell[], isHeader: boolean, topY: number): number {
     const h = rowHeight(cells);
     let x = MARGIN;
     cells.forEach((cell, i) => {
       const w = columns[i].width;
+      const isCurrency = !isHeader && columns[i].currency;
       const align = isHeader ? "center" : (columns[i].align || "left");
       drawRect(doc, { x, y: topY - h, width: w, height: h });
       const lines = wrapText(cellText(cell), sans, fontSize, w - cellPadX * 2);
       const blockH = lines.length * lineHeight;
       let ty = topY - (h - blockH) / 2 - fontSize + 1;
-      for (const line of lines) {
-        if (align === "center") {
+      lines.forEach((line, li) => {
+        if (isCurrency) {
+          // Skip "-" placeholders and percentage figures — a currency
+          // column can carry both (e.g. Account Summary's Total Value
+          // column also reports Total Performance % in the same column).
+          if (line !== "-" && !line.includes("%") && li === 0) {
+            drawText(doc, "RM", { x: x + cellPadX, y: ty, font: sans, size: fontSize, color: cellColor(cell) });
+          }
+          drawTextRight(doc, line, { x: x + w - cellPadX, y: ty, font: sans, size: fontSize, color: cellColor(cell) });
+        } else if (align === "center") {
           drawTextCenter(doc, line, { x: x + w / 2, y: ty, font: sans, size: fontSize, color: cellColor(cell) });
         } else if (align === "right") {
           drawTextRight(doc, line, { x: x + w - cellPadX, y: ty, font: sans, size: fontSize, color: cellColor(cell) });
@@ -234,7 +256,7 @@ export function drawTable(doc: Doc, spec: TableSpec): void {
           drawText(doc, line, { x: x + cellPadX, y: ty, font: sans, size: fontSize, color: cellColor(cell) });
         }
         ty -= lineHeight;
-      }
+      });
       x += w;
     });
     return topY - h;
@@ -290,8 +312,8 @@ export function drawNoticeHeader(doc: Doc, text: string): void {
   const { sans } = doc.fonts;
   ensureSpace(doc, 24);
   doc.y -= 10;
-  drawText(doc, text, { x: MARGIN, y: doc.y - CONTENT_SIZE, font: sans, size: CONTENT_SIZE, color: BLACK });
-  doc.y -= CONTENT_SIZE + 8;
+  drawText(doc, text, { x: MARGIN, y: doc.y - NOTICE_SIZE, font: sans, size: NOTICE_SIZE, color: BLACK });
+  doc.y -= NOTICE_SIZE + 8;
 }
 
 // Keeps a section header + the table that follows on the same page: if the
@@ -329,11 +351,14 @@ export function fmt(value: number | string, decimals = 4): string {
 
 export function drawHeaderBlock(
   doc: Doc,
-  { title, investor, statementType, periodText }: {
+  { title, investor, statementType, periodText, referenceNo }: {
     title: string;
     investor: InvestorInfo;
     statementType: string;
     periodText: string;
+    // The generating transaction's capital_injection.reference_id — "-" for
+    // statement types (Dividend, Annual) that aren't tied to one transaction.
+    referenceNo: string;
   },
 ): void {
   const { serif, serifBold, sans } = doc.fonts;
@@ -351,7 +376,7 @@ export function drawHeaderBlock(
   const [leftColW, rightColW] = colWidths(BODY_W, [270, 235]);
   const rightColX = MARGIN + leftColW;
 
-  const titleSize = CONTENT_SIZE;
+  const titleSize = TITLE_SIZE;
   const titleW = serifBold.widthOfTextAtSize(title, titleSize);
   drawText(doc, title, {
     x: rightColX + (rightColW - titleW) / 2,
@@ -362,9 +387,10 @@ export function drawHeaderBlock(
 
   const rowTopY = topY - Math.max(logoDrawH, titleSize) - 14;
 
-  // Left: investor name + address, stacked.
+  // Left: investor name + address, stacked — larger than the rest of the
+  // document since it doubles as the postal/letter address.
   let ly = rowTopY;
-  const nameSize = CONTENT_SIZE;
+  const nameSize = NAME_SIZE;
   drawText(doc, investor.registeredName.toUpperCase(), { x: MARGIN, y: ly - nameSize, font: serif, size: nameSize });
   ly -= nameSize + 4;
   for (const line of [investor.addressLine1, investor.addressLine2, investor.addressLine3]) {
@@ -380,8 +406,7 @@ export function drawHeaderBlock(
     ["Issued Date", new Date().toISOString().slice(0, 10).split("-").reverse().join("-")],
     ["Statement Type", statementType],
     ["Statement Period", periodText],
-    ["Email Address", FUND_EMAIL],
-    ["Telephone No.", FUND_PHONE],
+    ["Reference No.", referenceNo],
   ];
   const metaSize = CONTENT_SIZE;
   const metaLineHeight = metaSize + 3;
@@ -430,9 +455,32 @@ function drawJustifiedLine(
   });
 }
 
+// Wraps `text` with a narrower first line (indented past the bold "1. Label:"
+// lead-in) and full-width subsequent lines — a wrapped line does NOT keep
+// the lead-in's indent, it starts back at the margin like a fresh paragraph.
+function wrapHangingFirstLine(text: string, font: PDFFont, size: number, firstWidth: number, restWidth: number): string[] {
+  const safeWidth = Math.max(1, Math.min(firstWidth, restWidth));
+  const words = text.split(" ").flatMap((w) => breakOversizedWord(w, font, size, safeWidth));
+  const lines: string[] = [];
+  let cur = "";
+  let curWidth = firstWidth;
+  for (const w of words) {
+    const trial = cur ? `${cur} ${w}` : w;
+    if (font.widthOfTextAtSize(trial, size) > curWidth && cur) {
+      lines.push(cur);
+      cur = w;
+      curWidth = restWidth;
+    } else {
+      cur = trial;
+    }
+  }
+  if (cur) lines.push(cur);
+  return lines.length ? lines : [""];
+}
+
 function estimateNoticesHeight(doc: Doc): number {
   const { sans, sansBold } = doc.fonts;
-  const size = CONTENT_SIZE;
+  const size = NOTICE_SIZE;
   const lineHeight = size + 4;
   const headingH = 28; // matches drawNoticeHeader's own vertical consumption
   let itemsH = 0;
@@ -440,7 +488,7 @@ function estimateNoticesHeight(doc: Doc): number {
     const [label, text] = NOTICE_ITEMS[i];
     const lead = `${i + 1}. ${label}: `;
     const leadW = sansBold.widthOfTextAtSize(lead, size);
-    const lines = wrapText(text, sans, size, BODY_W - leadW);
+    const lines = wrapHangingFirstLine(text, sans, size, BODY_W - leadW, BODY_W);
     itemsH += Math.max(lines.length * lineHeight + 2, lineHeight);
   }
   return headingH + itemsH;
@@ -462,24 +510,27 @@ export function drawImportantNotices(doc: Doc): void {
 
   drawNoticeHeader(doc, "IMPORTANT NOTICES");
   const { sans, sansBold } = doc.fonts;
-  const size = CONTENT_SIZE;
+  const size = NOTICE_SIZE;
   const lineHeight = size + 4;
   const textWidth = BODY_W;
   for (let i = 0; i < NOTICE_ITEMS.length; i++) {
     const [label, text] = NOTICE_ITEMS[i];
     const lead = `${i + 1}. ${label}: `;
     const leadW = sansBold.widthOfTextAtSize(lead, size);
-    const lines = wrapText(text, sans, size, textWidth - leadW);
+    const lines = wrapHangingFirstLine(text, sans, size, textWidth - leadW, textWidth);
     const itemH = lines.length * lineHeight + 2;
     drawText(doc, lead, { x: MARGIN, y: doc.y - size, font: sansBold, size });
     let ty = doc.y;
     lines.forEach((line, li) => {
+      const isFirstLine = li === 0;
       const isLastLine = li === lines.length - 1;
+      const x = isFirstLine ? MARGIN + leadW : MARGIN;
+      const width = isFirstLine ? textWidth - leadW : textWidth;
       const y = ty - size;
       if (isLastLine) {
-        drawText(doc, line, { x: MARGIN + leadW, y, font: sans, size });
+        drawText(doc, line, { x, y, font: sans, size });
       } else {
-        drawJustifiedLine(doc, line.split(" "), { x: MARGIN + leadW, y, font: sans, size, width: textWidth - leadW });
+        drawJustifiedLine(doc, line.split(" "), { x, y, font: sans, size, width });
       }
       ty -= lineHeight;
     });
@@ -487,19 +538,17 @@ export function drawImportantNotices(doc: Doc): void {
   }
 }
 
-// A compact identity card — up to 2 label/value pairs per row (4 columns),
-// sized to a fraction of the page body width (not the full width every
-// other table uses) so it reads as a small info box rather than a
-// spanning table. Pass "" for an unused label/value in the last row.
-export function drawInfoCard(doc: Doc, rows: [string, string, string, string][], widthFraction = 0.4): void {
-  const cardW = BODY_W * widthFraction;
-  const colW = colWidths(cardW, [1, 1, 1, 1]);
+// The investor profile grid — up to 2 label/value pairs per row (4
+// columns), spanning the full page body width like every other table.
+// Pass "" for an unused label/value in the last row.
+export function drawInfoCard(doc: Doc, rows: [string, string, string, string][]): void {
+  const colW = colWidths(BODY_W, [130, 210, 130, 210]);
   const { sans } = doc.fonts;
   const fontSize = CONTENT_SIZE;
   const lineHeight = fontSize + 3;
   const padY = 6;
   for (const row of rows) {
-    const cellLines = row.map((text, i) => wrapText(text, sans, fontSize, colW[i] - 8));
+    const cellLines = row.map((text, i) => wrapText(text, sans, fontSize, colW[i] - 12));
     const maxLines = Math.max(...cellLines.map((l) => l.length));
     const rowH = maxLines * lineHeight + padY * 2 - 3;
     ensureSpace(doc, rowH);
@@ -509,7 +558,7 @@ export function drawInfoCard(doc: Doc, rows: [string, string, string, string][],
       const blockH = cellLines[i].length * lineHeight;
       let ty = doc.y - (rowH - blockH) / 2 - fontSize + 1;
       for (const line of cellLines[i]) {
-        drawText(doc, line, { x: x + 4, y: ty, font: sans, size: fontSize });
+        drawText(doc, line, { x: x + 6, y: ty, font: sans, size: fontSize });
         ty -= lineHeight;
       }
       x += colW[i];
