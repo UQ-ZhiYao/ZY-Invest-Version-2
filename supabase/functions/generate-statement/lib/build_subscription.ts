@@ -33,13 +33,10 @@ export async function buildSubscriptionPdf(
   });
   drawSectionHeader(doc, "Investor's Profile");
   drawInfoCard(doc, [
-    ["Account Type", investor.accountType],
-    ["Account ID", investor.accountId],
-    ["Registered Name", investor.registeredName],
-    ["Settlement Type", investor.settlementType],
-    ["Reference No.", investor.referenceNo],
-    ["Bank Name", investor.bankName],
-    ["Bank Account No.", investor.bankAccountNo],
+    ["Account Type", investor.accountType, "Account ID", investor.accountId],
+    ["Registered Name", investor.registeredName, "Settlement Type", investor.settlementType],
+    ["Reference No.", investor.referenceNo, "Bank Name", investor.bankName],
+    ["Bank Account No.", investor.bankAccountNo, "", ""],
   ]);
   doc.y -= SECTION_GAP;
 
@@ -47,10 +44,10 @@ export async function buildSubscriptionPdf(
   const columns = [
     { header: "Date", width: w[0] },
     { header: "Description", width: w[1] },
-    { header: "Investment Value", width: w[2], align: "right" as const },
-    { header: `${txType} Price`, width: w[3], align: "right" as const },
+    { header: "Investment Value (RM)", width: w[2], align: "right" as const },
+    { header: `${txType} Price (RM)`, width: w[3], align: "right" as const },
     { header: "Unit Balanced", width: w[4], align: "right" as const },
-    { header: "Average Cost", width: w[5], align: "right" as const },
+    { header: "Average Cost (RM)", width: w[5], align: "right" as const },
   ];
   const rows = [
     [dateStr, "Opening", rm(openingCost), "-", fmt(openingUnits),

@@ -13,10 +13,9 @@ export const BLACK = rgb(0, 0, 0);
 export const FUND_EMAIL = "nzy.invest@gmail.com";
 export const FUND_PHONE = "(+60)11 - 1121 8085";
 
-// One consistent body font size for every table (transactional tables, the
-// investor info card) and the header's meta info list — headings
-// (title/section headers) are exempt, they're deliberately larger.
-export const CONTENT_SIZE = 8.5;
+// One uniform font size for the entire document — titles, section headers,
+// table content, the investor info card, notices, footer, all of it.
+export const CONTENT_SIZE = 7.5;
 // Vertical gap between one table/section and the next — "1 line" of space.
 export const SECTION_GAP = 16;
 
@@ -116,8 +115,29 @@ export function ensureSpace(doc: Doc, height: number): void {
   }
 }
 
+// Breaks a single word that's wider than maxWidth all on its own (a long
+// reference number/UUID with no spaces, or a plain long label in a narrow
+// column) into character chunks — otherwise wrapText below has no space to
+// break on and the word silently overflows past its cell's border.
+function breakOversizedWord(word: string, font: PDFFont, size: number, maxWidth: number): string[] {
+  if (font.widthOfTextAtSize(word, size) <= maxWidth) return [word];
+  const chunks: string[] = [];
+  let cur = "";
+  for (const ch of word) {
+    const trial = cur + ch;
+    if (font.widthOfTextAtSize(trial, size) > maxWidth && cur) {
+      chunks.push(cur);
+      cur = ch;
+    } else {
+      cur = trial;
+    }
+  }
+  if (cur) chunks.push(cur);
+  return chunks;
+}
+
 export function wrapText(text: unknown, font: PDFFont, size: number, maxWidth: number): string[] {
-  const words = String(text).split(" ");
+  const words = String(text).split(" ").flatMap((w) => breakOversizedWord(w, font, size, maxWidth));
   const lines: string[] = [];
   let cur = "";
   for (const w of words) {
@@ -261,16 +281,17 @@ export function drawSectionHeader(doc: Doc, text: string): void {
   const { sans } = doc.fonts;
   ensureSpace(doc, 24);
   doc.y -= 4;
-  drawText(doc, text, { x: MARGIN, y: doc.y - 11, font: sans, size: 11, color: BLACK });
-  doc.y -= 20;
+  drawText(doc, text, { x: MARGIN, y: doc.y - CONTENT_SIZE, font: sans, size: CONTENT_SIZE, color: BLACK });
+  doc.y -= CONTENT_SIZE + 9;
 }
 
+// Not bold — every other heading in the document is plain weight too.
 export function drawNoticeHeader(doc: Doc, text: string): void {
-  const { sansBold } = doc.fonts;
+  const { sans } = doc.fonts;
   ensureSpace(doc, 24);
   doc.y -= 10;
-  drawText(doc, text, { x: MARGIN, y: doc.y - 10, font: sansBold, size: 10, color: BLACK });
-  doc.y -= 18;
+  drawText(doc, text, { x: MARGIN, y: doc.y - CONTENT_SIZE, font: sans, size: CONTENT_SIZE, color: BLACK });
+  doc.y -= CONTENT_SIZE + 8;
 }
 
 // Keeps a section header + the table that follows on the same page: if the
@@ -286,9 +307,11 @@ export function drawKeptTogether(doc: Doc, headerText: string, tableSpec: TableS
   drawTable(doc, tableSpec);
 }
 
+// No "RM" prefix — the currency is named once in the column header
+// (e.g. "Total Value (RM)"), not repeated on every data cell.
 export function rm(value: number | string | null | undefined, decimals = 2): string {
   if (value === null || value === undefined || value === "-") return "-";
-  return `RM ${Number(value).toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`;
+  return Number(value).toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 }
 
 export function redIfNegative(value: number, decimals = 2): Cell {
@@ -328,7 +351,7 @@ export function drawHeaderBlock(
   const [leftColW, rightColW] = colWidths(BODY_W, [270, 235]);
   const rightColX = MARGIN + leftColW;
 
-  const titleSize = 11.5;
+  const titleSize = CONTENT_SIZE;
   const titleW = serifBold.widthOfTextAtSize(title, titleSize);
   drawText(doc, title, {
     x: rightColX + (rightColW - titleW) / 2,
@@ -341,7 +364,7 @@ export function drawHeaderBlock(
 
   // Left: investor name + address, stacked.
   let ly = rowTopY;
-  const nameSize = 10;
+  const nameSize = CONTENT_SIZE;
   drawText(doc, investor.registeredName.toUpperCase(), { x: MARGIN, y: ly - nameSize, font: serif, size: nameSize });
   ly -= nameSize + 4;
   for (const line of [investor.addressLine1, investor.addressLine2, investor.addressLine3]) {
@@ -415,7 +438,7 @@ function estimateNoticesHeight(doc: Doc): number {
   let itemsH = 0;
   for (let i = 0; i < NOTICE_ITEMS.length; i++) {
     const [label, text] = NOTICE_ITEMS[i];
-    const lead = `${i + 1}.  ${label}: `;
+    const lead = `${i + 1}. ${label}: `;
     const leadW = sansBold.widthOfTextAtSize(lead, size);
     const lines = wrapText(text, sans, size, BODY_W - leadW);
     itemsH += Math.max(lines.length * lineHeight + 2, lineHeight);
@@ -444,7 +467,7 @@ export function drawImportantNotices(doc: Doc): void {
   const textWidth = BODY_W;
   for (let i = 0; i < NOTICE_ITEMS.length; i++) {
     const [label, text] = NOTICE_ITEMS[i];
-    const lead = `${i + 1}.  ${label}: `;
+    const lead = `${i + 1}. ${label}: `;
     const leadW = sansBold.widthOfTextAtSize(lead, size);
     const lines = wrapText(text, sans, size, textWidth - leadW);
     const itemH = lines.length * lineHeight + 2;
@@ -464,32 +487,32 @@ export function drawImportantNotices(doc: Doc): void {
   }
 }
 
-// A compact identity card — one label/value pair per row, sized to a
-// fraction of the page body width (not the full width every other table
-// uses) so it reads as a small info box rather than a spanning table.
-export function drawInfoCard(doc: Doc, rows: [string, string][], widthFraction = 0.4): void {
+// A compact identity card — up to 2 label/value pairs per row (4 columns),
+// sized to a fraction of the page body width (not the full width every
+// other table uses) so it reads as a small info box rather than a
+// spanning table. Pass "" for an unused label/value in the last row.
+export function drawInfoCard(doc: Doc, rows: [string, string, string, string][], widthFraction = 0.4): void {
   const cardW = BODY_W * widthFraction;
-  const [labelW, valueW] = colWidths(cardW, [110, 170]);
+  const colW = colWidths(cardW, [1, 1, 1, 1]);
   const { sans } = doc.fonts;
   const fontSize = CONTENT_SIZE;
   const lineHeight = fontSize + 3;
   const padY = 6;
-  for (const [label, value] of rows) {
-    const labelLines = wrapText(label, sans, fontSize, labelW - 12);
-    const valueLines = wrapText(value, sans, fontSize, valueW - 12);
-    const maxLines = Math.max(labelLines.length, valueLines.length);
+  for (const row of rows) {
+    const cellLines = row.map((text, i) => wrapText(text, sans, fontSize, colW[i] - 8));
+    const maxLines = Math.max(...cellLines.map((l) => l.length));
     const rowH = maxLines * lineHeight + padY * 2 - 3;
     ensureSpace(doc, rowH);
     let x = MARGIN;
-    for (const [lines, w] of [[labelLines, labelW], [valueLines, valueW]] as const) {
-      drawRect(doc, { x, y: doc.y - rowH, width: w, height: rowH });
-      const blockH = lines.length * lineHeight;
+    for (let i = 0; i < 4; i++) {
+      drawRect(doc, { x, y: doc.y - rowH, width: colW[i], height: rowH });
+      const blockH = cellLines[i].length * lineHeight;
       let ty = doc.y - (rowH - blockH) / 2 - fontSize + 1;
-      for (const line of lines) {
-        drawText(doc, line, { x: x + 6, y: ty, font: sans, size: fontSize });
+      for (const line of cellLines[i]) {
+        drawText(doc, line, { x: x + 4, y: ty, font: sans, size: fontSize });
         ty -= lineHeight;
       }
-      x += w;
+      x += colW[i];
     }
     doc.y -= rowH;
   }

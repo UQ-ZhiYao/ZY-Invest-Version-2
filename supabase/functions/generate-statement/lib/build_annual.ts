@@ -1,6 +1,6 @@
 import {
   newDoc, drawHeaderBlock, drawInfoCard, drawSectionHeader, drawKeptTogether, drawImportantNotices,
-  drawFooterOnAllPages, drawText, drawTable, rm, redIfNegative, fmt, colWidths, BODY_W, SECTION_GAP, CONTENT_SIZE,
+  drawFooterOnAllPages, drawText, rm, redIfNegative, fmt, colWidths, BODY_W, SECTION_GAP, CONTENT_SIZE,
   InvestorInfo, Cell,
 } from "./common.ts";
 import { xirr, CapitalInjectionRow, DistributionRow } from "./compute.ts";
@@ -39,13 +39,10 @@ export async function buildAnnualPdf({
   drawHeaderBlock(doc, { title: "INVESTMENT  ACCOUNT  STATEMENT", investor, statementType: "Annually", periodText });
   drawSectionHeader(doc, "Investor's Profile");
   drawInfoCard(doc, [
-    ["Account Type", investor.accountType],
-    ["Account ID", investor.accountId],
-    ["Registered Name", investor.registeredName],
-    ["Settlement Type", investor.settlementType],
-    ["Reference No.", investor.referenceNo],
-    ["Bank Name", investor.bankName],
-    ["Bank Account No.", investor.bankAccountNo],
+    ["Account Type", investor.accountType, "Account ID", investor.accountId],
+    ["Registered Name", investor.registeredName, "Settlement Type", investor.settlementType],
+    ["Reference No.", investor.referenceNo, "Bank Name", investor.bankName],
+    ["Bank Account No.", investor.bankAccountNo, "", ""],
   ]);
   doc.y -= SECTION_GAP;
 
@@ -54,7 +51,7 @@ export async function buildAnnualPdf({
   const pCols = [
     { header: "Date", width: pW[0] },
     { header: "Description", width: pW[1] },
-    { header: "Cashflow @ Price", width: pW[2], align: "right" as const },
+    { header: "Cashflow (RM) @ Price", width: pW[2], align: "right" as const },
     { header: "Avg. Cost (RM)", width: pW[3], align: "right" as const },
     { header: "Units Issued", width: pW[4], align: "right" as const },
     { header: "Units Balanced", width: pW[5], align: "right" as const },
@@ -86,7 +83,7 @@ export async function buildAnnualPdf({
     { header: "Description", width: dW[1] },
     { header: "DPS", width: dW[2], align: "right" as const },
     { header: "Holding Units", width: dW[3], align: "right" as const },
-    { header: "Dividend Amount", width: dW[4], align: "right" as const },
+    { header: "Dividend Amount (RM)", width: dW[4], align: "right" as const },
     { header: "Balanced (RM)", width: dW[5], align: "right" as const },
   ];
   let runningDiv = 0;
@@ -118,29 +115,22 @@ export async function buildAnnualPdf({
     { header: "Average Price", width: sW[2], align: "right" as const },
     { header: "Total Value (RM)", width: sW[3], align: "right" as const },
   ];
+  // One table start to finish — the performance rows below just leave the
+  // Holding Units / Average Price columns blank rather than starting a
+  // second, visually detached table.
   const sRows: Cell[][] = [
     ["( a )  Latest Fund Price", fmt(closingUnits), fmt(latestNavPerUnit, 6), rm(marketValue)],
     ["( b )  Subscription Cost", fmt(closingUnits), closingUnits ? fmt(Math.abs(costBasis / closingUnits), 6) : "-",
       redIfNegative(-costBasis, 2)],
+    ["( c )  Unrealized Profit & Loss:  ( a ) + ( b )", "", "", rm(unrealizedPl)],
+    ["( d )  Realized Profit & Loss", "", "", rm(realizedPl)],
+    ["( e )  Dividend Received", "", "", rm(dividendReceived)],
+    ["( f )  Adjustment", "", "", rm(adjustment)],
+    ["Total Profit & Loss:  ( c ) + ( d ) + ( e ) + ( f )", "", "", rm(totalPl)],
+    ["Total Performance %", "", "", totalPerfPct !== null ? `${totalPerfPct.toFixed(2)} %` : "-"],
+    ["Annualized Performance* %", "", "", irr !== null ? `${(irr * 100).toFixed(2)} %` : "-"],
   ];
   drawKeptTogether(doc, "Account Summary", { columns: sCols, rows: sRows });
-  doc.y -= SECTION_GAP;
-
-  const plainW = colWidths(BODY_W, [376, 130]);
-  const plainCols = [
-    { header: "", width: plainW[0] },
-    { header: "", width: plainW[1], align: "right" as const },
-  ];
-  const plainRows = [
-    ["( c )  Unrealized Profit & Loss:  ( a ) + ( b )", rm(unrealizedPl)],
-    ["( d )  Realized Profit & Loss", rm(realizedPl)],
-    ["( e )  Dividend Received", rm(dividendReceived)],
-    ["( f )  Adjustment", rm(adjustment)],
-    ["Total Profit & Loss:  ( c ) + ( d ) + ( e ) + ( f )", rm(totalPl)],
-    ["Total Performance %", totalPerfPct !== null ? `${totalPerfPct.toFixed(2)} %` : "-"],
-    ["Annualized Performance* %", irr !== null ? `${(irr * 100).toFixed(2)} %` : "-"],
-  ];
-  drawTable(doc, { columns: plainCols, rows: plainRows, noHeader: true });
   doc.y -= 2;
   const { sans } = doc.fonts;
   drawText(doc,
