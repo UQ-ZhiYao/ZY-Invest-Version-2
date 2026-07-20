@@ -23,14 +23,19 @@
       var data = await res.json();
       if(!res.ok || data.error) throw new Error(data.error || ('Request failed (' + res.status + ')'));
 
-      var signed = await sb.storage.from('statements').createSignedUrl(data.storage_path, 300);
-      if(signed.error) throw new Error('Generated, but could not open it: ' + signed.error.message);
-
-      if(window.zyToast) zyToast('Statement generated — ' + data.file_name);
-      window.open(signed.data.signedUrl, '_blank');
+      // opts.silent: used by bulk-generation flows that fire many of these in
+      // a row — opening a tab and toasting per statement would spam the user
+      // (and most of the tabs would get popup-blocked anyway since only the
+      // first async open is a direct user gesture).
+      if(!opts.silent){
+        var signed = await sb.storage.from('statements').createSignedUrl(data.storage_path, 300);
+        if(signed.error) throw new Error('Generated, but could not open it: ' + signed.error.message);
+        if(window.zyToast) zyToast('Statement generated — ' + data.file_name);
+        window.open(signed.data.signedUrl, '_blank');
+      }
       return data;
     }catch(ex){
-      if(window.zyToast) zyToast('Error: ' + ((ex && ex.message) || 'Unknown error'));
+      if(!opts.silent && window.zyToast) zyToast('Error: ' + ((ex && ex.message) || 'Unknown error'));
       throw ex;
     }finally{
       if(btn){ btn.disabled = false; btn.textContent = origText; }
