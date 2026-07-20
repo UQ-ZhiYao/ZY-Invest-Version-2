@@ -36,13 +36,16 @@ export async function buildAnnualPdf({
   const periodText = `${dmy(fyStart)} - ${dmy(fyEnd)}`;
   const doc = await newDoc();
 
-  drawHeaderBlock(doc, { title: "INVESTMENT  ACCOUNT  STATEMENT", investor, statementType: "Annually", periodText });
+  drawHeaderBlock(doc, {
+    title: "INVESTMENT  ACCOUNT  STATEMENT", investor, statementType: "Annually", periodText,
+    referenceNo: "-",
+  });
   drawSectionHeader(doc, "Investor's Profile");
   drawInfoCard(doc, [
     ["Account Type", investor.accountType, "Account ID", investor.accountId],
     ["Registered Name", investor.registeredName, "Settlement Type", investor.settlementType],
-    ["Reference No.", investor.referenceNo, "Bank Name", investor.bankName],
-    ["Bank Account No.", investor.bankAccountNo, "", ""],
+    ["Phone No.", investor.phone, "Email Address", investor.email],
+    ["Bank Name", investor.bankName, "Bank Account No.", investor.bankAccountNo],
   ]);
   doc.y -= SECTION_GAP;
 
@@ -51,8 +54,8 @@ export async function buildAnnualPdf({
   const pCols = [
     { header: "Date", width: pW[0] },
     { header: "Description", width: pW[1] },
-    { header: "Cashflow (RM) @ Price", width: pW[2], align: "right" as const },
-    { header: "Avg. Cost (RM)", width: pW[3], align: "right" as const },
+    { header: "Cashflow @ Price", width: pW[2], align: "right" as const, currency: true },
+    { header: "Avg. Cost", width: pW[3], align: "right" as const, currency: true },
     { header: "Units Issued", width: pW[4], align: "right" as const },
     { header: "Units Balanced", width: pW[5], align: "right" as const },
   ];
@@ -83,8 +86,8 @@ export async function buildAnnualPdf({
     { header: "Description", width: dW[1] },
     { header: "DPS", width: dW[2], align: "right" as const },
     { header: "Holding Units", width: dW[3], align: "right" as const },
-    { header: "Dividend Amount (RM)", width: dW[4], align: "right" as const },
-    { header: "Balanced (RM)", width: dW[5], align: "right" as const },
+    { header: "Dividend Amount", width: dW[4], align: "right" as const, currency: true },
+    { header: "Balanced", width: dW[5], align: "right" as const, currency: true },
   ];
   let runningDiv = 0;
   const dRows: Cell[][] = [[dstr(fyStart), "Opening", "", "", "", rm(0)]];
@@ -113,7 +116,7 @@ export async function buildAnnualPdf({
     { header: "Fields", width: sW[0] },
     { header: "Holding Units", width: sW[1], align: "right" as const },
     { header: "Average Price", width: sW[2], align: "right" as const },
-    { header: "Total Value (RM)", width: sW[3], align: "right" as const },
+    { header: "Total Value", width: sW[3], align: "right" as const, currency: true },
   ];
   // One table start to finish — the performance rows below just leave the
   // Holding Units / Average Price columns blank rather than starting a

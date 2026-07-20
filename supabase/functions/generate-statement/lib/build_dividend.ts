@@ -18,13 +18,14 @@ export async function buildDividendPdf(
   drawHeaderBlock(doc, {
     title: "DIVIDEND  PAYMENT  STATEMENT", investor,
     statementType: "Dividend Statement", periodText,
+    referenceNo: "-",
   });
   drawSectionHeader(doc, "Investor's Profile");
   drawInfoCard(doc, [
     ["Account Type", investor.accountType, "Account ID", investor.accountId],
     ["Registered Name", investor.registeredName, "Settlement Type", investor.settlementType],
-    ["Reference No.", investor.referenceNo, "Bank Name", investor.bankName],
-    ["Bank Account No.", investor.bankAccountNo, "", ""],
+    ["Phone No.", investor.phone, "Email Address", investor.email],
+    ["Bank Name", investor.bankName, "Bank Account No.", investor.bankAccountNo],
   ]);
   doc.y -= SECTION_GAP;
 
@@ -36,7 +37,7 @@ export async function buildDividendPdf(
     { header: "EPS", width: w[3], align: "right" as const },
     { header: "DPR", width: w[4], align: "right" as const },
     { header: "DPS", width: w[5], align: "right" as const },
-    { header: "Dividend Amount (RM)", width: w[6], align: "right" as const },
+    { header: "Dividend Amount", width: w[6], align: "right" as const, currency: true },
   ];
   let totalDps = 0, totalAmount = 0;
   const rows = distributions.map((d) => {
