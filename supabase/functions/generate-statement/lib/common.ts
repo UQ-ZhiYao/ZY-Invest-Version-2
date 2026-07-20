@@ -10,17 +10,19 @@ export const BODY_W = PAGE_W - MARGIN * 2;
 export const RED = rgb(0.7529, 0, 0); // #C00000
 export const BLACK = rgb(0, 0, 0);
 
-export const FUND_EMAIL = "nzy.invest@gmail.com";
-export const FUND_PHONE = "(+60)11 - 1121 8085";
+export const FUND_EMAIL = "support@zy-invest.com";
+export const FUND_PHONE = "(+60)413 0880 69";
+export const FUND_WEBSITE = "zy-invest.com";
 
-// Base font size — tables, the investor info card, section headers, footer.
+// Base font size — tables, the investor info card, the investor's
+// name/address (it doubles as the postal/letter address), notice body
+// copy, footer.
 export const CONTENT_SIZE = 7.5;
-// Larger sizes used for a few call-outs: the big statement title, the
-// investor's name/address (it doubles as the postal/letter address), and
-// the important-notices block (title + body).
+// Section/table titles ("Investor's Profile", "Principal Transaction", ...)
+// and the "IMPORTANT NOTICES" heading.
+export const HEADING_SIZE = 8.5;
+// The big statement title ("FUND SUBSCRIPTION STATEMENT" etc.) only.
 export const TITLE_SIZE = 10;
-export const NAME_SIZE = 10;
-export const NOTICE_SIZE = 10;
 // Vertical gap between one table/section and the next — "1 line" of space.
 export const SECTION_GAP = 16;
 
@@ -56,15 +58,20 @@ export interface Doc {
 export interface InvestorInfo {
   accountType: string; // "Personal Account" | "Joint Account"
   accountId: string; // first 8 characters of the investor's profile id
+  // The letter/table name: the investor's own name for a Personal Account,
+  // or every joint-account holder's name (e.g. "A & B") for a Joint Account.
   registeredName: string;
   settlementType: string;
   phone: string;
   email: string;
   bankName: string;
   bankAccountNo: string;
+  // profiles.address / address2 / "postcode city" / state — one investor's
+  // own address, even for a Joint Account ("address will take 1 of them").
   addressLine1: string;
   addressLine2: string;
   addressLine3: string;
+  addressLine4: string;
 }
 
 export type Cell = string | { text: string; color: RGB };
@@ -303,8 +310,8 @@ export function drawSectionHeader(doc: Doc, text: string): void {
   const { sans } = doc.fonts;
   ensureSpace(doc, 24);
   doc.y -= 4;
-  drawText(doc, text, { x: MARGIN, y: doc.y - CONTENT_SIZE, font: sans, size: CONTENT_SIZE, color: BLACK });
-  doc.y -= CONTENT_SIZE + 9;
+  drawText(doc, text, { x: MARGIN, y: doc.y - HEADING_SIZE, font: sans, size: HEADING_SIZE, color: BLACK });
+  doc.y -= HEADING_SIZE + 9;
 }
 
 // Not bold — every other heading in the document is plain weight too.
@@ -312,8 +319,8 @@ export function drawNoticeHeader(doc: Doc, text: string): void {
   const { sans } = doc.fonts;
   ensureSpace(doc, 24);
   doc.y -= 10;
-  drawText(doc, text, { x: MARGIN, y: doc.y - NOTICE_SIZE, font: sans, size: NOTICE_SIZE, color: BLACK });
-  doc.y -= NOTICE_SIZE + 8;
+  drawText(doc, text, { x: MARGIN, y: doc.y - HEADING_SIZE, font: sans, size: HEADING_SIZE, color: BLACK });
+  doc.y -= HEADING_SIZE + 8;
 }
 
 // Keeps a section header + the table that follows on the same page: if the
@@ -387,20 +394,24 @@ export function drawHeaderBlock(
 
   const rowTopY = topY - Math.max(logoDrawH, titleSize) - 14;
 
-  // Left: investor name + address, stacked — larger than the rest of the
-  // document since it doubles as the postal/letter address.
+  // Left: investor name + address, stacked, at the same size as the rest
+  // of the document's body copy.
   let ly = rowTopY;
-  const nameSize = NAME_SIZE;
+  const nameSize = CONTENT_SIZE;
   drawText(doc, investor.registeredName.toUpperCase(), { x: MARGIN, y: ly - nameSize, font: serif, size: nameSize });
   ly -= nameSize + 4;
-  for (const line of [investor.addressLine1, investor.addressLine2, investor.addressLine3]) {
+  for (const line of [investor.addressLine1, investor.addressLine2, investor.addressLine3, investor.addressLine4]) {
     if (!line) continue;
     drawText(doc, line, { x: MARGIN, y: ly - nameSize, font: serif, size: nameSize });
     ly -= nameSize + 4;
   }
 
-  // Right: meta info, one label/value pair per line (wraps if a value is long).
+  // Right: meta info, one label/value pair per line (wraps if a value is
+  // long). Label sits at the column's left edge, value is right-aligned to
+  // the page body's own right edge — so the card always reaches flush
+  // right instead of leaving blank trailing space after a short value.
   const metaLabelW = 95;
+  const metaRightEdge = MARGIN + BODY_W;
   const metaRows: [string, string][] = [
     ["Page No.", "1 of 1"],
     ["Issued Date", new Date().toISOString().slice(0, 10).split("-").reverse().join("-")],
@@ -417,7 +428,7 @@ export function drawHeaderBlock(
     const lines = wrapText(`: ${value}`, sans, metaSize, valueMaxW);
     let vy = my - metaSize;
     for (const line of lines) {
-      drawText(doc, line, { x: rightColX + metaLabelW, y: vy, font: sans, size: metaSize });
+      drawTextRight(doc, line, { x: metaRightEdge, y: vy, font: sans, size: metaSize });
       vy -= metaLineHeight;
     }
     my -= Math.max(metaSize + 4.5, (lines.length - 1) * metaLineHeight + metaSize + 4.5);
@@ -480,7 +491,7 @@ function wrapHangingFirstLine(text: string, font: PDFFont, size: number, firstWi
 
 function estimateNoticesHeight(doc: Doc): number {
   const { sans, sansBold } = doc.fonts;
-  const size = NOTICE_SIZE;
+  const size = CONTENT_SIZE;
   const lineHeight = size + 4;
   const headingH = 28; // matches drawNoticeHeader's own vertical consumption
   let itemsH = 0;
@@ -510,7 +521,7 @@ export function drawImportantNotices(doc: Doc): void {
 
   drawNoticeHeader(doc, "IMPORTANT NOTICES");
   const { sans, sansBold } = doc.fonts;
-  const size = NOTICE_SIZE;
+  const size = CONTENT_SIZE;
   const lineHeight = size + 4;
   const textWidth = BODY_W;
   for (let i = 0; i < NOTICE_ITEMS.length; i++) {
@@ -573,7 +584,7 @@ export function drawFooterOnAllPages(doc: Doc): void {
   for (const page of doc.pages) {
     page.drawLine({ start: { x: MARGIN, y: y + 14 }, end: { x: PAGE_W - MARGIN, y: y + 14 }, thickness: 0.6, color: BLACK });
     page.drawText("Head Office: None", { x: MARGIN, y, size: 7.5, font: sans });
-    const text = `Line: ${FUND_PHONE}      Email: ${FUND_EMAIL}      Website: -`;
+    const text = `Line: ${FUND_PHONE}      Email: ${FUND_EMAIL}      Website: ${FUND_WEBSITE}`;
     const w = sans.widthOfTextAtSize(text, 7.5);
     page.drawText(text, { x: PAGE_W - MARGIN - w, y, size: 7.5, font: sans });
   }

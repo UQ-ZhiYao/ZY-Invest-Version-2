@@ -38,12 +38,26 @@ function json(body: unknown, status = 200) {
   });
 }
 
-function investorInfo(profile: Record<string, any>) {
+// Personal Account: just the investor's own name. Joint Account: every
+// holder under that joint_account_id, so the letter is addressed to all
+// of them — the postal address itself still comes from this one profile.
+async function registeredNameFor(sb: ReturnType<typeof createClient>, profile: Record<string, any>): Promise<string> {
+  if (!profile.joint_account_id) return profile.full_name || "-";
+  const { data } = await sb
+    .from("profiles")
+    .select("full_name")
+    .eq("joint_account_id", profile.joint_account_id)
+    .order("full_name", { ascending: true });
+  const names = (data || []).map((r: any) => r.full_name).filter(Boolean);
+  return names.length ? names.join(" & ") : (profile.full_name || "-");
+}
+
+async function investorInfo(sb: ReturnType<typeof createClient>, profile: Record<string, any>) {
   const addr = addressFromProfile(profile);
   return {
     accountType: profile.joint_account_id ? "Joint Account" : "Personal Account",
     accountId: String(profile.id || "").slice(0, 8),
-    registeredName: profile.full_name || "-",
+    registeredName: await registeredNameFor(sb, profile),
     settlementType: DEFAULT_SETTLEMENT_TYPE,
     phone: profile.phone || "-",
     email: profile.email || "-",
@@ -52,6 +66,7 @@ function investorInfo(profile: Record<string, any>) {
     addressLine1: addr.line1,
     addressLine2: addr.line2,
     addressLine3: addr.line3,
+    addressLine4: addr.line4,
   };
 }
 
@@ -167,7 +182,7 @@ async function handleSubscriptionOrRedemption(sb: ReturnType<typeof createClient
   const openingUnits = netUnitsAsof(prior, txDate);
   const openingCost = netCostAsof(prior, txDate, tx.uid);
 
-  const investor = investorInfo(profile);
+  const investor = await investorInfo(sb, profile);
 
   const pdfBytes = await buildSubscriptionPdf({ tx, investor, openingUnits, openingCost });
   const fileName = `${tx.type}_${tx.reference_id || tx.id}.pdf`;
@@ -196,7 +211,7 @@ async function handleDividend(sb: ReturnType<typeof createClient>, body: Record<
   const fyEnd = parseDate(fy.end_date);
   const holdingUnits = netUnitsAsof(allCis || [], fyEnd, investorId);
 
-  const investor = investorInfo(profile);
+  const investor = await investorInfo(sb, profile);
 
   const pdfBytes = await buildDividendPdf({ distributions: dists, investor, holdingUnits, periodText: fy.label });
   const fileName = `Dividend_${(profile.full_name || "investor").replace(/\s+/g, "_")}_${fy.label}.pdf`;
@@ -259,7 +274,7 @@ async function handleAnnual(sb: ReturnType<typeof createClient>, body: Record<st
   }
   cashflows.push([fyEnd, closingUnits * latestNav]);
 
-  const investor = investorInfo(profile);
+  const investor = await investorInfo(sb, profile);
 
   const pdfBytes = await buildAnnualPdf({
     investor, fyStart, fyEnd, openingUnits, openingCost, closingUnits, closingCost,
