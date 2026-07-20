@@ -224,7 +224,7 @@ async function handleDividend(sb: ReturnType<typeof createClient>, body: Record<
 }
 
 async function handleAnnual(sb: ReturnType<typeof createClient>, body: Record<string, any>) {
-  const { investorId, fyId, realizedPl = 0, adjustment = 0 } = body;
+  const { investorId, fyId } = body;
   if (!investorId || !fyId) return json({ error: "investorId and fyId are required" }, 400);
 
   const { data: profile } = await sb.from("profiles").select("*").eq("id", investorId).single();
@@ -247,12 +247,25 @@ async function handleAnnual(sb: ReturnType<typeof createClient>, body: Record<st
       parseDate(r.date) >= fyStart && parseDate(r.date) <= fyEnd,
   );
 
-  const { data: distsRaw } = await sb.from("distributions").select("*").eq("fy", fy.label).order("ex_date");
+  // Fund-wide, not scoped to this FY — the "prior" bucket below needs every
+  // distribution before fyStart, regardless of which FY label it carries.
+  const { data: distsRaw } = await sb.from("distributions").select("*").order("ex_date");
   const dists = distsRaw || [];
   const distributionsInFy = dists.filter((d: any) => {
     const p = parseDate(d.pay_date || d.ex_date);
     return p >= fyStart && p <= fyEnd;
   });
+  // Dividends this investor actually received before this FY, so the
+  // Dividend Transaction table's Opening row carries their real cumulative
+  // total instead of always starting from 0 — each prior distribution
+  // valued at this investor's actual holding on its own ex-date.
+  const distributionsBeforeFy = dists.filter((d: any) => parseDate(d.pay_date || d.ex_date) < fyStart);
+  let priorDividendsReceived = 0;
+  for (const d of distributionsBeforeFy) {
+    const unitsAtEx = netUnitsAsof(allCis, parseDate(d.ex_date), investorId);
+    priorDividendsReceived += Math.round(unitsAtEx * Number(d.dps) / 100 * 100) / 100;
+  }
+  priorDividendsReceived = Math.round(priorDividendsReceived * 100) / 100;
 
   const { data: ntaRow } = await sb
     .from("nta_daily").select("date,nta").lte("date", fyEnd.toISOString().slice(0, 10))
@@ -281,8 +294,8 @@ async function handleAnnual(sb: ReturnType<typeof createClient>, body: Record<st
 
   const pdfBytes = await buildAnnualPdf({
     investor, fyStart, fyEnd, openingUnits, openingCost, closingUnits, closingCost,
-    latestNavPerUnit: latestNav, transactionsInFy, distributionsInFy, cashflowsForIrr: cashflows,
-    realizedPl, adjustment,
+    latestNavPerUnit: latestNav, transactionsInFy, distributionsInFy, priorDividendsReceived,
+    cashflowsForIrr: cashflows,
   });
   const fileName = `Annual_${(profile.full_name || "investor").replace(/\s+/g, "_")}_${fy.label}.pdf`;
 
