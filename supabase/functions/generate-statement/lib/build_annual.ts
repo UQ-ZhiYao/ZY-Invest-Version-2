@@ -27,12 +27,16 @@ export interface BuildAnnualArgs {
   // Transaction table's Opening row carries the investor's real cumulative
   // total instead of always starting from 0.
   priorDividendsReceived: number;
+  // Realized P&L from every Redemption before this FY — the Realized
+  // Transaction table's Opening row.
+  priorRealizedPl: number;
   cashflowsForIrr: [Date, number][];
 }
 
 export async function buildAnnualPdf({
   investor, fyStart, fyEnd, openingUnits, openingCost, closingUnits, closingCost,
-  latestNavPerUnit, transactionsInFy, distributionsInFy, priorDividendsReceived, cashflowsForIrr,
+  latestNavPerUnit, transactionsInFy, distributionsInFy, priorDividendsReceived, priorRealizedPl,
+  cashflowsForIrr,
 }: BuildAnnualArgs): Promise<Uint8Array> {
   const periodText = `${dmy(fyStart)} - ${dmy(fyEnd)}`;
   const doc = await newDoc();
@@ -61,11 +65,12 @@ export async function buildAnnualPdf({
     { header: "Units Balanced", width: pW[5], align: "right" as const },
   ];
   let runUnits = openingUnits, runCost = openingCost;
-  // Realized P&L: every Redemption's proceeds minus the cost basis it
-  // actually removed (units × avg cost right before it) — the standard
-  // proceeds-minus-cost-basis-sold definition, summed across this FY's
-  // redemptions using the same running avg cost tracked below.
-  let realizedPl = 0;
+  // Realized P&L this FY: every Redemption's proceeds minus the cost basis
+  // it actually removed (units × avg cost right before it) — the standard
+  // proceeds-minus-cost-basis-sold definition. Captured per-redemption too,
+  // for the Realized Transaction table below.
+  let realizedPlThisFy = 0;
+  const realizedRows: { date: Date; refId: string; units: number; price: number; avgCostBefore: number; pnl: number }[] = [];
   const pRows: Cell[][] = [
     [dstr(fyStart), "Opening", "-", runUnits > 0 ? rm(runCost / runUnits, 4) : "-", "-", fmt(runUnits)],
   ];
@@ -79,18 +84,49 @@ export async function buildAnnualPdf({
     // existed, not its own cash proceeds (`amt`, priced at this tx's NTA).
     const avgCostBefore = runUnits > 0 ? runCost / runUnits : 0;
     const signedUnits = isRedemption ? -units : units;
-    if (isRedemption) realizedPl += amt - units * avgCostBefore;
+    if (isRedemption) {
+      const pnl = amt - units * avgCostBefore;
+      realizedPlThisFy += pnl;
+      realizedRows.push({ date: d, refId: tx.reference_id || "-", units, price, avgCostBefore, pnl });
+    }
     runCost += isRedemption ? -(units * avgCostBefore) : amt;
     runUnits += signedUnits;
     pRows.push([
-      dstr(d), tx.type, `${rm(amt)} @ ${fmt(price)}`,
+      dstr(d), `${tx.type}\n${tx.reference_id || "-"}`, `${rm(amt)} @ ${fmt(price)}`,
       runUnits > 0 ? rm(runCost / runUnits, 4) : "-",
       redIfNegative(signedUnits, 4), fmt(runUnits),
     ]);
   }
-  realizedPl = Math.round(realizedPl * 100) / 100;
+  realizedPlThisFy = Math.round(realizedPlThisFy * 100) / 100;
   pRows.push([dstr(fyEnd), "Closing", "-", closingUnits > 0 ? rm(closingCost / closingUnits, 4) : "-", "-", fmt(closingUnits)]);
   drawKeptTogether(doc, "Principal Transaction", { columns: pCols, rows: pRows });
+  doc.y -= SECTION_GAP;
+
+  // --- Realized Transaction: itemised ---------------------------------------
+  // Opening = all realized P&L before this period; each Redemption in the
+  // FY (if any) sits between Opening and Closing with its own proceeds,
+  // sell price, avg cost right before it, and that transaction's own P&L;
+  // Closing is the cumulative realized P&L through FY end, which is what
+  // Account Summary's (d) Realized Profit & Loss reads.
+  const rW = colWidths(BODY_W, [76, 100, 76, 86, 86, 86]);
+  const rCols = [
+    { header: "Date", width: rW[0] },
+    { header: "Description", width: rW[1] },
+    { header: "Units", width: rW[2], align: "right" as const },
+    { header: "Sell Price", width: rW[3], align: "right" as const, currency: true },
+    { header: "Avg. Cost", width: rW[4], align: "right" as const, currency: true },
+    { header: "Profit & Loss", width: rW[5], align: "right" as const, currency: true },
+  ];
+  const realizedPl = Math.round((priorRealizedPl + realizedPlThisFy) * 100) / 100;
+  const rRows: Cell[][] = [
+    [dstr(fyStart), "Opening", "-", "-", "-", redIfNegative(priorRealizedPl, 2)],
+    ...realizedRows.map((r) => [
+      dstr(r.date), `Redemption\n${r.refId}`, fmt(r.units, 4), rm(r.price, 4), rm(r.avgCostBefore, 4),
+      redIfNegative(Math.round(r.pnl * 100) / 100, 2),
+    ]),
+    [dstr(fyEnd), "Closing", "-", "-", "-", redIfNegative(realizedPl, 2)],
+  ];
+  drawKeptTogether(doc, "Realized Transaction", { columns: rCols, rows: rRows });
   doc.y -= SECTION_GAP;
 
   // --- Dividend Transaction: itemised --------------------------------------

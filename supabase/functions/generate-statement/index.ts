@@ -20,6 +20,7 @@ import {
   addressFromProfile,
   magnitude,
   netCostAsof,
+  netRealizedPlAsof,
   netUnitsAsof,
   parseDate,
 } from "./lib/compute.ts";
@@ -57,7 +58,7 @@ async function investorInfo(sb: ReturnType<typeof createClient>, profile: Record
   const addr = addressFromProfile(profile);
   return {
     accountType: profile.joint_account_id ? "Joint Account" : "Personal Account",
-    accountId: String(profile.id || "").slice(0, 8),
+    accountId: String(profile.id || "").slice(0, 8).toUpperCase(),
     registeredName: await registeredNameFor(sb, profile),
     settlementType: DEFAULT_SETTLEMENT_TYPE,
     phone: profile.phone || "-",
@@ -242,6 +243,9 @@ async function handleAnnual(sb: ReturnType<typeof createClient>, body: Record<st
   const openingCost = netCostAsof(allCis, dayBeforeFy, investorId);
   const closingUnits = netUnitsAsof(allCis, fyEnd, investorId);
   const closingCost = netCostAsof(allCis, fyEnd, investorId);
+  // All realized P&L from redemptions before this FY — the Realized
+  // Transaction table's Opening row.
+  const priorRealizedPl = netRealizedPlAsof(allCis, dayBeforeFy, investorId);
   const transactionsInFy = allCis.filter(
     (r: any) => r.status === "Approved" && r.uid === investorId &&
       parseDate(r.date) >= fyStart && parseDate(r.date) <= fyEnd,
@@ -295,7 +299,7 @@ async function handleAnnual(sb: ReturnType<typeof createClient>, body: Record<st
   const pdfBytes = await buildAnnualPdf({
     investor, fyStart, fyEnd, openingUnits, openingCost, closingUnits, closingCost,
     latestNavPerUnit: latestNav, transactionsInFy, distributionsInFy, priorDividendsReceived,
-    cashflowsForIrr: cashflows,
+    priorRealizedPl, cashflowsForIrr: cashflows,
   });
   const fileName = `Annual_${(profile.full_name || "investor").replace(/\s+/g, "_")}_${fy.label}.pdf`;
 
