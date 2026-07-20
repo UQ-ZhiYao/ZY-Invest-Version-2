@@ -153,20 +153,26 @@ function breakOversizedWord(word: string, font: PDFFont, size: number, maxWidth:
   return chunks;
 }
 
+// A "\n" in the source text is a forced line break (e.g. a transaction
+// type with its reference ID on the next line within one table cell) —
+// each side of it wraps independently by width, same as the whole string
+// would without any "\n" in it.
 export function wrapText(text: unknown, font: PDFFont, size: number, maxWidth: number): string[] {
-  const words = String(text).split(" ").flatMap((w) => breakOversizedWord(w, font, size, maxWidth));
   const lines: string[] = [];
-  let cur = "";
-  for (const w of words) {
-    const trial = cur ? `${cur} ${w}` : w;
-    if (font.widthOfTextAtSize(trial, size) > maxWidth && cur) {
-      lines.push(cur);
-      cur = w;
-    } else {
-      cur = trial;
+  for (const para of String(text).split("\n")) {
+    const words = para.split(" ").flatMap((w) => breakOversizedWord(w, font, size, maxWidth));
+    let cur = "";
+    for (const w of words) {
+      const trial = cur ? `${cur} ${w}` : w;
+      if (font.widthOfTextAtSize(trial, size) > maxWidth && cur) {
+        lines.push(cur);
+        cur = w;
+      } else {
+        cur = trial;
+      }
     }
+    lines.push(cur);
   }
-  if (cur) lines.push(cur);
   return lines.length ? lines : [""];
 }
 

@@ -57,19 +57,23 @@ export function netUnitsAsof(capitalInjections: CapitalInjectionRow[], asof: Dat
   return Math.max(0, net);
 }
 
+function approvedSortedFor(capitalInjections: CapitalInjectionRow[], asof: Date, uid: string): CapitalInjectionRow[] {
+  return capitalInjections
+    .filter((r) => r.status === "Approved" && r.uid === uid && parseDate(r.date) <= asof)
+    .slice()
+    .sort((a, b) => parseDate(a.date).getTime() - parseDate(b.date).getTime());
+}
+
 // AVCO (weighted-average cost): a Subscription adds its own amount to the
 // cost pool, changing the average cost per unit. A Redemption does NOT
 // change the average cost — it removes cost proportional to the average
 // cost immediately before it (units redeemed × prior avg cost), not the
 // redemption's own `amount` (that's cash proceeds at that day's NTA, a
-// market-value figure, not a cost-basis one). Requires chronological
-// order, so this sorts by date itself rather than trusting call-site order.
-export function netCostAsof(capitalInjections: CapitalInjectionRow[], asof: Date, uid: string): number {
-  const rows = capitalInjections
-    .filter((r) => r.status === "Approved" && r.uid === uid && parseDate(r.date) <= asof)
-    .slice()
-    .sort((a, b) => parseDate(a.date).getTime() - parseDate(b.date).getTime());
-  let units = 0, cost = 0;
+// market-value figure, not a cost-basis one). Also tracks realized P&L:
+// each Redemption's proceeds minus the cost basis it removed. Requires
+// chronological order, which is why the caller must pass pre-sorted rows.
+function avcoTrace(rows: CapitalInjectionRow[]): { units: number; cost: number; realizedPl: number } {
+  let units = 0, cost = 0, realizedPl = 0;
   for (const r of rows) {
     const u = magnitude(r.units);
     if (r.type === "Subscription") {
@@ -77,11 +81,24 @@ export function netCostAsof(capitalInjections: CapitalInjectionRow[], asof: Date
       cost += magnitude(r.amount);
     } else {
       const avgCost = units > 0 ? cost / units : 0;
+      realizedPl += magnitude(r.amount) - u * avgCost;
       units -= u;
       cost -= u * avgCost;
     }
   }
-  return cost;
+  return { units, cost, realizedPl };
+}
+
+export function netCostAsof(capitalInjections: CapitalInjectionRow[], asof: Date, uid: string): number {
+  return avcoTrace(approvedSortedFor(capitalInjections, asof, uid)).cost;
+}
+
+// Cumulative realized P&L (from every Redemption up to `asof`) — this is
+// what "Realized Profit & Loss" means all-time: proceeds minus cost basis
+// removed, summed across every redemption in the investor's history.
+export function netRealizedPlAsof(capitalInjections: CapitalInjectionRow[], asof: Date, uid: string): number {
+  const realizedPl = avcoTrace(approvedSortedFor(capitalInjections, asof, uid)).realizedPl;
+  return Math.round(realizedPl * 100) / 100;
 }
 
 // Newton's method XIRR, mirrors compute.py's xirr(). Returns null rather
