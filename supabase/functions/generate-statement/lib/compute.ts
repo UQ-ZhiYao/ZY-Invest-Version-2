@@ -48,16 +48,31 @@ export function netUnitsAsof(capitalInjections: CapitalInjectionRow[], asof: Dat
   return Math.max(0, net);
 }
 
+// AVCO (weighted-average cost): a Subscription adds its own amount to the
+// cost pool, changing the average cost per unit. A Redemption does NOT
+// change the average cost — it removes cost proportional to the average
+// cost immediately before it (units redeemed × prior avg cost), not the
+// redemption's own `amount` (that's cash proceeds at that day's NTA, a
+// market-value figure, not a cost-basis one). Requires chronological
+// order, so this sorts by date itself rather than trusting call-site order.
 export function netCostAsof(capitalInjections: CapitalInjectionRow[], asof: Date, uid: string): number {
-  let net = 0;
-  for (const r of capitalInjections) {
-    if (r.status !== "Approved" || r.uid !== uid) continue;
-    const d = parseDate(r.date);
-    if (d > asof) continue;
-    const amt = Number(r.amount || 0);
-    net += r.type === "Subscription" ? amt : -amt;
+  const rows = capitalInjections
+    .filter((r) => r.status === "Approved" && r.uid === uid && parseDate(r.date) <= asof)
+    .slice()
+    .sort((a, b) => parseDate(a.date).getTime() - parseDate(b.date).getTime());
+  let units = 0, cost = 0;
+  for (const r of rows) {
+    const u = Number(r.units || 0);
+    if (r.type === "Subscription") {
+      units += u;
+      cost += Number(r.amount || 0);
+    } else {
+      const avgCost = units > 0 ? cost / units : 0;
+      units -= u;
+      cost -= u * avgCost;
+    }
   }
-  return net;
+  return cost;
 }
 
 // Newton's method XIRR, mirrors compute.py's xirr(). Returns null rather

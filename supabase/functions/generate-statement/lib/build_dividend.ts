@@ -1,5 +1,5 @@
 import {
-  newDoc, drawHeaderBlock, drawInfoCard, drawSectionHeader, drawKeptTogether, drawImportantNotices,
+  newDoc, drawHeaderBlock, drawPageNo, drawInfoCard, drawSectionHeader, drawKeptTogether, drawImportantNotices,
   drawFooterOnAllPages, drawText, rm, colWidths, BODY_W, SECTION_GAP, CONTENT_SIZE, InvestorInfo, Cell,
 } from "./common.ts";
 import { DistributionRow } from "./compute.ts";
@@ -15,7 +15,7 @@ export async function buildDividendPdf(
   if (!distributions.length) throw new Error("at least one distribution row is required");
 
   const doc = await newDoc();
-  drawHeaderBlock(doc, {
+  const pageNoPos = drawHeaderBlock(doc, {
     title: "DIVIDEND  PAYMENT  STATEMENT", investor,
     statementType: "Dividend Statement", periodText,
     referenceNo: "-",
@@ -60,5 +60,6 @@ export async function buildDividendPdf(
 
   drawImportantNotices(doc);
   drawFooterOnAllPages(doc);
+  drawPageNo(doc, pageNoPos);
   return doc.pdf.save();
 }

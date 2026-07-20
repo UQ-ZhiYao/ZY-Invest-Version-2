@@ -1,5 +1,5 @@
 import {
-  newDoc, drawHeaderBlock, drawInfoCard, drawSectionHeader, drawKeptTogether, drawImportantNotices,
+  newDoc, drawHeaderBlock, drawPageNo, drawInfoCard, drawSectionHeader, drawKeptTogether, drawImportantNotices,
   drawFooterOnAllPages, rm, redIfNegative, fmt, colWidths, BODY_W, SECTION_GAP, InvestorInfo,
 } from "./common.ts";
 import { CapitalInjectionRow } from "./compute.ts";
@@ -19,15 +19,20 @@ export async function buildSubscriptionPdf(
   const price = Number(tx.nta);
   const units = Number(tx.units);
 
+  // AVCO: a Subscription's own amount becomes cost basis. A Redemption
+  // doesn't move the average cost — it removes units × the average cost
+  // that already existed, not the redemption's cash proceeds (`amount`,
+  // priced at this tx's NTA, which is a different number from cost basis).
+  const avgCostBeforeTx = openingUnits > 0 ? openingCost / openingUnits : 0;
   const signedUnits = isRedemption ? -units : units;
-  const signedAmount = isRedemption ? -amount : amount;
+  const costDelta = isRedemption ? -(units * avgCostBeforeTx) : amount;
   const closingUnits = openingUnits + signedUnits;
-  const closingCost = openingCost + signedAmount;
+  const closingCost = openingCost + costDelta;
 
   const doc = await newDoc();
   const dateStr = txDate.toISOString().slice(0, 10).split("-").reverse().join(" - ");
 
-  drawHeaderBlock(doc, {
+  const pageNoPos = drawHeaderBlock(doc, {
     title: `FUND  ${txType.toUpperCase()}  STATEMENT`,
     investor, statementType: `${txType} Statement`, periodText: dateStr.replaceAll(" - ", "/"),
     referenceNo: tx.reference_id || "-",
@@ -61,5 +66,6 @@ export async function buildSubscriptionPdf(
 
   drawImportantNotices(doc);
   drawFooterOnAllPages(doc);
+  drawPageNo(doc, pageNoPos);
   return doc.pdf.save();
 }

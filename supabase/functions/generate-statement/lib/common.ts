@@ -356,6 +356,11 @@ export function fmt(value: number | string, decimals = 4): string {
   return Number(value).toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 }
 
+export interface PageNoPos {
+  x: number;
+  y: number;
+}
+
 export function drawHeaderBlock(
   doc: Doc,
   { title, investor, statementType, periodText, referenceNo }: {
@@ -367,7 +372,7 @@ export function drawHeaderBlock(
     // statement types (Dividend, Annual) that aren't tied to one transaction.
     referenceNo: string;
   },
-): void {
+): PageNoPos {
   const { serif, serifBold, sans } = doc.fonts;
   const topY = doc.y;
 
@@ -411,17 +416,25 @@ export function drawHeaderBlock(
   // Right: meta info, one label/value pair per line, left-aligned — label
   // at the card's left edge, value directly after it (wraps if long).
   const metaLabelW = 78;
+  const metaSize = CONTENT_SIZE;
+  const metaLineHeight = metaSize + 3;
+  const valueMaxW = rightColW - metaLabelW;
+  let my = rowTopY;
+
+  // Page No.'s value ("1 of N") isn't known yet — N is the PDF's total
+  // page count, which isn't final until everything after this header has
+  // been drawn. Draw the label now and hand the caller back where its
+  // value belongs, to stamp in via drawPageNo() right before saving.
+  drawText(doc, "Page No.", { x: rightColX, y: my - metaSize, font: sans, size: metaSize });
+  const pageNoPos: PageNoPos = { x: rightColX + metaLabelW, y: my - metaSize };
+  my -= metaSize + 4.5;
+
   const metaRows: [string, string][] = [
-    ["Page No.", "1 of 1"],
     ["Issued Date", new Date().toISOString().slice(0, 10).split("-").reverse().join("-")],
     ["Statement Type", statementType],
     ["Statement Period", periodText],
     ["Reference No.", referenceNo],
   ];
-  const metaSize = CONTENT_SIZE;
-  const metaLineHeight = metaSize + 3;
-  const valueMaxW = rightColW - metaLabelW;
-  let my = rowTopY;
   for (const [label, value] of metaRows) {
     drawText(doc, label, { x: rightColX, y: my - metaSize, font: sans, size: metaSize });
     const lines = wrapText(`: ${value}`, sans, metaSize, valueMaxW);
@@ -434,6 +447,14 @@ export function drawHeaderBlock(
   }
 
   doc.y = Math.min(ly, my) - 12;
+  return pageNoPos;
+}
+
+// Stamps "Page No." on the first page — call once, right before
+// doc.pdf.save(), once every page has actually been created.
+export function drawPageNo(doc: Doc, pos: PageNoPos): void {
+  const { sans } = doc.fonts;
+  doc.pages[0].drawText(`: 1 of ${doc.pages.length}`, { x: pos.x, y: pos.y, size: CONTENT_SIZE, font: sans, color: BLACK });
 }
 
 const NOTICE_ITEMS: [string, string][] = [
@@ -580,11 +601,13 @@ export function drawInfoCard(doc: Doc, rows: [string, string, string, string][])
 export function drawFooterOnAllPages(doc: Doc): void {
   const { sans } = doc.fonts;
   const y = MARGIN - 12;
-  for (const page of doc.pages) {
+  const total = doc.pages.length;
+  doc.pages.forEach((page, i) => {
     page.drawLine({ start: { x: MARGIN, y: y + 14 }, end: { x: PAGE_W - MARGIN, y: y + 14 }, thickness: 0.6, color: BLACK });
-    page.drawText("Head Office: None", { x: MARGIN, y, size: 7.5, font: sans });
-    const text = `Line: ${FUND_PHONE}      Email: ${FUND_EMAIL}      Website: ${FUND_WEBSITE}`;
-    const w = sans.widthOfTextAtSize(text, 7.5);
-    page.drawText(text, { x: PAGE_W - MARGIN - w, y, size: 7.5, font: sans });
-  }
+    const leftText = `Line: ${FUND_PHONE}      Email: ${FUND_EMAIL}      Website: ${FUND_WEBSITE}`;
+    page.drawText(leftText, { x: MARGIN, y, size: 7.5, font: sans });
+    const rightText = `Page ${i + 1} of ${total}`;
+    const w = sans.widthOfTextAtSize(rightText, 7.5);
+    page.drawText(rightText, { x: PAGE_W - MARGIN - w, y, size: 7.5, font: sans });
+  });
 }

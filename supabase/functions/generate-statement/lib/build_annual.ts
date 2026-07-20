@@ -1,5 +1,5 @@
 import {
-  newDoc, drawHeaderBlock, drawInfoCard, drawSectionHeader, drawKeptTogether, drawImportantNotices,
+  newDoc, drawHeaderBlock, drawPageNo, drawInfoCard, drawSectionHeader, drawKeptTogether, drawImportantNotices,
   drawFooterOnAllPages, drawText, rm, redIfNegative, fmt, colWidths, BODY_W, SECTION_GAP, CONTENT_SIZE,
   InvestorInfo, Cell,
 } from "./common.ts";
@@ -36,7 +36,7 @@ export async function buildAnnualPdf({
   const periodText = `${dmy(fyStart)} - ${dmy(fyEnd)}`;
   const doc = await newDoc();
 
-  drawHeaderBlock(doc, {
+  const pageNoPos = drawHeaderBlock(doc, {
     title: "INVESTMENT  ACCOUNT  STATEMENT", investor, statementType: "Annually", periodText,
     referenceNo: "-",
   });
@@ -66,9 +66,13 @@ export async function buildAnnualPdf({
   for (const tx of transactionsInFy) {
     const d = new Date(tx.date + "T00:00:00Z");
     const amt = Number(tx.amount), units = Number(tx.units), price = Number(tx.nta);
-    const signedUnits = tx.type === "Subscription" ? units : -units;
+    const isRedemption = tx.type !== "Subscription";
+    // AVCO: Redemption removes units × the average cost that already
+    // existed, not its own cash proceeds (`amt`, priced at this tx's NTA).
+    const avgCostBefore = runUnits > 0 ? runCost / runUnits : 0;
+    const signedUnits = isRedemption ? -units : units;
+    runCost += isRedemption ? -(units * avgCostBefore) : amt;
     runUnits += signedUnits;
-    runCost += tx.type === "Subscription" ? amt : -amt;
     pRows.push([
       dstr(d), tx.type, `${rm(amt)} @ ${fmt(price)}`,
       runUnits > 0 ? rm(runCost / runUnits, 4) : "-",
@@ -143,5 +147,6 @@ export async function buildAnnualPdf({
 
   drawImportantNotices(doc);
   drawFooterOnAllPages(doc);
+  drawPageNo(doc, pageNoPos);
   return doc.pdf.save();
 }
