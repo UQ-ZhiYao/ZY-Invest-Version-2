@@ -91,7 +91,7 @@
     <a class="adm-nav adm-signout" id="admSignout" href="#"><span class="ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>Sign out</a>
   </aside>
   <main class="adm-main">
-<div class="ph" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;"><div><h1>Document Management</h1><p>View, download, preview, upload and delete all issued PDF statements and factsheets.</p></div><button class="btn-fill btn-sm" id="openDuModal" style="white-space:nowrap;">+ Upload Document</button></div>
+<div class="ph" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;"><div><h1>Document Management</h1><p>View, download, preview, upload and delete all issued PDF statements and factsheets.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn-line btn-sm" id="genAllBtn" style="white-space:nowrap;">⚡ Generate All Statements</button><button class="btn-fill btn-sm" id="openDuModal" style="white-space:nowrap;">+ Upload Document</button></div></div>
 <div class="metric-row">
   <div class="mc"><div class="label">Total Documents</div><div class="value blue" id="dmTotal">0</div><div class="sub" id="dmTotalSub">0 files in library</div></div>
   <div class="mc"><div class="label">Statements Issued</div><div class="value" id="dmStmts">0</div><div class="sub">Sub · Red · Dividend</div></div>
@@ -317,6 +317,77 @@
   duFile.addEventListener('click',function(){ duFile.classList.add('filled'); document.getElementById('du-fname').textContent='statement-draft.pdf · attached'; });
 
   document.getElementById('openDuModal').addEventListener('click',function(){ duType.value='Factsheet'; syncFields(); duFile.classList.remove('filled'); document.getElementById('du-fname').textContent='Click to attach PDF'; zyModalOpen('duModal'); });
+
+  // ── Generate All Statements — bulk-fills every missing Subscription,
+  // Redemption, Dividend and Annual statement across every investor.
+  // Annual is restricted to financial years that have already ended (an
+  // FY still in progress has no closing position to report on yet); every
+  // other statement type is generated for whatever's already on record.
+  // Already-generated statements (matched by transaction_id, or by
+  // investor+FY for Dividend/Annual) are skipped so repeat clicks only
+  // fill in the gaps instead of piling up duplicates.
+  document.getElementById('genAllBtn').addEventListener('click', async function(){
+    if(typeof sb==='undefined'||!sb){ zyToast('Supabase not ready'); return; }
+    if(!window.zyGenerateStatement){ zyToast('Statement generator not loaded'); return; }
+    var btn=this, origText=btn.textContent;
+    btn.disabled=true; btn.textContent='Checking…';
+    try{
+      var results=await Promise.all([
+        sb.from('profiles').select('id'),
+        sb.from('fy_settings').select('id,label,end_date'),
+        sb.from('capital_injection').select('id,uid,type,date').eq('status','Approved'),
+        sb.from('distributions').select('id,fy'),
+        sb.from('statements').select('type,transaction_id,investor_id,fy_id'),
+      ]);
+      var errRes=results.filter(function(r){return r.error;})[0];
+      if(errRes) throw new Error(errRes.error.message);
+      var investors=results[0].data||[], fys=results[1].data||[], cis=results[2].data||[],
+          dists=results[3].data||[], existing=results[4].data||[];
+
+      var haveTx=new Set(existing.filter(function(s){return s.transaction_id;}).map(function(s){return s.transaction_id;}));
+      var haveAnnual=new Set(existing.filter(function(s){return s.type==='Annual';}).map(function(s){return s.investor_id+'|'+s.fy_id;}));
+      var haveDividend=new Set(existing.filter(function(s){return s.type==='Dividend';}).map(function(s){return s.investor_id+'|'+s.fy_id;}));
+
+      var today=new Date(); today.setHours(0,0,0,0);
+      var completedFys=fys.filter(function(f){ return new Date(f.end_date+'T00:00:00Z')<today; });
+      var fyIdByLabel={}; fys.forEach(function(f){ fyIdByLabel[f.label]=f.id; });
+      var fyIdsWithDist=new Set(dists.map(function(d){return fyIdByLabel[d.fy];}).filter(Boolean));
+
+      var investedIds=new Set(cis.map(function(tx){return tx.uid;}));
+      var investors2=investors.filter(function(inv){return investedIds.has(inv.id);});
+
+      var jobs=[];
+      cis.forEach(function(tx){ if(!haveTx.has(tx.id)) jobs.push({type:tx.type, txId:tx.id}); });
+      investors2.forEach(function(inv){
+        completedFys.forEach(function(fy){
+          var key=inv.id+'|'+fy.id;
+          if(!haveAnnual.has(key)) jobs.push({type:'Annual', investorId:inv.id, fyId:fy.id});
+        });
+        fys.filter(function(f){return fyIdsWithDist.has(f.id);}).forEach(function(fy){
+          var key=inv.id+'|'+fy.id;
+          if(!haveDividend.has(key)) jobs.push({type:'Dividend', investorId:inv.id, fyId:fy.id});
+        });
+      });
+
+      if(!jobs.length){ zyToast('Nothing to generate — every statement is already up to date'); return; }
+      if(!confirm('Generate '+jobs.length+' missing statement'+(jobs.length>1?'s':'')+' now? This may take a little while.')) return;
+
+      var ok=0, fail=0;
+      for(var i=0;i<jobs.length;i++){
+        btn.textContent='Generating '+(i+1)+'/'+jobs.length+'…';
+        var job=jobs[i], payload={type:job.type};
+        if(job.txId){ payload.txId=job.txId; } else { payload.investorId=job.investorId; payload.fyId=job.fyId; }
+        try{ await zyGenerateStatement(payload, {silent:true}); ok++; }
+        catch(ex){ fail++; }
+      }
+      await loadDocs();
+      zyToast('Generated '+ok+' statement'+(ok!==1?'s':'')+(fail?(' · '+fail+' failed'):''));
+    }catch(ex){
+      zyToast('Bulk generation failed: '+((ex&&ex.message)||'Unknown error'));
+    }finally{
+      btn.disabled=false; btn.textContent=origText;
+    }
+  });
 
   duSave.addEventListener('click', async function(){
     var type=duType.value, edgeType=stmtEdgeType(type);
