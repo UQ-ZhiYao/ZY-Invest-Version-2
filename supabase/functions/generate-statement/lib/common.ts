@@ -14,13 +14,13 @@ export const FUND_EMAIL = "support@zy-invest.com";
 export const FUND_PHONE = "(+60)413 0880 69";
 export const FUND_WEBSITE = "zy-invest.com";
 
-// Base font size — tables, the investor info card, the investor's
-// name/address (it doubles as the postal/letter address), notice body
-// copy, footer.
+// Base font size — tables, the investor info card, notice body copy, footer.
 export const CONTENT_SIZE = 7.5;
 // Section/table titles ("Investor's Profile", "Principal Transaction", ...)
 // and the "IMPORTANT NOTICES" heading.
 export const HEADING_SIZE = 8.5;
+// The investor's name/address — it doubles as the postal/letter address.
+export const NAME_SIZE = 8.5;
 // The big statement title ("FUND SUBSCRIPTION STATEMENT" etc.) only.
 export const TITLE_SIZE = 10;
 // Vertical gap between one table/section and the next — "1 line" of space.
@@ -377,10 +377,13 @@ export function drawHeaderBlock(
   const logoDrawH = (logoDims.height / logoDims.width) * logoDrawW;
   doc.page.drawImage(doc.logoImage, { x: MARGIN, y: topY - logoDrawH, width: logoDrawW, height: logoDrawH });
 
-  // Two columns below the logo: investor name/address on the left,
-  // statement meta info on the right. The title sits on the logo's row,
-  // centered over the right column.
-  const [leftColW, rightColW] = colWidths(BODY_W, [270, 235]);
+  // Two columns below the logo: investor name/address on the left, the
+  // statement-info card on the right — capped at 35% of the body width so
+  // it reads as a compact card, not a half-page-wide block, and its right
+  // edge always lands exactly on the body's own right margin (colWidths
+  // guarantees leftColW + rightColW == BODY_W). The title sits on the
+  // logo's row, centered over that card.
+  const [leftColW, rightColW] = colWidths(BODY_W, [65, 35]);
   const rightColX = MARGIN + leftColW;
 
   const titleSize = TITLE_SIZE;
@@ -394,10 +397,9 @@ export function drawHeaderBlock(
 
   const rowTopY = topY - Math.max(logoDrawH, titleSize) - 14;
 
-  // Left: investor name + address, stacked, at the same size as the rest
-  // of the document's body copy.
+  // Left: investor name + address, stacked.
   let ly = rowTopY;
-  const nameSize = CONTENT_SIZE;
+  const nameSize = NAME_SIZE;
   drawText(doc, investor.registeredName.toUpperCase(), { x: MARGIN, y: ly - nameSize, font: serif, size: nameSize });
   ly -= nameSize + 4;
   for (const line of [investor.addressLine1, investor.addressLine2, investor.addressLine3, investor.addressLine4]) {
@@ -406,12 +408,9 @@ export function drawHeaderBlock(
     ly -= nameSize + 4;
   }
 
-  // Right: meta info, one label/value pair per line (wraps if a value is
-  // long). Label sits at the column's left edge, value is right-aligned to
-  // the page body's own right edge — so the card always reaches flush
-  // right instead of leaving blank trailing space after a short value.
-  const metaLabelW = 95;
-  const metaRightEdge = MARGIN + BODY_W;
+  // Right: meta info, one label/value pair per line, left-aligned — label
+  // at the card's left edge, value directly after it (wraps if long).
+  const metaLabelW = 78;
   const metaRows: [string, string][] = [
     ["Page No.", "1 of 1"],
     ["Issued Date", new Date().toISOString().slice(0, 10).split("-").reverse().join("-")],
@@ -428,7 +427,7 @@ export function drawHeaderBlock(
     const lines = wrapText(`: ${value}`, sans, metaSize, valueMaxW);
     let vy = my - metaSize;
     for (const line of lines) {
-      drawTextRight(doc, line, { x: metaRightEdge, y: vy, font: sans, size: metaSize });
+      drawText(doc, line, { x: rightColX + metaLabelW, y: vy, font: sans, size: metaSize });
       vy -= metaLineHeight;
     }
     my -= Math.max(metaSize + 4.5, (lines.length - 1) * metaLineHeight + metaSize + 4.5);
