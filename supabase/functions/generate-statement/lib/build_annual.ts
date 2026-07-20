@@ -23,15 +23,16 @@ export interface BuildAnnualArgs {
   latestNavPerUnit: number;
   transactionsInFy: CapitalInjectionRow[];
   distributionsInFy: DistributionRow[];
+  // Dividends received before this FY (any prior FY), so the Dividend
+  // Transaction table's Opening row carries the investor's real cumulative
+  // total instead of always starting from 0.
+  priorDividendsReceived: number;
   cashflowsForIrr: [Date, number][];
-  realizedPl?: number;
-  adjustment?: number;
 }
 
 export async function buildAnnualPdf({
   investor, fyStart, fyEnd, openingUnits, openingCost, closingUnits, closingCost,
-  latestNavPerUnit, transactionsInFy, distributionsInFy, cashflowsForIrr,
-  realizedPl = 0, adjustment = 0,
+  latestNavPerUnit, transactionsInFy, distributionsInFy, priorDividendsReceived, cashflowsForIrr,
 }: BuildAnnualArgs): Promise<Uint8Array> {
   const periodText = `${dmy(fyStart)} - ${dmy(fyEnd)}`;
   const doc = await newDoc();
@@ -60,6 +61,11 @@ export async function buildAnnualPdf({
     { header: "Units Balanced", width: pW[5], align: "right" as const },
   ];
   let runUnits = openingUnits, runCost = openingCost;
+  // Realized P&L: every Redemption's proceeds minus the cost basis it
+  // actually removed (units × avg cost right before it) — the standard
+  // proceeds-minus-cost-basis-sold definition, summed across this FY's
+  // redemptions using the same running avg cost tracked below.
+  let realizedPl = 0;
   const pRows: Cell[][] = [
     [dstr(fyStart), "Opening", "-", runUnits > 0 ? rm(runCost / runUnits, 4) : "-", "-", fmt(runUnits)],
   ];
@@ -73,6 +79,7 @@ export async function buildAnnualPdf({
     // existed, not its own cash proceeds (`amt`, priced at this tx's NTA).
     const avgCostBefore = runUnits > 0 ? runCost / runUnits : 0;
     const signedUnits = isRedemption ? -units : units;
+    if (isRedemption) realizedPl += amt - units * avgCostBefore;
     runCost += isRedemption ? -(units * avgCostBefore) : amt;
     runUnits += signedUnits;
     pRows.push([
@@ -81,6 +88,7 @@ export async function buildAnnualPdf({
       redIfNegative(signedUnits, 4), fmt(runUnits),
     ]);
   }
+  realizedPl = Math.round(realizedPl * 100) / 100;
   pRows.push([dstr(fyEnd), "Closing", "-", closingUnits > 0 ? rm(closingCost / closingUnits, 4) : "-", "-", fmt(closingUnits)]);
   drawKeptTogether(doc, "Principal Transaction", { columns: pCols, rows: pRows });
   doc.y -= SECTION_GAP;
@@ -95,8 +103,8 @@ export async function buildAnnualPdf({
     { header: "Dividend Amount", width: dW[4], align: "right" as const, currency: true },
     { header: "Balanced", width: dW[5], align: "right" as const, currency: true },
   ];
-  let runningDiv = 0;
-  const dRows: Cell[][] = [[dstr(fyStart), "Opening", "", "", "", rm(0)]];
+  let runningDiv = priorDividendsReceived;
+  const dRows: Cell[][] = [[dstr(fyStart), "Opening", "", "", "", rm(runningDiv)]];
   for (const d of distributionsInFy) {
     const payDate = new Date((d.pay_date || d.ex_date) + "T00:00:00Z");
     const dps = Number(d.dps);
@@ -113,7 +121,7 @@ export async function buildAnnualPdf({
   const marketValue = Math.round(closingUnits * latestNavPerUnit * 100) / 100;
   const costBasis = Math.round(closingCost * 100) / 100;
   const unrealizedPl = Math.round((marketValue - costBasis) * 100) / 100;
-  const totalPl = Math.round((unrealizedPl + realizedPl + dividendReceived + adjustment) * 100) / 100;
+  const totalPl = Math.round((unrealizedPl + realizedPl + dividendReceived) * 100) / 100;
   const totalPerfPct = costBasis ? (totalPl / costBasis) * 100 : null;
   const irr = xirr(cashflowsForIrr);
 
@@ -134,8 +142,7 @@ export async function buildAnnualPdf({
     ["( c )  Unrealized Profit & Loss:  ( a ) + ( b )", "", "", rm(unrealizedPl)],
     ["( d )  Realized Profit & Loss", "", "", rm(realizedPl)],
     ["( e )  Dividend Received", "", "", rm(dividendReceived)],
-    ["( f )  Adjustment", "", "", rm(adjustment)],
-    ["Total Profit & Loss:  ( c ) + ( d ) + ( e ) + ( f )", "", "", rm(totalPl)],
+    ["Total Profit & Loss:  ( c ) + ( d ) + ( e )", "", "", rm(totalPl)],
     ["Total Performance %", "", "", totalPerfPct !== null ? `${totalPerfPct.toFixed(2)} %` : "-"],
     ["Annualized Performance* %", "", "", irr !== null ? `${(irr * 100).toFixed(2)} %` : "-"],
   ];
