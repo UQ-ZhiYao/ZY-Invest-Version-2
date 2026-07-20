@@ -1,9 +1,9 @@
 import {
-  newDoc, drawHeaderBlock, drawLabelValueGrid, drawSectionHeader, drawKeptTogether, drawImportantNotices,
+  newDoc, drawHeaderBlock, drawInfoCard, drawSectionHeader, drawKeptTogether, drawImportantNotices,
   drawFooterOnAllPages, drawText, drawTable, rm, redIfNegative, fmt, colWidths, BODY_W, SECTION_GAP, CONTENT_SIZE,
   InvestorInfo, Cell,
 } from "./common.ts";
-import { xirr, daysHeldText, CapitalInjectionRow, DistributionRow } from "./compute.ts";
+import { xirr, CapitalInjectionRow, DistributionRow } from "./compute.ts";
 
 function dstr(d: Date): string {
   return d.toISOString().slice(0, 10).split("-").reverse().join(" - ");
@@ -37,13 +37,15 @@ export async function buildAnnualPdf({
   const doc = await newDoc();
 
   drawHeaderBlock(doc, { title: "INVESTMENT  ACCOUNT  STATEMENT", investor, statementType: "Annually", periodText });
-  drawSectionHeader(doc, "Investor's Information");
-  drawLabelValueGrid(doc, [
-    ["Account Type", investor.accountType, "Account ID", investor.accountId],
-    ["Registered Name", investor.registeredName, "Settlement Type", investor.settlementType],
-    ["Phone No.", investor.phone, "Bank Name", investor.bankName],
-    ["Email Address", investor.email, "Bank Account No.", investor.bankAccountNo],
-    [investor.nomineeLabel, investor.nomineeValue, "Total Days Held", daysHeldText(investor.issuedDate, fyEnd)],
+  drawSectionHeader(doc, "Investor's Profile");
+  drawInfoCard(doc, [
+    ["Account Type", investor.accountType],
+    ["Account ID", investor.accountId],
+    ["Registered Name", investor.registeredName],
+    ["Settlement Type", investor.settlementType],
+    ["Reference No.", investor.referenceNo],
+    ["Bank Name", investor.bankName],
+    ["Bank Account No.", investor.bankAccountNo],
   ]);
   doc.y -= SECTION_GAP;
 

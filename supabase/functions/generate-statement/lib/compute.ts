@@ -60,14 +60,6 @@ export function netCostAsof(capitalInjections: CapitalInjectionRow[], asof: Date
   return net;
 }
 
-export function accountId(accountType: string, issuedDate: Date): string {
-  const prefix = (accountType || "D")[0].toUpperCase();
-  const yy = String(issuedDate.getUTCFullYear()).slice(-2);
-  const mm = String(issuedDate.getUTCMonth() + 1).padStart(2, "0");
-  const dd = String(issuedDate.getUTCDate()).padStart(2, "0");
-  return `${prefix}A00${yy}${mm}${dd}`;
-}
-
 // Newton's method XIRR, mirrors compute.py's xirr(). Returns null rather
 // than a fabricated number if it fails to converge (e.g. all cashflows the
 // same sign) — callers should render that as "-".
@@ -99,7 +91,3 @@ export function addressFromProfile(profile: { address?: string }): { line1: stri
   return { line1: parts[0], line2: parts[1], line3: parts[2] };
 }
 
-export function daysHeldText(issued: Date, asof: Date): string {
-  const n = daysBetween(issued, asof);
-  return `${n.toLocaleString("en-US")}  days`;
-}

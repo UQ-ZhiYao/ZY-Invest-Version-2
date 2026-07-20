@@ -1,5 +1,5 @@
 import {
-  newDoc, drawHeaderBlock, drawLabelValueGrid, drawSectionHeader, drawKeptTogether, drawImportantNotices,
+  newDoc, drawHeaderBlock, drawInfoCard, drawSectionHeader, drawKeptTogether, drawImportantNotices,
   drawFooterOnAllPages, rm, redIfNegative, fmt, colWidths, BODY_W, SECTION_GAP, InvestorInfo,
 } from "./common.ts";
 import { CapitalInjectionRow } from "./compute.ts";
@@ -31,13 +31,15 @@ export async function buildSubscriptionPdf(
     title: `FUND  ${txType.toUpperCase()}  STATEMENT`,
     investor, statementType: `${txType} Statement`, periodText: dateStr.replaceAll(" - ", "/"),
   });
-  drawSectionHeader(doc, "Investor's Information");
-  drawLabelValueGrid(doc, [
-    ["Account Type", investor.accountType, "Account ID", investor.accountId],
-    ["Registered Name", investor.registeredName, "Settlement Type", investor.settlementType],
-    ["Phone No.", investor.phone, "Bank Name", investor.bankName],
-    ["Email Address", investor.email, "Bank Account No.", investor.bankAccountNo],
-    [investor.nomineeLabel, investor.nomineeValue, "Total Days Held", investor.totalDaysHeldText],
+  drawSectionHeader(doc, "Investor's Profile");
+  drawInfoCard(doc, [
+    ["Account Type", investor.accountType],
+    ["Account ID", investor.accountId],
+    ["Registered Name", investor.registeredName],
+    ["Settlement Type", investor.settlementType],
+    ["Reference No.", investor.referenceNo],
+    ["Bank Name", investor.bankName],
+    ["Bank Account No.", investor.bankAccountNo],
   ]);
   doc.y -= SECTION_GAP;
 

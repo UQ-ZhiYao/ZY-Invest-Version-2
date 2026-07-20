@@ -17,9 +17,7 @@ import { buildAnnualPdf } from "./lib/build_annual.ts";
 import { buildDividendPdf } from "./lib/build_dividend.ts";
 import { buildSubscriptionPdf } from "./lib/build_subscription.ts";
 import {
-  accountId,
   addressFromProfile,
-  daysHeldText,
   netCostAsof,
   netUnitsAsof,
   parseDate,
@@ -31,7 +29,6 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const DEFAULT_ACCOUNT_TYPE = "Direct Account"; // `profiles` has no account-type column yet
 const DEFAULT_SETTLEMENT_TYPE = "Banking";
 
 function json(body: unknown, status = 200) {
@@ -41,29 +38,21 @@ function json(body: unknown, status = 200) {
   });
 }
 
-function investorInfo(profile: Record<string, any>, issuedDate: Date, asof: Date) {
+function investorInfo(profile: Record<string, any>) {
   const addr = addressFromProfile(profile);
+  const referenceNo = String(profile.id || "");
   return {
-    accountType: DEFAULT_ACCOUNT_TYPE,
-    accountId: accountId(DEFAULT_ACCOUNT_TYPE, issuedDate),
+    accountType: profile.joint_account_id ? "Joint Account" : "Personal Account",
+    accountId: referenceNo.slice(0, 8),
+    referenceNo,
     registeredName: profile.full_name || "-",
     settlementType: DEFAULT_SETTLEMENT_TYPE,
-    phone: profile.phone || "-",
     bankName: profile.bank_name || "-",
-    email: profile.email || "-",
     bankAccountNo: profile.bank_account_no || "-",
-    nomineeLabel: "Nominee Name", // `profiles` has no joint/nominee tracking yet
-    nomineeValue: "-",
-    totalDaysHeldText: daysHeldText(issuedDate, asof),
     addressLine1: addr.line1,
     addressLine2: addr.line2,
     addressLine3: addr.line3,
-    issuedDate,
   };
-}
-
-function profileIssuedDate(profile: Record<string, any>): Date {
-  return parseDate(profile.created_at || new Date().toISOString());
 }
 
 Deno.serve(async (req: Request) => {
@@ -178,8 +167,7 @@ async function handleSubscriptionOrRedemption(sb: ReturnType<typeof createClient
   const openingUnits = netUnitsAsof(prior, txDate);
   const openingCost = netCostAsof(prior, txDate, tx.uid);
 
-  const issuedDate = profileIssuedDate(profile);
-  const investor = investorInfo(profile, issuedDate, txDate);
+  const investor = investorInfo(profile);
 
   const pdfBytes = await buildSubscriptionPdf({ tx, investor, openingUnits, openingCost });
   const fileName = `${tx.type}_${tx.reference_id || tx.id}.pdf`;
@@ -208,8 +196,7 @@ async function handleDividend(sb: ReturnType<typeof createClient>, body: Record<
   const fyEnd = parseDate(fy.end_date);
   const holdingUnits = netUnitsAsof(allCis || [], fyEnd, investorId);
 
-  const issuedDate = profileIssuedDate(profile);
-  const investor = investorInfo(profile, issuedDate, fyEnd);
+  const investor = investorInfo(profile);
 
   const pdfBytes = await buildDividendPdf({ distributions: dists, investor, holdingUnits, periodText: fy.label });
   const fileName = `Dividend_${(profile.full_name || "investor").replace(/\s+/g, "_")}_${fy.label}.pdf`;
@@ -272,8 +259,7 @@ async function handleAnnual(sb: ReturnType<typeof createClient>, body: Record<st
   }
   cashflows.push([fyEnd, closingUnits * latestNav]);
 
-  const issuedDate = profileIssuedDate(profile);
-  const investor = investorInfo(profile, issuedDate, fyEnd);
+  const investor = investorInfo(profile);
 
   const pdfBytes = await buildAnnualPdf({
     investor, fyStart, fyEnd, openingUnits, openingCost, closingUnits, closingCost,
