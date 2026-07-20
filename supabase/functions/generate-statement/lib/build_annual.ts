@@ -3,7 +3,7 @@ import {
   drawFooterOnAllPages, drawText, rm, redIfNegative, fmt, colWidths, BODY_W, SECTION_GAP, CONTENT_SIZE,
   InvestorInfo, Cell,
 } from "./common.ts";
-import { xirr, CapitalInjectionRow, DistributionRow } from "./compute.ts";
+import { xirr, magnitude, CapitalInjectionRow, DistributionRow } from "./compute.ts";
 
 function dstr(d: Date): string {
   return d.toISOString().slice(0, 10).split("-").reverse().join(" - ");
@@ -65,7 +65,9 @@ export async function buildAnnualPdf({
   ];
   for (const tx of transactionsInFy) {
     const d = new Date(tx.date + "T00:00:00Z");
-    const amt = Number(tx.amount), units = Number(tx.units), price = Number(tx.nta);
+    // capital_injection stores amount/units signed (Redemption rows are
+    // negative) — normalize to a magnitude, this file derives its own sign.
+    const amt = magnitude(tx.amount), units = magnitude(tx.units), price = Number(tx.nta);
     const isRedemption = tx.type !== "Subscription";
     // AVCO: Redemption removes units × the average cost that already
     // existed, not its own cash proceeds (`amt`, priced at this tx's NTA).

@@ -2,7 +2,7 @@ import {
   newDoc, drawHeaderBlock, drawPageNo, drawInfoCard, drawSectionHeader, drawKeptTogether, drawImportantNotices,
   drawFooterOnAllPages, rm, redIfNegative, fmt, colWidths, BODY_W, SECTION_GAP, InvestorInfo,
 } from "./common.ts";
-import { CapitalInjectionRow } from "./compute.ts";
+import { CapitalInjectionRow, magnitude } from "./compute.ts";
 
 export async function buildSubscriptionPdf(
   { tx, investor, openingUnits, openingCost }: {
@@ -15,9 +15,11 @@ export async function buildSubscriptionPdf(
   const txType = tx.type; // 'Subscription' | 'Redemption'
   const isRedemption = txType === "Redemption";
   const txDate = new Date(tx.date + "T00:00:00Z");
-  const amount = Number(tx.amount);
+  // capital_injection stores amount/units signed (Redemption rows are
+  // negative) — normalize to a magnitude, this file derives its own sign.
+  const amount = magnitude(tx.amount);
   const price = Number(tx.nta);
-  const units = Number(tx.units);
+  const units = magnitude(tx.units);
 
   // AVCO: a Subscription's own amount becomes cost basis. A Redemption
   // doesn't move the average cost — it removes units × the average cost
