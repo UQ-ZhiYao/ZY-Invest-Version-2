@@ -51,8 +51,8 @@ function json(body: unknown, status = 200) {
 
 // #YYMMDDUIDXX — # is the type letter above, YYMMDD is today (the date the
 // statement is generated, not the underlying transaction/FY date), UID is
-// the investor's 8-character Account ID, XX is a 2-digit running count of
-// this investor's statements of this same type (01, 02, ...).
+// the first 3 characters of the investor's Account ID, XX is a 2-digit
+// running count of this investor's statements of this same type (01, 02, ...).
 async function nextStatementRefId(
   sb: ReturnType<typeof createClient>,
   statementType: string,
@@ -60,14 +60,14 @@ async function nextStatementRefId(
 ): Promise<string> {
   const letter = STATEMENT_TYPE_LETTER[statementType] || "X";
   const yymmdd = new Date().toISOString().slice(2, 10).replace(/-/g, "");
-  const uid8 = investorId.slice(0, 8).toUpperCase();
+  const uid3 = investorId.slice(0, 3).toUpperCase();
   const { count } = await sb
     .from("statements")
     .select("id", { count: "exact", head: true })
     .eq("investor_id", investorId)
     .eq("type", statementType);
   const idx = String((count || 0) + 1).padStart(2, "0");
-  return `${letter}${yymmdd}${uid8}${idx}`;
+  return `${letter}${yymmdd}${uid3}${idx}`;
 }
 
 // Personal Account: just the investor's own name. Joint Account: every
