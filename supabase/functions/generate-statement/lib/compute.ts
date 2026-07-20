@@ -35,6 +35,15 @@ export function daysBetween(a: Date, b: Date): number {
   return Math.round((b.getTime() - a.getTime()) / 86400000);
 }
 
+// capital_injection.amount/.units come back signed straight from the
+// database — Redemption rows store both as negative. Every consumer here
+// derives its own sign from `type` instead, so always normalize to a
+// magnitude at the point of reading a raw value rather than trusting
+// whatever sign happens to already be on the row.
+export function magnitude(v: unknown): number {
+  return Math.abs(Number(v) || 0);
+}
+
 export function netUnitsAsof(capitalInjections: CapitalInjectionRow[], asof: Date, uid: string | null = null): number {
   let net = 0;
   for (const r of capitalInjections) {
@@ -42,7 +51,7 @@ export function netUnitsAsof(capitalInjections: CapitalInjectionRow[], asof: Dat
     if (uid !== null && r.uid !== uid) continue;
     const d = parseDate(r.date);
     if (d > asof) continue;
-    const units = Number(r.units || 0);
+    const units = magnitude(r.units);
     net += r.type === "Subscription" ? units : -units;
   }
   return Math.max(0, net);
@@ -62,10 +71,10 @@ export function netCostAsof(capitalInjections: CapitalInjectionRow[], asof: Date
     .sort((a, b) => parseDate(a.date).getTime() - parseDate(b.date).getTime());
   let units = 0, cost = 0;
   for (const r of rows) {
-    const u = Number(r.units || 0);
+    const u = magnitude(r.units);
     if (r.type === "Subscription") {
       units += u;
-      cost += Number(r.amount || 0);
+      cost += magnitude(r.amount);
     } else {
       const avgCost = units > 0 ? cost / units : 0;
       units -= u;

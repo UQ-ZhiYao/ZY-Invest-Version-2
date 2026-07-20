@@ -18,6 +18,7 @@ import { buildDividendPdf } from "./lib/build_dividend.ts";
 import { buildSubscriptionPdf } from "./lib/build_subscription.ts";
 import {
   addressFromProfile,
+  magnitude,
   netCostAsof,
   netUnitsAsof,
   parseDate,
@@ -263,7 +264,9 @@ async function handleAnnual(sb: ReturnType<typeof createClient>, body: Record<st
     if (r.status !== "Approved" || r.uid !== investorId) continue;
     const d = parseDate(r.date);
     if (d > fyEnd) continue;
-    const amt = Number(r.amount);
+    // capital_injection stores amount signed (Redemption rows are
+    // negative) — normalize to a magnitude, the sign here comes from type.
+    const amt = magnitude(r.amount);
     cashflows.push([d, r.type === "Subscription" ? -amt : amt]);
   }
   for (const d of distributionsInFy) {
