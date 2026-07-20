@@ -85,9 +85,16 @@ export function xirr(cashflows: [Date, number][], guess = 0.1): number | null {
   return rate;
 }
 
-export function addressFromProfile(profile: { address?: string }): { line1: string; line2: string; line3: string } {
-  const parts = (profile.address || "").split(",").map((s) => s.trim()).filter(Boolean);
-  while (parts.length < 3) parts.push("");
-  return { line1: parts[0], line2: parts[1], line3: parts[2] };
+// profiles has separate address/address2/postcode/city/state columns —
+// no parsing of one combined string, each line maps to its own column(s).
+export function addressFromProfile(
+  profile: { address?: string; address2?: string; postcode?: string; city?: string; state?: string },
+): { line1: string; line2: string; line3: string; line4: string } {
+  return {
+    line1: profile.address || "",
+    line2: profile.address2 || "",
+    line3: [profile.postcode, profile.city].filter(Boolean).join(" "),
+    line4: profile.state || "",
+  };
 }
 
