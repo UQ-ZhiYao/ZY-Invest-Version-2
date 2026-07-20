@@ -3,10 +3,11 @@
 -- Adds the statement's own reference number, generated at statement-creation
 -- time by the generate-statement edge function: {TypeLetter}{YYMMDD}{UID}{XX}
 -- where TypeLetter is I/S/R/D for Annual/Subscription/Redemption/Dividend,
--- YYMMDD is the generation date, UID is the investor's 8-char Account ID, and
--- XX is a running count of that investor's statements of that type. This is
--- distinct from capital_injection.reference_id, which identifies the
--- underlying transaction rather than the generated statement document.
+-- YYMMDD is the generation date, UID is the first 3 characters of the
+-- investor's Account ID, and XX is a running count of that investor's
+-- statements of that type. This is distinct from
+-- capital_injection.reference_id, which identifies the underlying
+-- transaction rather than the generated statement document.
 
 alter table public.statements
   add column if not exists reference_id text;
