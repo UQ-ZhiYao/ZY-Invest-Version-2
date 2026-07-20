@@ -221,7 +221,7 @@ async function handleSubscriptionOrRedemption(sb: ReturnType<typeof createClient
   const refId = await nextStatementRefId(sb, tx.type, tx.uid);
 
   const pdfBytes = await buildSubscriptionPdf({ tx, investor, openingUnits, openingCost, referenceNo: refId });
-  const fileName = `${tx.type}_${tx.reference_id || tx.id}.pdf`;
+  const fileName = `${refId}.pdf`;
 
   const row = await storeStatement(sb, {
     pdfBytes, investorId: tx.uid, statementType: tx.type,
@@ -253,7 +253,7 @@ async function handleDividend(sb: ReturnType<typeof createClient>, body: Record<
   const pdfBytes = await buildDividendPdf({
     distributions: dists, investor, holdingUnits, periodText: fy.label, referenceNo: refId,
   });
-  const fileName = `Dividend_${(profile.full_name || "investor").replace(/\s+/g, "_")}_${fy.label}.pdf`;
+  const fileName = `${refId}.pdf`;
 
   const row = await storeStatement(sb, {
     pdfBytes, investorId, statementType: "Dividend", periodLabel: fy.label,
@@ -366,7 +366,7 @@ async function handleAnnual(sb: ReturnType<typeof createClient>, body: Record<st
     latestNavPerUnit: latestNav, transactionsInFy, distributionsInFy, priorDividendsReceived,
     priorRealizedPl, cashflowsForIrr: cashflows, referenceNo: refId,
   });
-  const fileName = `Annual_${(profile.full_name || "investor").replace(/\s+/g, "_")}_${fy.label}.pdf`;
+  const fileName = `${refId}.pdf`;
 
   const row = await storeStatement(sb, {
     pdfBytes, investorId, statementType: "Annual", periodLabel: fy.label,
