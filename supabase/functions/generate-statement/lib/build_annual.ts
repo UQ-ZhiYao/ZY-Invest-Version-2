@@ -31,19 +31,20 @@ export interface BuildAnnualArgs {
   // Transaction table's Opening row.
   priorRealizedPl: number;
   cashflowsForIrr: [Date, number][];
+  referenceNo: string;
 }
 
 export async function buildAnnualPdf({
   investor, fyStart, fyEnd, openingUnits, openingCost, closingUnits, closingCost,
   latestNavPerUnit, transactionsInFy, distributionsInFy, priorDividendsReceived, priorRealizedPl,
-  cashflowsForIrr,
+  cashflowsForIrr, referenceNo,
 }: BuildAnnualArgs): Promise<Uint8Array> {
   const periodText = `${dmy(fyStart)} - ${dmy(fyEnd)}`;
   const doc = await newDoc();
 
   const pageNoPos = drawHeaderBlock(doc, {
     title: "INVESTMENT  ACCOUNT  STATEMENT", investor, statementType: "Annually", periodText,
-    referenceNo: "-",
+    referenceNo,
   });
   drawSectionHeader(doc, "Investor's Profile");
   drawInfoCard(doc, [
@@ -171,14 +172,17 @@ export async function buildAnnualPdf({
   // One table start to finish — the performance rows below just leave the
   // Holding Units / Average Price columns blank rather than starting a
   // second, visually detached table.
+  // Every figure in this column goes through redIfNegative — not just the
+  // ones that happen to go negative in a given statement — so the format
+  // (red + parens for a negative) is consistent regardless of sign.
   const sRows: Cell[][] = [
-    ["( a )  Latest Fund Price", fmt(closingUnits), fmt(latestNavPerUnit, 6), rm(marketValue)],
+    ["( a )  Latest Fund Price", fmt(closingUnits), fmt(latestNavPerUnit, 6), redIfNegative(marketValue, 2)],
     ["( b )  Subscription Cost", fmt(closingUnits), closingUnits ? fmt(Math.abs(costBasis / closingUnits), 6) : "-",
       redIfNegative(-costBasis, 2)],
-    ["( c )  Unrealized Profit & Loss:  ( a ) + ( b )", "", "", rm(unrealizedPl)],
-    ["( d )  Realized Profit & Loss", "", "", rm(realizedPl)],
-    ["( e )  Dividend Received", "", "", rm(dividendReceived)],
-    ["Total Profit & Loss:  ( c ) + ( d ) + ( e )", "", "", rm(totalPl)],
+    ["( c )  Unrealized Profit & Loss:  ( a ) + ( b )", "", "", redIfNegative(unrealizedPl, 2)],
+    ["( d )  Realized Profit & Loss", "", "", redIfNegative(realizedPl, 2)],
+    ["( e )  Dividend Received", "", "", redIfNegative(dividendReceived, 2)],
+    ["Total Profit & Loss:  ( c ) + ( d ) + ( e )", "", "", redIfNegative(totalPl, 2)],
     ["Total Performance %", "", "", totalPerfPct !== null ? `${totalPerfPct.toFixed(2)} %` : "-"],
     ["Annualized Performance* %", "", "", irr !== null ? `${(irr * 100).toFixed(2)} %` : "-"],
   ];

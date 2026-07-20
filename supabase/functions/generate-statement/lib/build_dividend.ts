@@ -5,11 +5,12 @@ import {
 import { DistributionRow } from "./compute.ts";
 
 export async function buildDividendPdf(
-  { distributions, investor, holdingUnits, periodText }: {
+  { distributions, investor, holdingUnits, periodText, referenceNo }: {
     distributions: DistributionRow[];
     investor: InvestorInfo;
     holdingUnits: number;
     periodText: string;
+    referenceNo: string;
   },
 ): Promise<Uint8Array> {
   if (!distributions.length) throw new Error("at least one distribution row is required");
@@ -18,7 +19,7 @@ export async function buildDividendPdf(
   const pageNoPos = drawHeaderBlock(doc, {
     title: "DIVIDEND  PAYMENT  STATEMENT", investor,
     statementType: "Dividend Statement", periodText,
-    referenceNo: "-",
+    referenceNo,
   });
   drawSectionHeader(doc, "Investor's Profile");
   drawInfoCard(doc, [

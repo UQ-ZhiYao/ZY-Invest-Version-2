@@ -33,11 +33,41 @@ const CORS_HEADERS = {
 
 const DEFAULT_SETTLEMENT_TYPE = "Banking";
 
+// I: Investment Account (Annual) Statement, S: Subscription, R: Redemption,
+// D: Distribution/Dividend.
+const STATEMENT_TYPE_LETTER: Record<string, string> = {
+  Annual: "I",
+  Subscription: "S",
+  Redemption: "R",
+  Dividend: "D",
+};
+
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
     headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
   });
+}
+
+// #YYMMDDUIDXX — # is the type letter above, YYMMDD is today (the date the
+// statement is generated, not the underlying transaction/FY date), UID is
+// the first 3 characters of the investor's Account ID, XX is a 2-digit
+// running count of this investor's statements of this same type (01, 02, ...).
+async function nextStatementRefId(
+  sb: ReturnType<typeof createClient>,
+  statementType: string,
+  investorId: string,
+): Promise<string> {
+  const letter = STATEMENT_TYPE_LETTER[statementType] || "X";
+  const yymmdd = new Date().toISOString().slice(2, 10).replace(/-/g, "");
+  const uid3 = investorId.slice(0, 3).toUpperCase();
+  const { count } = await sb
+    .from("statements")
+    .select("id", { count: "exact", head: true })
+    .eq("investor_id", investorId)
+    .eq("type", statementType);
+  const idx = String((count || 0) + 1).padStart(2, "0");
+  return `${letter}${yymmdd}${uid3}${idx}`;
 }
 
 // Personal Account: just the investor's own name. Joint Account: every
@@ -132,6 +162,7 @@ async function storeStatement(
     investorId,
     statementType,
     periodLabel,
+    referenceId,
     transactionId,
     fyId,
     fileName,
@@ -140,6 +171,7 @@ async function storeStatement(
     investorId: string;
     statementType: string;
     periodLabel: string;
+    referenceId: string;
     transactionId?: string | null;
     fyId?: string | null;
     fileName: string;
@@ -157,6 +189,7 @@ async function storeStatement(
       investor_id: investorId,
       type: statementType,
       period_label: periodLabel,
+      reference_id: referenceId,
       transaction_id: transactionId ?? null,
       fy_id: fyId ?? null,
       storage_path: storagePath,
@@ -185,14 +218,15 @@ async function handleSubscriptionOrRedemption(sb: ReturnType<typeof createClient
   const openingCost = netCostAsof(prior, txDate, tx.uid);
 
   const investor = await investorInfo(sb, profile);
+  const refId = await nextStatementRefId(sb, tx.type, tx.uid);
 
-  const pdfBytes = await buildSubscriptionPdf({ tx, investor, openingUnits, openingCost });
+  const pdfBytes = await buildSubscriptionPdf({ tx, investor, openingUnits, openingCost, referenceNo: refId });
   const fileName = `${tx.type}_${tx.reference_id || tx.id}.pdf`;
 
   const row = await storeStatement(sb, {
     pdfBytes, investorId: tx.uid, statementType: tx.type,
     periodLabel: txDate.toISOString().slice(0, 10).split("-").reverse().join("/"),
-    transactionId: tx.id, fileName,
+    referenceId: refId, transactionId: tx.id, fileName,
   });
   return json(row);
 }
@@ -214,13 +248,34 @@ async function handleDividend(sb: ReturnType<typeof createClient>, body: Record<
   const holdingUnits = netUnitsAsof(allCis || [], fyEnd, investorId);
 
   const investor = await investorInfo(sb, profile);
+  const refId = await nextStatementRefId(sb, "Dividend", investorId);
 
-  const pdfBytes = await buildDividendPdf({ distributions: dists, investor, holdingUnits, periodText: fy.label });
+  const pdfBytes = await buildDividendPdf({
+    distributions: dists, investor, holdingUnits, periodText: fy.label, referenceNo: refId,
+  });
   const fileName = `Dividend_${(profile.full_name || "investor").replace(/\s+/g, "_")}_${fy.label}.pdf`;
 
   const row = await storeStatement(sb, {
-    pdfBytes, investorId, statementType: "Dividend", periodLabel: fy.label, fyId: fy.id, fileName,
+    pdfBytes, investorId, statementType: "Dividend", periodLabel: fy.label,
+    referenceId: refId, fyId: fy.id, fileName,
   });
+
+  // One distribution_ledger row per (distribution, investor) pair, linked to
+  // the statement just generated — mirrors the per-distribution amount each
+  // dist row shows in the PDF above.
+  const ledgerRows = dists.map((d: any) => ({
+    distribution_id: d.id,
+    investor_id: investorId,
+    holding_units: holdingUnits,
+    dps: d.dps,
+    amount: Math.round(holdingUnits * Number(d.dps) / 100 * 100) / 100,
+    statement_id: row.id,
+  }));
+  const { error: ledgerErr } = await sb
+    .from("distribution_ledger")
+    .upsert(ledgerRows, { onConflict: "distribution_id,investor_id" });
+  if (ledgerErr) throw new Error(`distribution_ledger upsert failed: ${ledgerErr.message}`);
+
   return json(row);
 }
 
@@ -235,7 +290,16 @@ async function handleAnnual(sb: ReturnType<typeof createClient>, body: Record<st
 
   const fyStart = parseDate(fy.start_date);
   const fyEnd = parseDate(fy.end_date);
-  const dayBeforeFy = new Date(fyStart.getTime() - 86400000);
+  // "Opening" (everything before this FY) has to mean the end of the fund's
+  // actual previous financial year per fy_settings, not just "one calendar
+  // day before this FY's start" — FY boundaries aren't guaranteed to be
+  // perfectly back-to-back. Falls back to the naive day-before only when
+  // there's no earlier FY on record (this is the fund's first FY).
+  const { data: allFySettings } = await sb.from("fy_settings").select("start_date,end_date");
+  const priorFy = (allFySettings || [])
+    .filter((f: any) => parseDate(f.end_date) < fyStart)
+    .sort((a: any, b: any) => parseDate(b.end_date).getTime() - parseDate(a.end_date).getTime())[0];
+  const dayBeforeFy = priorFy ? parseDate(priorFy.end_date) : new Date(fyStart.getTime() - 86400000);
 
   const { data: allCisRaw } = await sb.from("capital_injection").select("*").eq("uid", investorId).order("date");
   const allCis = allCisRaw || [];
@@ -295,16 +359,18 @@ async function handleAnnual(sb: ReturnType<typeof createClient>, body: Record<st
   cashflows.push([fyEnd, closingUnits * latestNav]);
 
   const investor = await investorInfo(sb, profile);
+  const refId = await nextStatementRefId(sb, "Annual", investorId);
 
   const pdfBytes = await buildAnnualPdf({
     investor, fyStart, fyEnd, openingUnits, openingCost, closingUnits, closingCost,
     latestNavPerUnit: latestNav, transactionsInFy, distributionsInFy, priorDividendsReceived,
-    priorRealizedPl, cashflowsForIrr: cashflows,
+    priorRealizedPl, cashflowsForIrr: cashflows, referenceNo: refId,
   });
   const fileName = `Annual_${(profile.full_name || "investor").replace(/\s+/g, "_")}_${fy.label}.pdf`;
 
   const row = await storeStatement(sb, {
-    pdfBytes, investorId, statementType: "Annual", periodLabel: fy.label, fyId: fy.id, fileName,
+    pdfBytes, investorId, statementType: "Annual", periodLabel: fy.label,
+    referenceId: refId, fyId: fy.id, fileName,
   });
   return json(row);
 }

@@ -5,11 +5,15 @@ import {
 import { CapitalInjectionRow, magnitude } from "./compute.ts";
 
 export async function buildSubscriptionPdf(
-  { tx, investor, openingUnits, openingCost }: {
+  { tx, investor, openingUnits, openingCost, referenceNo }: {
     tx: CapitalInjectionRow;
     investor: InvestorInfo;
     openingUnits: number;
     openingCost: number;
+    // The statement's own reference_id (#YYMMDDUIDXX) — distinct from
+    // tx.reference_id, which identifies the underlying capital_injection
+    // transaction, not the generated statement document.
+    referenceNo: string;
   },
 ): Promise<Uint8Array> {
   const txType = tx.type; // 'Subscription' | 'Redemption'
@@ -37,7 +41,7 @@ export async function buildSubscriptionPdf(
   const pageNoPos = drawHeaderBlock(doc, {
     title: `FUND  ${txType.toUpperCase()}  STATEMENT`,
     investor, statementType: `${txType} Statement`, periodText: dateStr.replaceAll(" - ", "/"),
-    referenceNo: tx.reference_id || "-",
+    referenceNo,
   });
   drawSectionHeader(doc, "Investor's Profile");
   drawInfoCard(doc, [
