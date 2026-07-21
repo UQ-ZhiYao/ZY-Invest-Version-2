@@ -249,7 +249,6 @@ async function computeNTA(sb: any, forceFrom: string | null) {
   let prev_nta        = Number(baseRow.nta) || 1.0;
 
   const rows: any[] = [];
-  const holdingRows: any[] = [];   // nta_holdings check table
   let computed = 0, errors = 0;
   let current = startDate;
 
@@ -304,22 +303,9 @@ async function computeNTA(sb: any, forceFrom: string | null) {
           }
           const mv = round2(pos.units * priceInfo.price);
           securities += mv;
-          holdingRows.push({
-            date: current, instrument_name: instr, product: pos.product,
-            is_mtm: true, units: round6(pos.units),
-            price: round6(priceInfo.price), price_date: priceInfo.priceDate,
-            market_value: mv,
-          });
         } else {
           // At cost: P(i,t) = VWAP, MV = total_cost
-          const vwap = pos.units > 0 ? pos.total_cost / pos.units : 0;
           other_assets += pos.total_cost;
-          holdingRows.push({
-            date: current, instrument_name: instr, product: pos.product,
-            is_mtm: false, units: round6(pos.units),
-            price: round6(vwap), price_date: null,
-            market_value: round2(pos.total_cost),
-          });
         }
       }
 
@@ -376,23 +362,6 @@ async function computeNTA(sb: any, forceFrom: string | null) {
   for (let i = 0; i < rows.length; i += 100) {
     const { error } = await sb.from('nta_daily').upsert(rows.slice(i, i + 100), { onConflict: 'date' });
     if (error) console.error('Upsert nta_daily error:', error.message);
-  }
-
-  // 8b. Upsert nta_holdings (per-instrument check table) in chunks of 200
-  // Delete existing unlocked holding rows for the date range first, then insert fresh
-  if (holdingRows.length > 0) {
-    const { error: delErr } = await sb.from('nta_holdings')
-      .delete()
-      .gte('date', startDate)
-      .lte('date', todayStr);
-    if (delErr) console.error('Delete nta_holdings error:', delErr.message);
-
-    for (let i = 0; i < holdingRows.length; i += 200) {
-      const { error } = await sb.from('nta_holdings')
-        .upsert(holdingRows.slice(i, i + 200), { onConflict: 'date,instrument_name' });
-      if (error) console.error('Upsert nta_holdings error:', error.message);
-    }
-    console.log('nta_holdings: wrote ' + holdingRows.length + ' rows for ' + computed + ' days');
   }
 
   // 9. Update fund_overview
