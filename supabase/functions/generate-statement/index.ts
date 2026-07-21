@@ -87,6 +87,46 @@ async function registeredNameFor(sb: ReturnType<typeof createClient>, profile: R
   return names.length ? names.join(" & ") : (profile.full_name || "-");
 }
 
+// Resolves an admin-supplied "investor" id to a profile plus every uid
+// value that could appear on that investor's capital_injection rows.
+// Two independent things can create a capital_injection row for a joint
+// account, keyed differently:
+//  - Admin manually posting a transaction (assets/js/principal-admin.js)
+//    always picks an individual co-holder from `profiles`, so uid = that
+//    co-holder's own profile id.
+//  - A member's own Subscribe/Redeem request for their joint account
+//    (mpSubmitCapitalInjectionRequest in member-api.js) uses
+//    profile.joint_account_id directly, so uid = the joint_accounts.id.
+// investorId can be either a profiles.id (personal, or one co-holder) or
+// a joint_accounts.id (the admin's Document Generator lets an admin pick
+// the joint account itself) — resolve whichever it is, and always return
+// every uid that account's history could be scattered across.
+async function resolveInvestorScope(
+  sb: ReturnType<typeof createClient>,
+  investorId: string,
+): Promise<{ profile: Record<string, any>; ciUids: string[] } | null> {
+  const { data: profile } = await sb.from("profiles").select("*").eq("id", investorId).single();
+  if (profile) {
+    const ciUids = [investorId];
+    if (profile.joint_account_id) ciUids.push(profile.joint_account_id);
+    return { profile, ciUids };
+  }
+  const { data: jointAccount } = await sb.from("joint_accounts").select("*").eq("id", investorId).single();
+  if (!jointAccount) return null;
+  const { data: coHolders } = await sb
+    .from("profiles")
+    .select("*")
+    .eq("joint_account_id", investorId)
+    .order("full_name", { ascending: true });
+  if (!coHolders || !coHolders.length) return null;
+  // Postal address, phone, email, bank details come from this one
+  // co-holder — same convention registeredNameFor() below already uses
+  // for the "profile IS a co-holder" case, just applied here too.
+  const primary = coHolders[0];
+  const syntheticProfile = { ...primary, id: investorId, joint_account_id: investorId };
+  return { profile: syntheticProfile, ciUids: [investorId, ...coHolders.map((c: any) => c.id)] };
+}
+
 async function investorInfo(sb: ReturnType<typeof createClient>, profile: Record<string, any>) {
   const addr = addressFromProfile(profile);
   return {
@@ -211,16 +251,16 @@ async function handleSubscriptionOrRedemption(sb: ReturnType<typeof createClient
   const { data: tx, error } = await sb.from("capital_injection").select("*").eq("id", txId).single();
   if (error || !tx) return json({ error: `No capital_injection row with id=${txId}` }, 404);
 
-  const { data: profile } = await sb.from("profiles").select("*").eq("id", tx.uid).single();
-  if (!profile) return json({ error: `No profile found for uid=${tx.uid}` }, 404);
+  const scope = await resolveInvestorScope(sb, tx.uid);
+  if (!scope) return json({ error: `No profile found for uid=${tx.uid}` }, 404);
 
-  const { data: allCis } = await sb.from("capital_injection").select("*").eq("uid", tx.uid);
+  const { data: allCis } = await sb.from("capital_injection").select("*").in("uid", scope.ciUids);
   const txDate = parseDate(tx.date);
   const prior = (allCis || []).filter((r: any) => r.id !== tx.id);
   const openingUnits = netUnitsAsof(prior, txDate);
-  const openingCost = netCostAsof(prior, txDate, tx.uid);
+  const openingCost = netCostAsof(prior, txDate);
 
-  const investor = await investorInfo(sb, profile);
+  const investor = await investorInfo(sb, scope.profile);
   const refId = await nextStatementRefId(sb, tx.type, tx.uid, txDate);
 
   const pdfBytes = await buildSubscriptionPdf({ tx, investor, openingUnits, openingCost, referenceNo: refId });
@@ -238,19 +278,19 @@ async function handleDividend(sb: ReturnType<typeof createClient>, body: Record<
   const { investorId, fyId } = body;
   if (!investorId || !fyId) return json({ error: "investorId and fyId are required" }, 400);
 
-  const { data: profile } = await sb.from("profiles").select("*").eq("id", investorId).single();
-  if (!profile) return json({ error: `No profile found for id=${investorId}` }, 404);
+  const scope = await resolveInvestorScope(sb, investorId);
+  if (!scope) return json({ error: `No profile found for id=${investorId}` }, 404);
   const { data: fy } = await sb.from("fy_settings").select("*").eq("id", fyId).single();
   if (!fy) return json({ error: `No fy_settings row with id=${fyId}` }, 404);
 
   const { data: dists } = await sb.from("distributions").select("*").eq("fy", fy.label).order("ex_date");
   if (!dists || !dists.length) return json({ error: `No distributions found for FY '${fy.label}'` }, 404);
 
-  const { data: allCis } = await sb.from("capital_injection").select("*").eq("uid", investorId);
+  const { data: allCis } = await sb.from("capital_injection").select("*").in("uid", scope.ciUids);
   const fyEnd = parseDate(fy.end_date);
-  const holdingUnits = netUnitsAsof(allCis || [], fyEnd, investorId);
+  const holdingUnits = netUnitsAsof(allCis || [], fyEnd);
 
-  const investor = await investorInfo(sb, profile);
+  const investor = await investorInfo(sb, scope.profile);
   const refId = await nextStatementRefId(sb, "Dividend", investorId, fyEnd);
 
   const pdfBytes = await buildDividendPdf({
@@ -286,8 +326,8 @@ async function handleAnnual(sb: ReturnType<typeof createClient>, body: Record<st
   const { investorId, fyId } = body;
   if (!investorId || !fyId) return json({ error: "investorId and fyId are required" }, 400);
 
-  const { data: profile } = await sb.from("profiles").select("*").eq("id", investorId).single();
-  if (!profile) return json({ error: `No profile found for id=${investorId}` }, 404);
+  const scope = await resolveInvestorScope(sb, investorId);
+  if (!scope) return json({ error: `No profile found for id=${investorId}` }, 404);
   const { data: fy } = await sb.from("fy_settings").select("*").eq("id", fyId).single();
   if (!fy) return json({ error: `No fy_settings row with id=${fyId}` }, 404);
 
@@ -304,17 +344,17 @@ async function handleAnnual(sb: ReturnType<typeof createClient>, body: Record<st
     .sort((a: any, b: any) => parseDate(b.end_date).getTime() - parseDate(a.end_date).getTime())[0];
   const dayBeforeFy = priorFy ? parseDate(priorFy.end_date) : new Date(fyStart.getTime() - 86400000);
 
-  const { data: allCisRaw } = await sb.from("capital_injection").select("*").eq("uid", investorId).order("date");
+  const { data: allCisRaw } = await sb.from("capital_injection").select("*").in("uid", scope.ciUids).order("date");
   const allCis = allCisRaw || [];
-  const openingUnits = netUnitsAsof(allCis, dayBeforeFy, investorId);
-  const openingCost = netCostAsof(allCis, dayBeforeFy, investorId);
-  const closingUnits = netUnitsAsof(allCis, fyEnd, investorId);
-  const closingCost = netCostAsof(allCis, fyEnd, investorId);
+  const openingUnits = netUnitsAsof(allCis, dayBeforeFy);
+  const openingCost = netCostAsof(allCis, dayBeforeFy);
+  const closingUnits = netUnitsAsof(allCis, fyEnd);
+  const closingCost = netCostAsof(allCis, fyEnd);
   // All realized P&L from redemptions before this FY — the Realized
   // Transaction table's Opening row.
-  const priorRealizedPl = netRealizedPlAsof(allCis, dayBeforeFy, investorId);
+  const priorRealizedPl = netRealizedPlAsof(allCis, dayBeforeFy);
   const transactionsInFy = allCis.filter(
-    (r: any) => r.status === "Approved" && r.uid === investorId &&
+    (r: any) => r.status === "Approved" && scope.ciUids.includes(r.uid) &&
       parseDate(r.date) >= fyStart && parseDate(r.date) <= fyEnd,
   );
 
@@ -333,7 +373,7 @@ async function handleAnnual(sb: ReturnType<typeof createClient>, body: Record<st
   const distributionsBeforeFy = dists.filter((d: any) => parseDate(d.pay_date || d.ex_date) < fyStart);
   let priorDividendsReceived = 0;
   for (const d of distributionsBeforeFy) {
-    const unitsAtEx = netUnitsAsof(allCis, parseDate(d.ex_date), investorId);
+    const unitsAtEx = netUnitsAsof(allCis, parseDate(d.ex_date));
     priorDividendsReceived += Math.round(unitsAtEx * Number(d.dps) / 100 * 100) / 100;
   }
   priorDividendsReceived = Math.round(priorDividendsReceived * 100) / 100;
@@ -345,7 +385,7 @@ async function handleAnnual(sb: ReturnType<typeof createClient>, body: Record<st
 
   const cashflows: [Date, number][] = [];
   for (const r of allCis) {
-    if (r.status !== "Approved" || r.uid !== investorId) continue;
+    if (r.status !== "Approved" || !scope.ciUids.includes(r.uid)) continue;
     const d = parseDate(r.date);
     if (d > fyEnd) continue;
     // capital_injection stores amount signed (Redemption rows are
@@ -356,12 +396,12 @@ async function handleAnnual(sb: ReturnType<typeof createClient>, body: Record<st
   for (const d of distributionsInFy) {
     const payDate = parseDate(d.pay_date || d.ex_date);
     const exDate = parseDate(d.ex_date);
-    const unitsAtEx = netUnitsAsof(allCis, exDate, investorId);
+    const unitsAtEx = netUnitsAsof(allCis, exDate);
     cashflows.push([payDate, (unitsAtEx * Number(d.dps)) / 100]);
   }
   cashflows.push([fyEnd, closingUnits * latestNav]);
 
-  const investor = await investorInfo(sb, profile);
+  const investor = await investorInfo(sb, scope.profile);
   const refId = await nextStatementRefId(sb, "Annual", investorId, fyEnd);
 
   const pdfBytes = await buildAnnualPdf({
