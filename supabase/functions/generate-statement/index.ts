@@ -49,17 +49,20 @@ function json(body: unknown, status = 200) {
   });
 }
 
-// #YYMMDDUIDXX — # is the type letter above, YYMMDD is today (the date the
-// statement is generated, not the underlying transaction/FY date), UID is
-// the first 3 characters of the investor's Account ID, XX is a 2-digit
-// running count of this investor's statements of this same type (01, 02, ...).
+// #YYMMDDUIDXX — # is the type letter above, YYMMDD is the underlying
+// transaction date (Subscription/Redemption) or the financial year's
+// end/completed date (Dividend/Annual) — not the date the statement PDF
+// happens to be generated — UID is the first 3 characters of the
+// investor's Account ID, XX is a 2-digit running count of this investor's
+// statements of this same type (01, 02, ...).
 async function nextStatementRefId(
   sb: ReturnType<typeof createClient>,
   statementType: string,
   investorId: string,
+  refDate: Date,
 ): Promise<string> {
   const letter = STATEMENT_TYPE_LETTER[statementType] || "X";
-  const yymmdd = new Date().toISOString().slice(2, 10).replace(/-/g, "");
+  const yymmdd = refDate.toISOString().slice(2, 10).replace(/-/g, "");
   const uid3 = investorId.slice(0, 3).toUpperCase();
   const { count } = await sb
     .from("statements")
@@ -218,7 +221,7 @@ async function handleSubscriptionOrRedemption(sb: ReturnType<typeof createClient
   const openingCost = netCostAsof(prior, txDate, tx.uid);
 
   const investor = await investorInfo(sb, profile);
-  const refId = await nextStatementRefId(sb, tx.type, tx.uid);
+  const refId = await nextStatementRefId(sb, tx.type, tx.uid, txDate);
 
   const pdfBytes = await buildSubscriptionPdf({ tx, investor, openingUnits, openingCost, referenceNo: refId });
   const fileName = `${refId}.pdf`;
@@ -248,7 +251,7 @@ async function handleDividend(sb: ReturnType<typeof createClient>, body: Record<
   const holdingUnits = netUnitsAsof(allCis || [], fyEnd, investorId);
 
   const investor = await investorInfo(sb, profile);
-  const refId = await nextStatementRefId(sb, "Dividend", investorId);
+  const refId = await nextStatementRefId(sb, "Dividend", investorId, fyEnd);
 
   const pdfBytes = await buildDividendPdf({
     distributions: dists, investor, holdingUnits, periodText: fy.label, referenceNo: refId,
@@ -359,7 +362,7 @@ async function handleAnnual(sb: ReturnType<typeof createClient>, body: Record<st
   cashflows.push([fyEnd, closingUnits * latestNav]);
 
   const investor = await investorInfo(sb, profile);
-  const refId = await nextStatementRefId(sb, "Annual", investorId);
+  const refId = await nextStatementRefId(sb, "Annual", investorId, fyEnd);
 
   const pdfBytes = await buildAnnualPdf({
     investor, fyStart, fyEnd, openingUnits, openingCost, closingUnits, closingCost,
