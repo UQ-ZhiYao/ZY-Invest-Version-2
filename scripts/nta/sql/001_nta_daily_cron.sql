@@ -5,26 +5,25 @@
 -- run automatically every day at 5:30pm UTC+8 (Malaysia/Singapore time).
 -- pg_cron on Supabase always schedules in UTC, so that's 09:30 UTC.
 --
--- Requires the pg_cron and pg_net extensions. Enable them first via
--- Database -> Extensions in the Supabase dashboard, or:
---   create extension if not exists pg_cron;
---   create extension if not exists pg_net;
---
--- IMPORTANT — auth: nta-compute's sibling function (generate-statement)
--- requires a real logged-in admin's session JWT and checks
--- profiles.role = 'admin'; a cron job has no logged-in user, so this calls
--- the function with the service_role key instead. If nta-compute enforces
--- the same admin-user check as generate-statement, it will reject a
--- service_role-only call — that function's own code needs a small
--- exception added (e.g. "if the Authorization header IS the service_role
--- key, treat the caller as trusted and skip the profiles.role lookup").
--- That edit has to happen in nta-compute itself, which isn't tracked in
--- this repo (it's deployed separately) — share its source to get that
--- patch written alongside this migration.
+-- Auth: nta-compute's own code (supabase/functions/nta-compute/index.ts)
+-- has no admin/JWT check of its own — it builds its own privileged client
+-- from its SUPABASE_SERVICE_ROLE_KEY env var regardless of who calls it.
+-- The only gate is the Supabase platform's default "verify_jwt" check on
+-- the function endpoint itself, which just requires the Authorization
+-- header to carry *some* validly-signed project JWT — the service_role
+-- key satisfies that either way, so it's used below as the caller.
 --
 -- The service_role key is stored in Supabase Vault rather than hardcoded
 -- into the cron job body, since cron.job rows (including the SQL command
 -- text) are visible to anyone who can query cron.job.
+
+-- 0. Enable the extensions this migration needs. If this errors with a
+--    permissions message (rather than succeeding or saying it already
+--    exists), enable pg_cron and pg_net from the Supabase dashboard
+--    instead: Database -> Extensions -> search "pg_cron" / "pg_net" ->
+--    Enable — then re-run the rest of this file.
+create extension if not exists pg_cron with schema pg_catalog;
+create extension if not exists pg_net with schema extensions;
 
 -- 1. Store the service_role key in Vault (run once — replace the
 --    placeholder with the real key from Project Settings -> API ->
