@@ -57,9 +57,12 @@ export function netUnitsAsof(capitalInjections: CapitalInjectionRow[], asof: Dat
   return Math.max(0, net);
 }
 
-function approvedSortedFor(capitalInjections: CapitalInjectionRow[], asof: Date, uid: string): CapitalInjectionRow[] {
+// uid === null means capitalInjections is already scoped to the right rows
+// (e.g. a joint account's transactions, fetched under several different
+// uid values) — same idiom as netUnitsAsof below.
+function approvedSortedFor(capitalInjections: CapitalInjectionRow[], asof: Date, uid: string | null): CapitalInjectionRow[] {
   return capitalInjections
-    .filter((r) => r.status === "Approved" && r.uid === uid && parseDate(r.date) <= asof)
+    .filter((r) => r.status === "Approved" && (uid === null || r.uid === uid) && parseDate(r.date) <= asof)
     .slice()
     .sort((a, b) => parseDate(a.date).getTime() - parseDate(b.date).getTime());
 }
@@ -89,14 +92,14 @@ function avcoTrace(rows: CapitalInjectionRow[]): { units: number; cost: number; 
   return { units, cost, realizedPl };
 }
 
-export function netCostAsof(capitalInjections: CapitalInjectionRow[], asof: Date, uid: string): number {
+export function netCostAsof(capitalInjections: CapitalInjectionRow[], asof: Date, uid: string | null = null): number {
   return avcoTrace(approvedSortedFor(capitalInjections, asof, uid)).cost;
 }
 
 // Cumulative realized P&L (from every Redemption up to `asof`) — this is
 // what "Realized Profit & Loss" means all-time: proceeds minus cost basis
 // removed, summed across every redemption in the investor's history.
-export function netRealizedPlAsof(capitalInjections: CapitalInjectionRow[], asof: Date, uid: string): number {
+export function netRealizedPlAsof(capitalInjections: CapitalInjectionRow[], asof: Date, uid: string | null = null): number {
   const realizedPl = avcoTrace(approvedSortedFor(capitalInjections, asof, uid)).realizedPl;
   return Math.round(realizedPl * 100) / 100;
 }

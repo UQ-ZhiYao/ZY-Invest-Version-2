@@ -253,11 +253,26 @@
 
   async function loadRealInvestors(){
     if(typeof sb==='undefined'||!sb) return;
-    var res=await sb.from('profiles').select('id,full_name').order('full_name');
-    if(res.error||!res.data) return;
-    REAL_INVESTORS=res.data;
+    // Joint accounts are their own entity (joint_accounts table) distinct
+    // from any individual co-holder's profile row — list both so an admin
+    // can generate a Dividend/Annual statement for the joint account
+    // itself, not just for one co-holder.
+    var results=await Promise.all([
+      sb.from('profiles').select('id,full_name').order('full_name'),
+      sb.from('joint_accounts').select('id,display_name').order('display_name'),
+    ]);
+    var profRes=results[0], jaRes=results[1];
+    if(profRes.error||!profRes.data) return;
+    var personal=profRes.data.map(function(p){ return {id:p.id, full_name:p.full_name, isJoint:false}; });
+    var joint=(jaRes.data||[]).map(function(j){ return {id:j.id, full_name:j.display_name, isJoint:true}; });
+    REAL_INVESTORS=personal.concat(joint);
     duScope.innerHTML='';
-    REAL_INVESTORS.forEach(function(p){ var o=document.createElement('option'); o.value=p.id; o.textContent=p.full_name||p.id; duScope.appendChild(o); });
+    personal.forEach(function(p){ var o=document.createElement('option'); o.value=p.id; o.textContent=p.full_name||p.id; duScope.appendChild(o); });
+    if(joint.length){
+      var grp=document.createElement('optgroup'); grp.label='Joint Accounts';
+      joint.forEach(function(j){ var o=document.createElement('option'); o.value=j.id; o.textContent=(j.full_name||j.id)+' (Joint)'; grp.appendChild(o); });
+      duScope.appendChild(grp);
+    }
   }
   async function loadRealFY(){
     if(typeof sb==='undefined'||!sb) return;
@@ -273,7 +288,17 @@
     var edgeType=stmtEdgeType(duType.value), investorId=duScope.value;
     if(!investorId||(edgeType!=='Subscription'&&edgeType!=='Redemption')){ duTx.innerHTML=''; updatePreview(); return; }
     duTx.innerHTML='<option value="">Loading…</option>';
-    var res=await sb.from('capital_injection').select('*').eq('uid',investorId).eq('type',edgeType).eq('status','Approved').order('date',{ascending:false});
+    // Joint account transactions can be keyed either by the joint account's
+    // own id (member self-service subscribe/redeem) or by one of its
+    // co-holders' own profile id (admin manually posting a transaction) —
+    // fetch under every uid this joint account's history could use.
+    var uids=[investorId];
+    var selInv=REAL_INVESTORS.filter(function(x){return x.id===investorId;})[0];
+    if(selInv&&selInv.isJoint){
+      var coRes=await sb.from('profiles').select('id').eq('joint_account_id',investorId);
+      if(coRes.data) uids=uids.concat(coRes.data.map(function(p){return p.id;}));
+    }
+    var res=await sb.from('capital_injection').select('*').in('uid',uids).eq('type',edgeType).eq('status','Approved').order('date',{ascending:false});
     duTx.innerHTML='';
     if(res.error||!res.data||!res.data.length){ duTx.innerHTML='<option value="">No approved '+edgeType.toLowerCase()+' transactions</option>'; updatePreview(); return; }
     res.data.forEach(function(tx){
@@ -333,7 +358,8 @@
     btn.disabled=true; btn.textContent='Checking…';
     try{
       var results=await Promise.all([
-        sb.from('profiles').select('id'),
+        sb.from('profiles').select('id,joint_account_id'),
+        sb.from('joint_accounts').select('id'),
         sb.from('fy_settings').select('id,label,end_date'),
         sb.from('capital_injection').select('id,uid,type,date').eq('status','Approved'),
         sb.from('distributions').select('id,fy'),
@@ -341,8 +367,8 @@
       ]);
       var errRes=results.filter(function(r){return r.error;})[0];
       if(errRes) throw new Error(errRes.error.message);
-      var investors=results[0].data||[], fys=results[1].data||[], cis=results[2].data||[],
-          dists=results[3].data||[], existing=results[4].data||[];
+      var profiles=results[0].data||[], jointAccounts=results[1].data||[], fys=results[2].data||[], cis=results[3].data||[],
+          dists=results[4].data||[], existing=results[5].data||[];
 
       var haveTx=new Set(existing.filter(function(s){return s.transaction_id;}).map(function(s){return s.transaction_id;}));
       var haveAnnual=new Set(existing.filter(function(s){return s.type==='Annual';}).map(function(s){return s.investor_id+'|'+s.fy_id;}));
@@ -354,7 +380,20 @@
       var fyIdsWithDist=new Set(dists.map(function(d){return fyIdByLabel[d.fy];}).filter(Boolean));
 
       var investedIds=new Set(cis.map(function(tx){return tx.uid;}));
-      var investors2=investors.filter(function(inv){return investedIds.has(inv.id);});
+      // Personal investors: their own id appears directly on a
+      // capital_injection row.
+      var personalTargets=profiles.filter(function(p){return investedIds.has(p.id);});
+      // Joint accounts: "invested" if either the joint account's own id, OR
+      // any of its co-holders' profile ids, appears on a capital_injection
+      // row — admin-posted transactions use a co-holder's own profile id,
+      // a member's own subscribe/redeem request uses the joint account's id.
+      var coHolderIdsByJoint={};
+      profiles.forEach(function(p){ if(p.joint_account_id){ (coHolderIdsByJoint[p.joint_account_id]=coHolderIdsByJoint[p.joint_account_id]||[]).push(p.id); } });
+      var jointTargets=jointAccounts.filter(function(ja){
+        var coIds=coHolderIdsByJoint[ja.id]||[];
+        return investedIds.has(ja.id)||coIds.some(function(id){return investedIds.has(id);});
+      });
+      var investors2=personalTargets.concat(jointTargets);
 
       var jobs=[];
       cis.forEach(function(tx){ if(!haveTx.has(tx.id)) jobs.push({type:tx.type, txId:tx.id}); });
