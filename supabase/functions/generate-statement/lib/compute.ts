@@ -44,6 +44,20 @@ export function magnitude(v: unknown): number {
   return Math.abs(Number(v) || 0);
 }
 
+// The investor's earliest Approved capital_injection date — null if they
+// have none. Used to reject Dividend/Annual generation for a period that
+// ended before the investor had any investment record yet (nothing
+// meaningful to report on).
+export function firstApprovedDate(capitalInjections: CapitalInjectionRow[]): Date | null {
+  let earliest: Date | null = null;
+  for (const r of capitalInjections) {
+    if (r.status !== "Approved") continue;
+    const d = parseDate(r.date);
+    if (earliest === null || d < earliest) earliest = d;
+  }
+  return earliest;
+}
+
 export function netUnitsAsof(capitalInjections: CapitalInjectionRow[], asof: Date, uid: string | null = null): number {
   let net = 0;
   for (const r of capitalInjections) {
