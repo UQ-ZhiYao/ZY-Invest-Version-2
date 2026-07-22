@@ -169,11 +169,29 @@
   var DB_TYPE_LABEL={'Subscription':'Subscription Statement','Redemption':'Redemption Statement','Dividend':'Dividend Statement','Annual':'Account Statement'};
   async function loadDocs(){
     if(typeof sb==='undefined'||!sb) return;
-    var res=await sb.from('statements').select('id,type,period_label,storage_path,file_name,generated_at,investor_id,profiles(full_name),fy_settings(label)').order('generated_at',{ascending:false});
+    // investor_id can be either a profiles.id or a joint_accounts.id (see
+    // resolveInvestorScope() in generate-statement/index.ts) — statements
+    // no longer has a single FK on investor_id to embed-join against
+    // (dropped in 005_joint_account_statements.sql, since a single column
+    // can't FK to two different tables), so resolve investor names for
+    // both kinds separately instead of relying on PostgREST's embed
+    // shorthand.
+    var res=await sb.from('statements').select('id,type,period_label,storage_path,file_name,generated_at,investor_id,fy_settings(label)').order('generated_at',{ascending:false});
     if(res.error){ if(window.zyToast) zyToast('Load documents failed: '+res.error.message); return; }
-    var real=(res.data||[]).map(function(r){
+    var rows=res.data||[];
+    var ids=Array.from(new Set(rows.map(function(r){return r.investor_id;}).filter(Boolean)));
+    var nameById={};
+    if(ids.length){
+      var lookups=await Promise.all([
+        sb.from('profiles').select('id,full_name').in('id',ids),
+        sb.from('joint_accounts').select('id,display_name').in('id',ids),
+      ]);
+      (lookups[0].data||[]).forEach(function(p){ nameById[p.id]=p.full_name; });
+      (lookups[1].data||[]).forEach(function(j){ nameById[j.id]=j.display_name; });
+    }
+    var real=rows.map(function(r){
       var typeLabel=DB_TYPE_LABEL[r.type]||r.type;
-      var investor=r.profiles?(r.profiles.full_name||r.investor_id):r.investor_id;
+      var investor=nameById[r.investor_id]||r.investor_id;
       return {
         _id:r.id, storage_path:r.storage_path,
         date:(new Date(r.generated_at)).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}),
