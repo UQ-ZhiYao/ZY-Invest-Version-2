@@ -129,6 +129,12 @@
             <option value="Redemption Statement">Redemption Statement</option>
           </select>
         </div>
+        <div class="field" id="du-acctType-wrap"><label>Account Type</label>
+          <select id="du-acctType">
+            <option value="personal">Personal Account</option>
+            <option value="joint">Joint Account</option>
+          </select>
+        </div>
         <div class="field" id="du-scope-wrap"><label>Investor</label><select id="du-scope"></select></div>
         <div class="field" id="du-tx-wrap" style="display:none;"><label>Transaction</label><select id="du-tx"></select></div>
         <div class="field" id="du-fy-wrap" style="display:none;"><label>Financial Year</label><select id="du-fy"></select></div>
@@ -236,6 +242,7 @@
   // fund-level, not tied to an investor/transaction). Every other Document Type
   // below calls the real generate-statement function and lists the real result.
   var duType=document.getElementById('du-type'),
+      duAcctType=document.getElementById('du-acctType'), duAcctTypeWrap=document.getElementById('du-acctType-wrap'),
       duScope=document.getElementById('du-scope'), duScopeWrap=document.getElementById('du-scope-wrap'),
       duTx=document.getElementById('du-tx'), duTxWrap=document.getElementById('du-tx-wrap'),
       duFy=document.getElementById('du-fy'), duFyWrap=document.getElementById('du-fy-wrap'),
@@ -246,33 +253,31 @@
       duSave=document.getElementById('du-save'),
       duCmp=document.getElementById('du-cmp');
 
-  var REAL_INVESTORS=[], REAL_FY=[];
+  var REAL_INVESTORS=[], REAL_PERSONAL=[], REAL_JOINT=[], REAL_FY=[];
 
   function stmtEdgeType(t){ return {'Subscription Statement':'Subscription','Redemption Statement':'Redemption','Dividend Statement':'Dividend','Account Statement':'Annual'}[t]||null; }
   function investorName(id){ var p=REAL_INVESTORS.filter(function(x){return x.id===id;})[0]; return p?(p.full_name||id):'—'; }
 
+  // Joint accounts are their own entity (joint_accounts table) distinct
+  // from any individual co-holder's profile row — Account Type picks which
+  // list the Investor dropdown below shows, instead of mixing both.
   async function loadRealInvestors(){
     if(typeof sb==='undefined'||!sb) return;
-    // Joint accounts are their own entity (joint_accounts table) distinct
-    // from any individual co-holder's profile row — list both so an admin
-    // can generate a Dividend/Annual statement for the joint account
-    // itself, not just for one co-holder.
     var results=await Promise.all([
       sb.from('profiles').select('id,full_name').order('full_name'),
       sb.from('joint_accounts').select('id,display_name').order('display_name'),
     ]);
     var profRes=results[0], jaRes=results[1];
     if(profRes.error||!profRes.data) return;
-    var personal=profRes.data.map(function(p){ return {id:p.id, full_name:p.full_name, isJoint:false}; });
-    var joint=(jaRes.data||[]).map(function(j){ return {id:j.id, full_name:j.display_name, isJoint:true}; });
-    REAL_INVESTORS=personal.concat(joint);
+    REAL_PERSONAL=profRes.data.map(function(p){ return {id:p.id, full_name:p.full_name, isJoint:false}; });
+    REAL_JOINT=(jaRes.data||[]).map(function(j){ return {id:j.id, full_name:j.display_name, isJoint:true}; });
+    REAL_INVESTORS=REAL_PERSONAL.concat(REAL_JOINT);
+    renderDuScopeOptions();
+  }
+  function renderDuScopeOptions(){
+    var list=duAcctType.value==='joint'?REAL_JOINT:REAL_PERSONAL;
     duScope.innerHTML='';
-    personal.forEach(function(p){ var o=document.createElement('option'); o.value=p.id; o.textContent=p.full_name||p.id; duScope.appendChild(o); });
-    if(joint.length){
-      var grp=document.createElement('optgroup'); grp.label='Joint Accounts';
-      joint.forEach(function(j){ var o=document.createElement('option'); o.value=j.id; o.textContent=(j.full_name||j.id)+' (Joint)'; grp.appendChild(o); });
-      duScope.appendChild(grp);
-    }
+    list.forEach(function(p){ var o=document.createElement('option'); o.value=p.id; o.textContent=p.full_name||p.id; duScope.appendChild(o); });
   }
   async function loadRealFY(){
     if(typeof sb==='undefined'||!sb) return;
@@ -293,8 +298,7 @@
     // co-holders' own profile id (admin manually posting a transaction) —
     // fetch under every uid this joint account's history could use.
     var uids=[investorId];
-    var selInv=REAL_INVESTORS.filter(function(x){return x.id===investorId;})[0];
-    if(selInv&&selInv.isJoint){
+    if(duAcctType.value==='joint'){
       var coRes=await sb.from('profiles').select('id').eq('joint_account_id',investorId);
       if(coRes.data) uids=uids.concat(coRes.data.map(function(p){return p.id;}));
     }
@@ -325,6 +329,7 @@
 
   function syncFields(){
     var type=duType.value, edgeType=stmtEdgeType(type), isFactsheet=(type==='Factsheet');
+    duAcctTypeWrap.style.display=isFactsheet?'none':'';
     duScopeWrap.style.display=isFactsheet?'none':'';
     duTxWrap.style.display=(edgeType==='Subscription'||edgeType==='Redemption')?'':'none';
     duFyWrap.style.display=(edgeType==='Dividend'||edgeType==='Annual')?'':'none';
@@ -336,12 +341,13 @@
     if(edgeType==='Subscription'||edgeType==='Redemption') loadTxOptions(); else updatePreview();
   }
   duType.addEventListener('change',syncFields);
+  duAcctType.addEventListener('change',function(){ renderDuScopeOptions(); var edgeType=stmtEdgeType(duType.value); if(edgeType==='Subscription'||edgeType==='Redemption') loadTxOptions(); else updatePreview(); });
   duScope.addEventListener('change',function(){ var edgeType=stmtEdgeType(duType.value); if(edgeType==='Subscription'||edgeType==='Redemption') loadTxOptions(); else updatePreview(); });
   duTx.addEventListener('change',updatePreview);
   duFy.addEventListener('change',updatePreview);
   duFile.addEventListener('click',function(){ duFile.classList.add('filled'); document.getElementById('du-fname').textContent='statement-draft.pdf · attached'; });
 
-  document.getElementById('openDuModal').addEventListener('click',function(){ duType.value='Factsheet'; syncFields(); duFile.classList.remove('filled'); document.getElementById('du-fname').textContent='Click to attach PDF'; zyModalOpen('duModal'); });
+  document.getElementById('openDuModal').addEventListener('click',function(){ duType.value='Factsheet'; duAcctType.value='personal'; renderDuScopeOptions(); syncFields(); duFile.classList.remove('filled'); document.getElementById('du-fname').textContent='Click to attach PDF'; zyModalOpen('duModal'); });
 
   // ── Generate All Statements — bulk-fills every missing Subscription,
   // Redemption, Dividend and Annual statement across every investor.
