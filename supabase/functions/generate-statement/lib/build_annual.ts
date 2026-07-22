@@ -1,5 +1,5 @@
 import {
-  newDoc, drawHeaderBlock, drawPageNo, drawInfoCard, drawSectionHeader, drawKeptTogether, drawImportantNotices,
+  newDoc, drawHeaderBlock, drawPageNo, drawInfoCard, drawSectionHeader, drawKeptTogether, drawTable, drawImportantNotices,
   drawFooterOnAllPages, drawText, rm, redIfNegative, fmt, colWidths, BODY_W, SECTION_GAP, CONTENT_SIZE,
   InvestorInfo, Cell,
 } from "./common.ts";
@@ -100,7 +100,14 @@ export async function buildAnnualPdf({
   }
   realizedPlThisFy = Math.round(realizedPlThisFy * 100) / 100;
   pRows.push([dstr(fyEnd), "Closing", "-", closingUnits > 0 ? rm(closingCost / closingUnits, 4) : "-", "-", fmt(closingUnits)]);
-  drawKeptTogether(doc, "Principal Transaction", { columns: pCols, rows: pRows });
+  // Unlike the other tables below (kept whole via drawKeptTogether — moved
+  // onto a fresh page rather than split, since they're normally short),
+  // Principal Transaction can run long enough to span several pages on its
+  // own over a fund's lifetime — let it split wherever it lands, with the
+  // column header repeating on each continuation page (drawTable's own
+  // per-row pagination already does this).
+  drawSectionHeader(doc, "Principal Transaction");
+  drawTable(doc, { columns: pCols, rows: pRows });
   doc.y -= SECTION_GAP;
 
   // --- Realized Transaction: itemised ---------------------------------------
