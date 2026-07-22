@@ -404,9 +404,25 @@
       var fyIdsWithDist=new Set(dists.map(function(d){return fyIdByLabel[d.fy];}).filter(Boolean));
 
       var investedIds=new Set(cis.map(function(tx){return tx.uid;}));
+      // Earliest Approved capital_injection date per uid — used below to
+      // skip Annual/Dividend for any FY that ended before an investor had
+      // an investment record yet (e.g. an account created this year has no
+      // business getting statements for FYs that closed years earlier).
+      var firstDateByUid={};
+      cis.forEach(function(tx){
+        if(!firstDateByUid[tx.uid]||tx.date<firstDateByUid[tx.uid]) firstDateByUid[tx.uid]=tx.date;
+      });
+      function firstInjectionDate(ciUids){
+        var d=null;
+        ciUids.forEach(function(uid){ var v=firstDateByUid[uid]; if(v&&(!d||v<d)) d=v; });
+        return d;
+      }
       // Personal investors: their own id appears directly on a
       // capital_injection row.
-      var personalTargets=profiles.filter(function(p){return investedIds.has(p.id);});
+      var personalTargets=profiles.filter(function(p){return investedIds.has(p.id);}).map(function(p){
+        var ciUids=[p.id]; if(p.joint_account_id) ciUids.push(p.joint_account_id);
+        return {id:p.id, firstDate:firstInjectionDate(ciUids)};
+      });
       // Joint accounts: "invested" if either the joint account's own id, OR
       // any of its co-holders' profile ids, appears on a capital_injection
       // row — admin-posted transactions use a co-holder's own profile id,
@@ -416,17 +432,23 @@
       var jointTargets=jointAccounts.filter(function(ja){
         var coIds=coHolderIdsByJoint[ja.id]||[];
         return investedIds.has(ja.id)||coIds.some(function(id){return investedIds.has(id);});
+      }).map(function(ja){
+        var ciUids=[ja.id].concat(coHolderIdsByJoint[ja.id]||[]);
+        return {id:ja.id, firstDate:firstInjectionDate(ciUids)};
       });
       var investors2=personalTargets.concat(jointTargets);
 
       var jobs=[];
       cis.forEach(function(tx){ if(!haveTx.has(tx.id)) jobs.push({type:tx.type, txId:tx.id}); });
       investors2.forEach(function(inv){
+        if(!inv.firstDate) return; // no investment record — shouldn't happen given investedIds, but be safe
         completedFys.forEach(function(fy){
+          if(fy.end_date<inv.firstDate) return; // FY ended before this investor's first capital injection
           var key=inv.id+'|'+fy.id;
           if(!haveAnnual.has(key)) jobs.push({type:'Annual', investorId:inv.id, fyId:fy.id});
         });
         fys.filter(function(f){return fyIdsWithDist.has(f.id);}).forEach(function(fy){
+          if(fy.end_date<inv.firstDate) return;
           var key=inv.id+'|'+fy.id;
           if(!haveDividend.has(key)) jobs.push({type:'Dividend', investorId:inv.id, fyId:fy.id});
         });

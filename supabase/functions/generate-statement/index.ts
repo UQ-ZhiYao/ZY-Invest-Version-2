@@ -18,6 +18,7 @@ import { buildDividendPdf } from "./lib/build_dividend.ts";
 import { buildSubscriptionPdf } from "./lib/build_subscription.ts";
 import {
   addressFromProfile,
+  firstApprovedDate,
   magnitude,
   netCostAsof,
   netRealizedPlAsof,
@@ -288,6 +289,14 @@ async function handleDividend(sb: ReturnType<typeof createClient>, body: Record<
 
   const { data: allCis } = await sb.from("capital_injection").select("*").in("uid", scope.ciUids);
   const fyEnd = parseDate(fy.end_date);
+  // The investor has to have actually held an investment record by this
+  // FY's end for a Dividend statement to mean anything — otherwise this is
+  // a period before they ever invested (e.g. a bulk-generate loop or a
+  // trigger reaching an FY that predates their first capital injection).
+  const firstDate = firstApprovedDate(allCis || []);
+  if (!firstDate || firstDate > fyEnd) {
+    return json({ error: `Investor ${investorId} had no approved capital injection by FY '${fy.label}' end — nothing to report` }, 422);
+  }
   const holdingUnits = netUnitsAsof(allCis || [], fyEnd);
 
   const investor = await investorInfo(sb, scope.profile);
@@ -346,6 +355,13 @@ async function handleAnnual(sb: ReturnType<typeof createClient>, body: Record<st
 
   const { data: allCisRaw } = await sb.from("capital_injection").select("*").in("uid", scope.ciUids).order("date");
   const allCis = allCisRaw || [];
+  // Same guard as handleDividend: an Annual statement for a FY that ended
+  // before the investor's first ever capital injection has nothing to
+  // report (they held no investment record that year).
+  const firstDate = firstApprovedDate(allCis);
+  if (!firstDate || firstDate > fyEnd) {
+    return json({ error: `Investor ${investorId} had no approved capital injection by FY '${fy.label}' end — nothing to report` }, 422);
+  }
   const openingUnits = netUnitsAsof(allCis, dayBeforeFy);
   const openingCost = netCostAsof(allCis, dayBeforeFy);
   const closingUnits = netUnitsAsof(allCis, fyEnd);
