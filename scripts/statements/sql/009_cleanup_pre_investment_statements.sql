@@ -10,11 +10,19 @@
 -- in either direction).
 --
 -- Deletes, in dependency order: the distribution_ledger rows linked to a
--- bad statement, the statements row itself, and the underlying PDF's
--- storage.objects row. Note: deleting a storage.objects row removes it
--- from listings/downloads but does not always reclaim the underlying
--- blob immediately — if that matters, sanity-check the file counts
--- afterward in Storage > statements bucket.
+-- bad statement, then the statements row itself.
+--
+-- The PDF files themselves are NOT deleted here — Supabase blocks direct
+-- SQL DELETE on storage.objects (a protect_delete() trigger raises
+-- "Direct deletion from storage tables is not allowed. Use the Storage
+-- API instead."), even though admins already have a delete policy for
+-- the 'statements' bucket via that API (002_statements_admin_storage_delete.sql).
+-- Part 3 below prints the storage paths this script removed the DB rows
+-- for — after running this file, open the browser console on
+-- admin/documents.html (already signed in as admin, so `sb` is ready)
+-- and run:
+--   await sb.storage.from('statements').remove([ /* paste the JSON array
+--   Part 3's final SELECT prints */ ]);
 --
 -- Inspect what this will remove BEFORE running the deletes below, by
 -- running the SELECT in Part 1 on its own first.
@@ -60,19 +68,23 @@ where st.type in ('Annual', 'Dividend')
 select * from _bad_statements order by investor_id, fy_end_date;
 
 -- ---------------------------------------------------------------------
--- Part 2: delete — comment this whole block out if you just want to
--- review Part 1's output first, then re-run the file once satisfied.
+-- Part 2: delete the DB rows — comment this whole block out if you just
+-- want to review Part 1's output first, then re-run the file once
+-- satisfied.
 -- ---------------------------------------------------------------------
 delete from public.distribution_ledger
 where statement_id in (select id from _bad_statements);
-
-delete from storage.objects
-where bucket_id = 'statements'
-  and name in (select storage_path from _bad_statements);
 
 delete from public.statements
 where id in (select id from _bad_statements);
 
 select count(*) as deleted_statements from _bad_statements;
+
+-- ---------------------------------------------------------------------
+-- Part 3: the storage paths whose DB rows were just deleted — copy this
+-- JSON array straight into the sb.storage.from('statements').remove([...])
+-- call described above to finish deleting the actual PDF files.
+-- ---------------------------------------------------------------------
+select json_agg(storage_path) as storage_paths_to_delete from _bad_statements;
 
 drop table _bad_statements;
