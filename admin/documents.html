@@ -137,7 +137,7 @@
         </div>
         <div class="field" id="du-scope-wrap"><label>Investor</label><select id="du-scope"></select></div>
         <div class="field" id="du-tx-wrap" style="display:none;"><label>Transaction</label><select id="du-tx"></select></div>
-        <div class="field" id="du-fy-wrap" style="display:none;"><label>Financial Year</label><select id="du-fy"></select></div>
+        <div class="field" id="du-fy-wrap" style="display:none;"><label id="du-fy-label">Financial Year</label><select id="du-fy"></select></div>
         <div class="field" id="du-period-wrap"><label>Period / As-at</label><input type="date" id="du-period" value="2026-05-31"></div>
         <div class="field" id="du-status-wrap"><label>Status</label><select id="du-status"><option>Published</option><option>Draft</option></select></div>
         <div class="field" id="du-file-wrap"><label>File</label><div class="file-drop" id="du-file"><span class="fd-ic">⤓</span><span id="du-fname">Click to attach PDF</span></div></div>
@@ -302,24 +302,29 @@
     var res=await sb.from('fy_settings').select('*').order('start_date',{ascending:false});
     if(res.error||!res.data) return;
     REAL_FY=res.data;
-    duFy.innerHTML='';
-    REAL_FY.forEach(function(fy){ var o=document.createElement('option'); o.value=fy.id; o.textContent=fy.label; duFy.appendChild(o); });
   }
   loadRealInvestors(); loadRealFY();
 
-  async function loadTxOptions(){
-    var edgeType=stmtEdgeType(duType.value), investorId=duScope.value;
-    if(!investorId||(edgeType!=='Subscription'&&edgeType!=='Redemption')){ duTx.innerHTML=''; updatePreview(); return; }
-    duTx.innerHTML='<option value="">Loading…</option>';
-    // Joint account transactions can be keyed either by the joint account's
-    // own id (member self-service subscribe/redeem) or by one of its
-    // co-holders' own profile id (admin manually posting a transaction) —
-    // fetch under every uid this joint account's history could use.
+  // Joint account transactions/holdings can be keyed either by the joint
+  // account's own id (member self-service subscribe/redeem) or by one of
+  // its co-holders' own profile id (admin manually posting a transaction)
+  // — shared by loadTxOptions() and loadFyOrDistOptions() below, both of
+  // which need every uid a given investor's history could be scattered
+  // across.
+  async function resolveInvestorCiUids(investorId){
     var uids=[investorId];
     if(duAcctType.value==='joint'){
       var coRes=await sb.from('profiles').select('id').eq('joint_account_id',investorId);
       if(coRes.data) uids=uids.concat(coRes.data.map(function(p){return p.id;}));
     }
+    return uids;
+  }
+
+  async function loadTxOptions(){
+    var edgeType=stmtEdgeType(duType.value), investorId=duScope.value;
+    if(!investorId||(edgeType!=='Subscription'&&edgeType!=='Redemption')){ duTx.innerHTML=''; updatePreview(); return; }
+    duTx.innerHTML='<option value="">Loading…</option>';
+    var uids=await resolveInvestorCiUids(investorId);
     var res=await sb.from('capital_injection').select('*').in('uid',uids).eq('type',edgeType).eq('status','Approved').order('date',{ascending:false});
     duTx.innerHTML='';
     if(res.error||!res.data||!res.data.length){ duTx.innerHTML='<option value="">No approved '+edgeType.toLowerCase()+' transactions</option>'; updatePreview(); return; }
@@ -331,6 +336,54 @@
     updatePreview();
   }
 
+  // Dividend/Annual equivalent of loadTxOptions() above — populates du-fy
+  // with only what's actually generatable for the selected investor,
+  // instead of every FY (Annual) or leaving the admin to guess which
+  // distribution goes with which investor (Dividend). Dividend now lists
+  // individual distributions, not financial years — see
+  // 010_dividend_per_distribution.sql — since each distribution gets its
+  // own statement, priced off the investor's holding as of that
+  // distribution's own ex_date.
+  async function loadFyOrDistOptions(){
+    var edgeType=stmtEdgeType(duType.value), investorId=duScope.value;
+    var duFyLabel=document.getElementById('du-fy-label');
+    if(!investorId||(edgeType!=='Dividend'&&edgeType!=='Annual')){ duFy.innerHTML=''; updatePreview(); return; }
+    duFy.innerHTML='<option value="">Loading…</option>';
+    var uids=await resolveInvestorCiUids(investorId);
+    var ciRes=await sb.from('capital_injection').select('date').in('uid',uids).eq('status','Approved').order('date',{ascending:true}).limit(1);
+    var firstDate=ciRes.data&&ciRes.data.length?ciRes.data[0].date:null;
+    if(!firstDate){ duFy.innerHTML='<option value="">No approved capital injection for this investor</option>'; updatePreview(); return; }
+
+    if(edgeType==='Annual'){
+      duFyLabel.textContent='Financial Year';
+      var existRes=await sb.from('statements').select('fy_id').eq('type','Annual').eq('investor_id',investorId);
+      var haveFyIds=new Set((existRes.data||[]).map(function(s){return s.fy_id;}));
+      var today=new Date(); today.setHours(0,0,0,0);
+      var eligible=REAL_FY.filter(function(fy){
+        return new Date(fy.end_date+'T00:00:00Z')<today && fy.end_date>=firstDate && !haveFyIds.has(fy.id);
+      });
+      duFy.innerHTML='';
+      if(!eligible.length){ duFy.innerHTML='<option value="">No financial year available to generate</option>'; updatePreview(); return; }
+      eligible.forEach(function(fy){ var o=document.createElement('option'); o.value=fy.id; o.textContent=fy.label; duFy.appendChild(o); });
+    } else {
+      duFyLabel.textContent='Distribution';
+      var distsRes=await sb.from('distributions').select('id,fy,type,ex_date,pay_date,dps').order('ex_date',{ascending:false});
+      var existDivRes=await sb.from('statements').select('distribution_id').eq('type','Dividend').eq('investor_id',investorId);
+      var haveDistIds=new Set((existDivRes.data||[]).map(function(s){return s.distribution_id;}));
+      var eligible=(distsRes.data||[]).filter(function(d){
+        return d.ex_date>=firstDate && !haveDistIds.has(d.id);
+      });
+      duFy.innerHTML='';
+      if(!eligible.length){ duFy.innerHTML='<option value="">No distribution available to generate</option>'; updatePreview(); return; }
+      eligible.forEach(function(d){
+        var o=document.createElement('option'); o.value=d.id;
+        o.textContent=(d.type||'Dividend')+' — '+(new Date((d.pay_date||d.ex_date)+'T00:00:00Z')).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+' · DPS '+parseFloat(d.dps).toFixed(4);
+        duFy.appendChild(o);
+      });
+    }
+    updatePreview();
+  }
+
   function updatePreview(){
     var type=duType.value, edgeType=stmtEdgeType(type);
     if(type==='Factsheet'){ duCmp.innerHTML='<div class="cmp-empty">Factsheets are uploaded manually — attach the PDF and save.</div>'; return; }
@@ -339,9 +392,12 @@
     if(edgeType==='Subscription'||edgeType==='Redemption'){
       if(!duTx.value){ duCmp.innerHTML='<div class="cmp-empty">No transaction selected.</div>'; return; }
       duCmp.innerHTML='<div class="cmp-row"><span class="ck">Investor</span><span class="cv">'+investorName(investorId)+'</span></div><div class="cmp-row"><span class="ck">Transaction</span><span class="cv">'+duTx.options[duTx.selectedIndex].textContent+'</span></div>';
+    } else if(edgeType==='Annual'){
+      if(!duFy.value){ duCmp.innerHTML='<div class="cmp-empty">No financial year available.</div>'; return; }
+      duCmp.innerHTML='<div class="cmp-row"><span class="ck">Investor</span><span class="cv">'+investorName(investorId)+'</span></div><div class="cmp-row"><span class="ck">Financial Year</span><span class="cv">'+duFy.options[duFy.selectedIndex].textContent+'</span></div>';
     } else {
-      var fy=REAL_FY.filter(function(f){return f.id===duFy.value;})[0];
-      duCmp.innerHTML='<div class="cmp-row"><span class="ck">Investor</span><span class="cv">'+investorName(investorId)+'</span></div><div class="cmp-row"><span class="ck">Financial Year</span><span class="cv">'+(fy?fy.label:'—')+'</span></div>';
+      if(!duFy.value){ duCmp.innerHTML='<div class="cmp-empty">No distribution available.</div>'; return; }
+      duCmp.innerHTML='<div class="cmp-row"><span class="ck">Investor</span><span class="cv">'+investorName(investorId)+'</span></div><div class="cmp-row"><span class="ck">Distribution</span><span class="cv">'+duFy.options[duFy.selectedIndex].textContent+'</span></div>';
     }
   }
 
@@ -356,11 +412,13 @@
     duFileWrap.style.display=isFactsheet?'':'none';
     duSave.textContent=isFactsheet?'Upload Document':'Generate Statement';
     document.getElementById('du-panel-title').textContent=isFactsheet?'Factsheet Data':'Statement Data';
-    if(edgeType==='Subscription'||edgeType==='Redemption') loadTxOptions(); else updatePreview();
+    if(edgeType==='Subscription'||edgeType==='Redemption') loadTxOptions();
+    else if(edgeType==='Dividend'||edgeType==='Annual') loadFyOrDistOptions();
+    else updatePreview();
   }
   duType.addEventListener('change',syncFields);
-  duAcctType.addEventListener('change',function(){ renderDuScopeOptions(); var edgeType=stmtEdgeType(duType.value); if(edgeType==='Subscription'||edgeType==='Redemption') loadTxOptions(); else updatePreview(); });
-  duScope.addEventListener('change',function(){ var edgeType=stmtEdgeType(duType.value); if(edgeType==='Subscription'||edgeType==='Redemption') loadTxOptions(); else updatePreview(); });
+  duAcctType.addEventListener('change',function(){ renderDuScopeOptions(); var edgeType=stmtEdgeType(duType.value); if(edgeType==='Subscription'||edgeType==='Redemption') loadTxOptions(); else if(edgeType==='Dividend'||edgeType==='Annual') loadFyOrDistOptions(); else updatePreview(); });
+  duScope.addEventListener('change',function(){ var edgeType=stmtEdgeType(duType.value); if(edgeType==='Subscription'||edgeType==='Redemption') loadTxOptions(); else if(edgeType==='Dividend'||edgeType==='Annual') loadFyOrDistOptions(); else updatePreview(); });
   duTx.addEventListener('change',updatePreview);
   duFy.addEventListener('change',updatePreview);
   duFile.addEventListener('click',function(){ duFile.classList.add('filled'); document.getElementById('du-fname').textContent='statement-draft.pdf · attached'; });
@@ -370,11 +428,13 @@
   // ── Generate All Statements — bulk-fills every missing Subscription,
   // Redemption, Dividend and Annual statement across every investor.
   // Annual is restricted to financial years that have already ended (an
-  // FY still in progress has no closing position to report on yet); every
+  // FY still in progress has no closing position to report on yet);
+  // Dividend is one statement per (investor, distribution) pair, priced
+  // off that distribution's own ex_date holding — not one per FY. Every
   // other statement type is generated for whatever's already on record.
-  // Already-generated statements (matched by transaction_id, or by
-  // investor+FY for Dividend/Annual) are skipped so repeat clicks only
-  // fill in the gaps instead of piling up duplicates.
+  // Already-generated statements (matched by transaction_id; investor+FY
+  // for Annual; investor+distribution for Dividend) are skipped so repeat
+  // clicks only fill in the gaps instead of piling up duplicates.
   document.getElementById('genAllBtn').addEventListener('click', async function(){
     if(typeof sb==='undefined'||!sb){ zyToast('Supabase not ready'); return; }
     if(!window.zyGenerateStatement){ zyToast('Statement generator not loaded'); return; }
@@ -386,8 +446,8 @@
         sb.from('joint_accounts').select('id'),
         sb.from('fy_settings').select('id,label,end_date'),
         sb.from('capital_injection').select('id,uid,type,date').eq('status','Approved'),
-        sb.from('distributions').select('id,fy'),
-        sb.from('statements').select('type,transaction_id,investor_id,fy_id'),
+        sb.from('distributions').select('id,ex_date'),
+        sb.from('statements').select('type,transaction_id,investor_id,fy_id,distribution_id'),
       ]);
       var errRes=results.filter(function(r){return r.error;})[0];
       if(errRes) throw new Error(errRes.error.message);
@@ -396,12 +456,10 @@
 
       var haveTx=new Set(existing.filter(function(s){return s.transaction_id;}).map(function(s){return s.transaction_id;}));
       var haveAnnual=new Set(existing.filter(function(s){return s.type==='Annual';}).map(function(s){return s.investor_id+'|'+s.fy_id;}));
-      var haveDividend=new Set(existing.filter(function(s){return s.type==='Dividend';}).map(function(s){return s.investor_id+'|'+s.fy_id;}));
+      var haveDividend=new Set(existing.filter(function(s){return s.type==='Dividend';}).map(function(s){return s.investor_id+'|'+s.distribution_id;}));
 
       var today=new Date(); today.setHours(0,0,0,0);
       var completedFys=fys.filter(function(f){ return new Date(f.end_date+'T00:00:00Z')<today; });
-      var fyIdByLabel={}; fys.forEach(function(f){ fyIdByLabel[f.label]=f.id; });
-      var fyIdsWithDist=new Set(dists.map(function(d){return fyIdByLabel[d.fy];}).filter(Boolean));
 
       var investedIds=new Set(cis.map(function(tx){return tx.uid;}));
       // Earliest Approved capital_injection date per uid — used below to
@@ -447,10 +505,10 @@
           var key=inv.id+'|'+fy.id;
           if(!haveAnnual.has(key)) jobs.push({type:'Annual', investorId:inv.id, fyId:fy.id});
         });
-        fys.filter(function(f){return fyIdsWithDist.has(f.id);}).forEach(function(fy){
-          if(fy.end_date<inv.firstDate) return;
-          var key=inv.id+'|'+fy.id;
-          if(!haveDividend.has(key)) jobs.push({type:'Dividend', investorId:inv.id, fyId:fy.id});
+        dists.forEach(function(d){
+          if(d.ex_date<inv.firstDate) return; // investor didn't hold units as of this distribution's ex_date
+          var key=inv.id+'|'+d.id;
+          if(!haveDividend.has(key)) jobs.push({type:'Dividend', investorId:inv.id, distributionId:d.id});
         });
       });
 
@@ -461,7 +519,9 @@
       for(var i=0;i<jobs.length;i++){
         btn.textContent='Generating '+(i+1)+'/'+jobs.length+'…';
         var job=jobs[i], payload={type:job.type};
-        if(job.txId){ payload.txId=job.txId; } else { payload.investorId=job.investorId; payload.fyId=job.fyId; }
+        if(job.txId){ payload.txId=job.txId; }
+        else if(job.distributionId){ payload.investorId=job.investorId; payload.distributionId=job.distributionId; }
+        else { payload.investorId=job.investorId; payload.fyId=job.fyId; }
         try{ await zyGenerateStatement(payload, {silent:true}); ok++; }
         catch(ex){ fail++; }
       }
@@ -491,9 +551,12 @@
     if(edgeType==='Subscription'||edgeType==='Redemption'){
       if(!duTx.value){ zyToast('Select a transaction'); return; }
       payload={ type:edgeType, txId:duTx.value };
-    } else {
+    } else if(edgeType==='Annual'){
       if(!duFy.value){ zyToast('Select a financial year'); return; }
       payload={ type:edgeType, investorId:investorId, fyId:duFy.value };
+    } else {
+      if(!duFy.value){ zyToast('Select a distribution'); return; }
+      payload={ type:edgeType, investorId:investorId, distributionId:duFy.value };
     }
     try{
       await zyGenerateStatement(payload, { button:this });
