@@ -50,8 +50,8 @@ export async function buildAnnualPdf({
   drawInfoCard(doc, [
     ["Account Type", investor.accountType, "Account ID", investor.accountId],
     ["Registered Name", investor.registeredName, "Settlement Type", investor.settlementType],
-    ["Phone No.", investor.phone, "Email Address", investor.email],
-    ["Bank Name", investor.bankName, "Bank Account No.", investor.bankAccountNo],
+    ["Email Address", investor.email, "Bank Name", investor.bankName],
+    ["Phone No.", investor.phone, "Bank Account No.", investor.bankAccountNo],
   ]);
   doc.y -= SECTION_GAP;
 

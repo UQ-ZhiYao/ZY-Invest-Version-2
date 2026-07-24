@@ -120,16 +120,35 @@ async function resolveInvestorScope(
     .eq("joint_account_id", investorId)
     .order("full_name", { ascending: true });
   if (!coHolders || !coHolders.length) return null;
-  // Postal address, phone, email, bank details come from this one
-  // co-holder — same convention registeredNameFor() below already uses
-  // for the "profile IS a co-holder" case, just applied here too.
+  // Phone/email still come from this one co-holder — a joint account has
+  // no phone/email of its own — but address and bank details come from
+  // the joint account's own record now (see investorInfo() below), not
+  // any one co-holder's.
   const primary = coHolders[0];
   const syntheticProfile = { ...primary, id: investorId, joint_account_id: investorId };
   return { profile: syntheticProfile, ciUids: [investorId, ...coHolders.map((c: any) => c.id)] };
 }
 
 async function investorInfo(sb: ReturnType<typeof createClient>, profile: Record<string, any>) {
-  const addr = addressFromProfile(profile);
+  // A joint account's mailing address and settlement bank account are its
+  // own record (scripts/accounts/sql/001_joint_account_contact_bank_fields.sql)
+  // — not any individual co-holder's, which may be blank or simply belong
+  // to that person rather than the joint account. Covers both paths
+  // resolveInvestorScope() can return for a joint account: the synthetic
+  // profile (investorId was the joint account itself) and a specific
+  // co-holder's own profile (investorId was that co-holder, but they still
+  // carry a joint_account_id) — either way, profile.joint_account_id is
+  // the right id to look the joint account's own record up by.
+  let addrBankSource = profile;
+  if (profile.joint_account_id) {
+    const { data: jointAccount } = await sb
+      .from("joint_accounts")
+      .select("address, address2, postcode, city, state, bank_name, bank_account_no")
+      .eq("id", profile.joint_account_id)
+      .maybeSingle();
+    if (jointAccount) addrBankSource = jointAccount;
+  }
+  const addr = addressFromProfile(addrBankSource);
   return {
     accountType: profile.joint_account_id ? "Joint Account" : "Personal Account",
     accountId: String(profile.id || "").slice(0, 8).toUpperCase(),
@@ -137,8 +156,8 @@ async function investorInfo(sb: ReturnType<typeof createClient>, profile: Record
     settlementType: DEFAULT_SETTLEMENT_TYPE,
     phone: profile.phone || "-",
     email: profile.email || "-",
-    bankName: profile.bank_name || "-",
-    bankAccountNo: profile.bank_account_no || "-",
+    bankName: addrBankSource.bank_name || "-",
+    bankAccountNo: addrBankSource.bank_account_no || "-",
     addressLine1: addr.line1,
     addressLine2: addr.line2,
     addressLine3: addr.line3,
