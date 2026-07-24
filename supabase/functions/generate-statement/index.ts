@@ -51,11 +51,12 @@ function json(body: unknown, status = 200) {
 }
 
 // #YYMMDDUIDXX — # is the type letter above, YYMMDD is the underlying
-// transaction date (Subscription/Redemption) or the financial year's
-// end/completed date (Dividend/Annual) — not the date the statement PDF
-// happens to be generated — UID is the first 3 characters of the
-// investor's Account ID, XX is a 2-digit running count of this investor's
-// statements of this same type (01, 02, ...).
+// transaction date (Subscription/Redemption), the distribution's own
+// ex_date (Dividend), or the financial year's end/completed date
+// (Annual) — not the date the statement PDF happens to be generated —
+// UID is the first 3 characters of the investor's Account ID, XX is a
+// 2-digit running count of this investor's statements of this same type
+// (01, 02, ...).
 async function nextStatementRefId(
   sb: ReturnType<typeof createClient>,
   statementType: string,
@@ -228,6 +229,7 @@ async function storeStatement(
     referenceId,
     transactionId,
     fyId,
+    distributionId,
     fileName,
   }: {
     pdfBytes: Uint8Array;
@@ -237,6 +239,7 @@ async function storeStatement(
     referenceId: string;
     transactionId?: string | null;
     fyId?: string | null;
+    distributionId?: string | null;
     fileName: string;
   },
 ) {
@@ -255,6 +258,7 @@ async function storeStatement(
       reference_id: referenceId,
       transaction_id: transactionId ?? null,
       fy_id: fyId ?? null,
+      distribution_id: distributionId ?? null,
       storage_path: storagePath,
       file_name: fileName,
     })
@@ -295,56 +299,52 @@ async function handleSubscriptionOrRedemption(sb: ReturnType<typeof createClient
 }
 
 async function handleDividend(sb: ReturnType<typeof createClient>, body: Record<string, any>) {
-  const { investorId, fyId } = body;
-  if (!investorId || !fyId) return json({ error: "investorId and fyId are required" }, 400);
+  const { investorId, distributionId } = body;
+  if (!investorId || !distributionId) return json({ error: "investorId and distributionId are required" }, 400);
 
   const scope = await resolveInvestorScope(sb, investorId);
   if (!scope) return json({ error: `No profile found for id=${investorId}` }, 404);
-  const { data: fy } = await sb.from("fy_settings").select("*").eq("id", fyId).single();
-  if (!fy) return json({ error: `No fy_settings row with id=${fyId}` }, 404);
-
-  const { data: dists } = await sb.from("distributions").select("*").eq("fy", fy.label).order("ex_date");
-  if (!dists || !dists.length) return json({ error: `No distributions found for FY '${fy.label}'` }, 404);
+  const { data: dist } = await sb.from("distributions").select("*").eq("id", distributionId).single();
+  if (!dist) return json({ error: `No distributions row with id=${distributionId}` }, 404);
+  // Only used to carry statements.fy_id (which FY this payout's own
+  // distribution falls under) — not for any date math below, that's all
+  // ex_date-based now.
+  const { data: fy } = await sb.from("fy_settings").select("id").eq("label", dist.fy).maybeSingle();
 
   const { data: allCis } = await sb.from("capital_injection").select("*").in("uid", scope.ciUids);
-  const fyEnd = parseDate(fy.end_date);
-  // The investor has to have actually held an investment record by this
-  // FY's end for a Dividend statement to mean anything — otherwise this is
-  // a period before they ever invested (e.g. a bulk-generate loop or a
-  // trigger reaching an FY that predates their first capital injection).
+  const exDate = parseDate(dist.ex_date);
+  // A dividend is only owed to whoever actually held units on this
+  // distribution's own ex_date — not on whatever the investor's holding
+  // happened to be by the end of that FY (a later Subscription/Redemption
+  // in the same FY must not change what an earlier distribution paid, and
+  // an investor who joined after this ex_date is owed nothing for it).
   const firstDate = firstApprovedDate(allCis || []);
-  if (!firstDate || firstDate > fyEnd) {
-    return json({ error: `Investor ${investorId} had no approved capital injection by FY '${fy.label}' end — nothing to report` }, 422);
+  if (!firstDate || firstDate > exDate) {
+    return json({ error: `Investor ${investorId} had no approved capital injection by ${dist.ex_date} — nothing to report` }, 422);
   }
-  const holdingUnits = netUnitsAsof(allCis || [], fyEnd);
+  const holdingUnits = netUnitsAsof(allCis || [], exDate);
 
   const investor = await investorInfo(sb, scope.profile);
-  const refId = await nextStatementRefId(sb, "Dividend", investorId, fyEnd);
+  const refId = await nextStatementRefId(sb, "Dividend", investorId, exDate);
+  const periodLabel = exDate.toISOString().slice(0, 10).split("-").reverse().join("/");
 
   const pdfBytes = await buildDividendPdf({
-    distributions: dists, investor, holdingUnits, periodText: fy.label, referenceNo: refId,
+    distribution: dist, investor, holdingUnits, periodText: periodLabel, referenceNo: refId,
   });
   const fileName = `${refId}.pdf`;
 
   const row = await storeStatement(sb, {
-    pdfBytes, investorId, statementType: "Dividend", periodLabel: fy.label,
-    referenceId: refId, fyId: fy.id, fileName,
+    pdfBytes, investorId, statementType: "Dividend", periodLabel,
+    referenceId: refId, fyId: fy?.id ?? null, distributionId: dist.id, fileName,
   });
 
-  // One distribution_ledger row per (distribution, investor) pair, linked to
-  // the statement just generated — mirrors the per-distribution amount each
-  // dist row shows in the PDF above.
-  const ledgerRows = dists.map((d: any) => ({
-    distribution_id: d.id,
-    investor_id: investorId,
-    holding_units: holdingUnits,
-    dps: d.dps,
-    amount: Math.round(holdingUnits * Number(d.dps) / 100 * 100) / 100,
-    statement_id: row.id,
-  }));
+  const amount = Math.round(holdingUnits * Number(dist.dps) / 100 * 100) / 100;
   const { error: ledgerErr } = await sb
     .from("distribution_ledger")
-    .upsert(ledgerRows, { onConflict: "distribution_id,investor_id" });
+    .upsert(
+      { distribution_id: dist.id, investor_id: investorId, holding_units: holdingUnits, dps: dist.dps, amount, statement_id: row.id },
+      { onConflict: "distribution_id,investor_id" },
+    );
   if (ledgerErr) throw new Error(`distribution_ledger upsert failed: ${ledgerErr.message}`);
 
   return json(row);
