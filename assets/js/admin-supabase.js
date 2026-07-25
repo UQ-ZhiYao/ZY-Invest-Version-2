@@ -129,6 +129,8 @@
     document.getElementById('dw-pwConfirmToggle').textContent='Show';
     document.getElementById('dw-pw-hint').textContent='Leave blank to keep existing password unchanged.';
     document.getElementById('dw-pw-hint').style.color='var(--fg-3)';
+    document.getElementById('dw-pwReset-hint').textContent='Emails the investor a link to set their own new password.';
+    document.getElementById('dw-pwReset-hint').style.color='var(--fg-3)';
     refreshMemHint();
     zyModalOpen('invModal');
   }
@@ -190,6 +192,38 @@
         hintEl.style.color='var(--red)';
       }
       this.disabled=false; this.textContent='Update Password';
+    });
+
+    // Trigger Reset Password button — a plain resetPasswordForEmail() call,
+    // same as the member phone app's own "Forgot password?" flow (see
+    // zyRequestPasswordReset() in test-mv/assets/js/supabase-auth.js), just
+    // initiated by the admin instead of the investor themselves. No
+    // privileged API or Edge Function needed: requesting a reset email for
+    // a given address is a public auth operation. redirectTo points at the
+    // member phone app's own domain (a separate deployment from this admin
+    // console), since that's where investors actually set the new password.
+    document.getElementById('dw-pwReset').addEventListener('click', async function(){
+      var hintEl=document.getElementById('dw-pwReset-hint');
+      var origHint=hintEl.textContent;
+      if(!curInv || !curInv.email){ hintEl.textContent='No email on file for this investor.'; hintEl.style.color='var(--red)'; return; }
+
+      this.disabled=true; this.textContent='Sending…';
+      try{
+        if(!ZY_DEMO){
+          var res=await sb.auth.resetPasswordForEmail(curInv.email, {
+            redirectTo:'https://zy-invest.com/phone/reset-password.html'
+          });
+          if(res.error) throw res.error;
+        }
+        hintEl.textContent='Reset link sent to '+curInv.email+' ✓';
+        hintEl.style.color='var(--green,#2E7D32)';
+        if(window.zyToast) zyToast('Reset link sent to '+(curInv.name||'investor'));
+      }catch(ex){
+        hintEl.textContent='Could not send reset link: '+((ex&&ex.message)||'Unknown error');
+        hintEl.style.color='var(--red)';
+      }
+      this.disabled=false; this.textContent='Trigger Reset Password';
+      setTimeout(function(){ hintEl.textContent=origHint; hintEl.style.color='var(--fg-3)'; },4000);
     });
 
     document.getElementById('dw-revoke').addEventListener('click',function(){ if(window.zyToast) zyToast('Session revoke is managed in Supabase Auth.'); });
