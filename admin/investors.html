@@ -157,7 +157,16 @@
           </div>
           <span id="dw-pw-hint" style="font-size:0.72rem;color:var(--fg-3);margin-top:4px;display:block;">Leave blank to keep existing password unchanged.</span>
         </div>
-        <button type="button" class="btn-fill btn-sm" id="dw-pwUpdate" style="width:100%;margin-bottom:16px;">Update Password</button>
+        <button type="button" class="btn-fill btn-sm" id="dw-pwUpdate" style="width:100%;margin-bottom:10px;">Update Password</button>
+
+        <!-- Trigger Reset Password — sends the investor the same "forgot
+             password" email they'd get requesting it themselves (a
+             resetPasswordForEmail() call, not a privileged admin API), so
+             they set their own new password via the member phone app's
+             reset-password.html rather than the admin choosing one for
+             them above. -->
+        <button type="button" class="btn-line btn-sm" id="dw-pwReset" style="width:100%;margin-bottom:4px;">Trigger Reset Password</button>
+        <span id="dw-pwReset-hint" style="font-size:0.72rem;color:var(--fg-3);margin-top:0;margin-bottom:16px;display:block;">Emails the investor a link to set their own new password.</span>
 
         <div class="sec-toggle-row"><div><div class="st-t">Two-Factor Authentication</div><div class="st-d">Require an OTP at sign-in</div></div><button type="button" class="toggle-sw on" id="dw-2fa"></button></div>
         <div class="sec-toggle-row"><div><div class="st-t">Login Notifications</div><div class="st-d">Email on each new sign-in</div></div><button type="button" class="toggle-sw" id="dw-notif"></button></div>
