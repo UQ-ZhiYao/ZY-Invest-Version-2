@@ -441,7 +441,7 @@ async function handleAnnual(sb: ReturnType<typeof createClient>, body: Record<st
 
   const pdfBytes = await buildAnnualPdf({
     investor, fyStart, fyEnd, openingUnits, openingCost, closingUnits, closingCost,
-    latestNavPerUnit: latestNav, transactionsInFy, distributionsInFy, priorDividendsReceived,
+    latestNavPerUnit: latestNav, transactionsInFy, distributionsInFy, allCis, priorDividendsReceived,
     priorRealizedPl, cashflowsForIrr: cashflows, referenceNo: refId,
   });
   const fileName = `${refId}.pdf`;

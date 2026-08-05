@@ -3,7 +3,7 @@ import {
   drawFooterOnAllPages, drawText, rm, redIfNegative, fmt, colWidths, BODY_W, SECTION_GAP, CONTENT_SIZE,
   InvestorInfo, Cell,
 } from "./common.ts";
-import { xirr, magnitude, CapitalInjectionRow, DistributionRow } from "./compute.ts";
+import { xirr, magnitude, netUnitsAsof, parseDate, CapitalInjectionRow, DistributionRow } from "./compute.ts";
 
 function dstr(d: Date): string {
   return d.toISOString().slice(0, 10).split("-").reverse().join(" - ");
@@ -23,6 +23,11 @@ export interface BuildAnnualArgs {
   latestNavPerUnit: number;
   transactionsInFy: CapitalInjectionRow[];
   distributionsInFy: DistributionRow[];
+  // Every capital_injection row for this investor (not just this FY's) —
+  // each distribution's Dividend Transaction row needs the investor's
+  // holding on that distribution's own ex_date, which can fall in an
+  // earlier FY's transaction history than the payout itself.
+  allCis: CapitalInjectionRow[];
   // Dividends received before this FY (any prior FY), so the Dividend
   // Transaction table's Opening row carries the investor's real cumulative
   // total instead of always starting from 0.
@@ -36,7 +41,7 @@ export interface BuildAnnualArgs {
 
 export async function buildAnnualPdf({
   investor, fyStart, fyEnd, openingUnits, openingCost, closingUnits, closingCost,
-  latestNavPerUnit, transactionsInFy, distributionsInFy, priorDividendsReceived, priorRealizedPl,
+  latestNavPerUnit, transactionsInFy, distributionsInFy, allCis, priorDividendsReceived, priorRealizedPl,
   cashflowsForIrr, referenceNo,
 }: BuildAnnualArgs): Promise<Uint8Array> {
   const periodText = `${dmy(fyStart)} - ${dmy(fyEnd)}`;
@@ -151,10 +156,15 @@ export async function buildAnnualPdf({
   const dRows: Cell[][] = [[dstr(fyStart), "Opening", "", "", "", rm(runningDiv)]];
   for (const d of distributionsInFy) {
     const payDate = new Date((d.pay_date || d.ex_date) + "T00:00:00Z");
+    // A dividend is owed on whatever the investor held on THIS
+    // distribution's own ex_date, not on the FY's closing holding — a
+    // later Subscription/Redemption in the same FY must not change what
+    // an earlier distribution paid.
+    const unitsAtEx = netUnitsAsof(allCis, parseDate(d.ex_date));
     const dps = Number(d.dps);
-    const amount = Math.round(closingUnits * dps / 100 * 100) / 100;
+    const amount = Math.round(unitsAtEx * dps / 100 * 100) / 100;
     runningDiv += amount;
-    dRows.push([dstr(payDate), `${d.type || ""} Dividend`.trim(), fmt(dps), fmt(closingUnits), rm(amount), rm(runningDiv)]);
+    dRows.push([dstr(payDate), `${d.type || ""} Dividend`.trim(), fmt(dps), fmt(unitsAtEx), rm(amount), rm(runningDiv)]);
   }
   const dividendReceived = Math.round(runningDiv * 100) / 100;
   dRows.push([dstr(fyEnd), "Closing", "", "", "", rm(dividendReceived)]);
