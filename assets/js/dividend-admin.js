@@ -173,10 +173,14 @@
     }
     if(hintEl) hintEl.textContent='Computing…';
     try{
-      var res=await sb.from('transaction_trading').select('action,units').eq('instrument_name',instName).lte('trade_date',exDate);
+      var res=await sb.from('transaction_trading').select('units').eq('instrument_name',instName).lte('trade_date',exDate);
       if(res.error) throw res.error;
+      // transaction_trading.units is already signed (positive for Buy,
+      // negative for Sell) — sum directly instead of re-deriving the sign
+      // from `action`, which double-applies it whenever a Sell row's
+      // units come back negative.
       var net=0;
-      (res.data||[]).forEach(function(t){ var u=parseFloat(t.units)||0; if(t.action==='Buy') net+=u; else net-=u; });
+      (res.data||[]).forEach(function(t){ net+=parseFloat(t.units)||0; });
       net=Math.max(0,net);
       if(unitsEl) unitsEl.value=net>0?fmt(net,0):'0';
       if(hintEl) hintEl.textContent=net>0?'Net units held as at '+exDate+' (from trade history)':'No trade history for this instrument up to ex-date.';
