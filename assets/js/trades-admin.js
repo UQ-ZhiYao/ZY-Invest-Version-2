@@ -214,7 +214,7 @@
         '<td>'+tag(r.action)+'</td>'+
         '<td class="hold-name"><b>'+(r.instrument_name||'—')+'</b><span>'+subLine+'</span></td>'+
         '<td>'+prodPill(r.product)+'</td>'+
-        '<td class="r">'+fmt(r.units,0)+'</td>'+
+        '<td class="r">'+fmt(Math.abs(parseFloat(r.units)||0),0)+'</td>'+
         '<td class="r">'+fmt(r.price,4)+'</td>'+
         '<td class="r">'+(fee ? fmt(fee) : '—')+'</td>'+
         '<td class="r">'+flowPill+'</td>';
@@ -312,6 +312,11 @@
         ? -((totalUnits * vwapPrice) + (fee||0))
         :  ((totalUnits * vwapPrice) - (fee||0));
 
+      // DB convention (relied on by settlement/portfolio/NTA AVCO computations
+      // and the Dividend admin's Units Held on Ex Date): Buy = positive units,
+      // Sell = negative units, since a Sell deducts from the holding.
+      var storedUnits = tradeAction === 'Sell' ? -totalUnits : totalUnits;
+
       var row = {
         action:          tradeAction,
         instrument_name: instName,
@@ -320,7 +325,7 @@
         product:         inst.product || 'Securities',
         sector:          inst.sector  || null,
         trade_date:      date,
-        units:           totalUnits,
+        units:           storedUnits,
         price:           vwapPrice,
         fee:             fee || null,
         cashflow:        cashflowVal
